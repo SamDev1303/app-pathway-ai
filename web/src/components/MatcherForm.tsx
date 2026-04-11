@@ -227,6 +227,16 @@ function ResultsView({ results }: { results: MatchResponse }) {
           </p>
         </div>
       )}
+
+      <div className="border-t border-[var(--color-navy-100)] pt-6 mt-8">
+        <p className="text-xs text-[var(--color-navy-700)] leading-relaxed max-w-3xl mx-auto text-center italic">
+          <span className="font-semibold">Indicative only.</span> Match scores
+          are based on published 2025 IELTS, GPA, and tuition data and do not
+          guarantee admission or student visa outcome. UniMate Australia is a
+          MARA-registered migration consultancy (MARN 1798425). For binding
+          eligibility advice, book a free consultation at our Liverpool office.
+        </p>
+      </div>
     </div>
   );
 }

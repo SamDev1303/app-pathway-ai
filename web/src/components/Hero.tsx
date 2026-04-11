@@ -47,16 +47,15 @@ export function Hero() {
         </div>
       </nav>
 
-      <div className="absolute top-6 right-6 md:top-8 md:right-12 z-20 hidden md:block text-right">
-        <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-gold-400)]">
-          {hero.metadata.title}
-        </p>
-        <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-cream)]/60 mt-1">
-          {hero.metadata.location} · {hero.metadata.since}
-        </p>
-      </div>
-
       <div className="absolute bottom-8 md:bottom-20 left-5 md:left-12 right-5 md:right-12 z-10 max-w-5xl">
+        <div className="hidden lg:block absolute -top-12 right-0 text-right">
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-gold-400)]">
+            {hero.metadata.title}
+          </p>
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[var(--color-cream)]/65 mt-1">
+            {hero.metadata.location} · {hero.metadata.since}
+          </p>
+        </div>
         <div className="rail-gold w-32 mb-6" />
         <p className="eyebrow mb-5">{hero.eyebrow}</p>
         <h1 className="font-display text-[2.75rem] sm:text-6xl md:text-7xl lg:text-8xl text-[var(--color-cream)] leading-[0.95] mask-reveal">
@@ -79,10 +78,10 @@ export function Hero() {
             <span>↓</span>
           </a>
           <a
-            href="#advisor"
+            href="#book"
             className="text-[var(--color-cream)]/90 hover:text-[var(--color-gold-400)] underline underline-offset-4 decoration-[var(--color-gold-500)]/40 hover:decoration-[var(--color-gold-400)] text-sm transition-colors"
           >
-            Or ask the AI advisor →
+            Or book the Liverpool office →
           </a>
         </div>
       </div>

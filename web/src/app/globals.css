@@ -1,0 +1,148 @@
+@import "tailwindcss";
+
+:root {
+  --color-ivory: #f6f7fb;
+  --color-cream: #faf8f3;
+  --color-paper: #f1efe6;
+  --color-charcoal: #1a1a1a;
+  --color-ink: #0d1a3d;
+
+  --color-navy-50: #f0f3fa;
+  --color-navy-100: #dee5f3;
+  --color-navy-500: #4a5ba8;
+  --color-navy-700: #2c4085;
+  --color-navy-900: #1a2f6e;
+  --color-navy-950: #0d1a3d;
+
+  --color-gold-100: #fbf4dc;
+  --color-gold-300: #ecd280;
+  --color-gold-400: #dcae3a;
+  --color-gold-500: #c8941a;
+  --color-gold-600: #b7820f;
+
+  --color-success: #1e7a45;
+  --color-warn: #c77e1a;
+  --color-error: #a23b2e;
+
+  --background: var(--color-ivory);
+  --foreground: var(--color-charcoal);
+
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@theme inline {
+  --color-ivory: var(--color-ivory);
+  --color-cream: var(--color-cream);
+  --color-paper: var(--color-paper);
+  --color-charcoal: var(--color-charcoal);
+  --color-ink: var(--color-ink);
+
+  --color-navy-50: var(--color-navy-50);
+  --color-navy-100: var(--color-navy-100);
+  --color-navy-500: var(--color-navy-500);
+  --color-navy-700: var(--color-navy-700);
+  --color-navy-900: var(--color-navy-900);
+  --color-navy-950: var(--color-navy-950);
+
+  --color-gold-100: var(--color-gold-100);
+  --color-gold-300: var(--color-gold-300);
+  --color-gold-400: var(--color-gold-400);
+  --color-gold-500: var(--color-gold-500);
+  --color-gold-600: var(--color-gold-600);
+
+  --color-success: var(--color-success);
+  --color-warn: var(--color-warn);
+  --color-error: var(--color-error);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  color: var(--color-charcoal);
+  background: var(--color-ivory);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--color-ivory);
+  color: var(--color-charcoal);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "ss01", "cv11";
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-display), ui-serif, Georgia, serif;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.paper-grain {
+  position: relative;
+  isolation: isolate;
+}
+.paper-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7'/%3E%3CfeColorMatrix values='0 0 0 0 0.1  0 0 0 0 0.1  0 0 0 0 0.2  0 0 0 0.08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+}
+
+.rail-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold-500) 15%, var(--color-gold-500) 85%, transparent);
+}
+
+.eyebrow {
+  font-family: var(--font-body), sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--color-gold-600);
+}
+
+@keyframes mask-reveal {
+  0% { clip-path: inset(100% 0 0 0); opacity: 0; }
+  100% { clip-path: inset(0 0 0 0); opacity: 1; }
+}
+.mask-reveal {
+  animation: mask-reveal 1.1s var(--ease-editorial) both;
+}
+
+@keyframes fade-up {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 0.9s var(--ease-editorial) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .mask-reveal,
+  .fade-up {
+    animation: none !important;
+    opacity: 1 !important;
+    clip-path: none !important;
+    transform: none !important;
+  }
+}

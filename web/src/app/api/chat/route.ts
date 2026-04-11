@@ -3,8 +3,18 @@ import {
   convertToModelMessages,
   type UIMessage,
 } from "ai";
+import { createOpenAI } from "@ai-sdk/openai";
 
 export const maxDuration = 30;
+
+const openrouter = createOpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY,
+  headers: {
+    "HTTP-Referer": "https://unimate-demo.vercel.app",
+    "X-Title": "UniMate Australia",
+  },
+});
 
 const SYSTEM_PROMPT = `You are the AI Advisor for UniMate Australia, a MARA-registered education and migration consultancy based in Liverpool, NSW.
 
@@ -36,15 +46,10 @@ export async function POST(req: Request) {
     const { messages }: { messages: UIMessage[] } = await req.json();
 
     const result = streamText({
-      model: "openai/gpt-5.4",
+      model: openrouter("openai/gpt-oss-120b:free"),
       system: SYSTEM_PROMPT,
       messages: await convertToModelMessages(messages),
       temperature: 0.5,
-      providerOptions: {
-        gateway: {
-          tags: ["feature:ai-advisor", "env:demo", "client:unimate"],
-        },
-      },
       onFinish: ({ usage }) => {
         console.log("[unimate.chat]", {
           ms: Date.now() - startedAt,

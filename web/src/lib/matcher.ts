@@ -19,7 +19,6 @@ const WEIGHTS = {
 
 const BUDGET_STRETCH = 1.2;
 const STRONG_BUCKET_MIN = 75;
-const STRETCH_BUCKET_MIN = 50;
 
 function scoreCourse(student: Student, uni: University, course: Course) {
   const ieltsOk = student.ielts >= course.ielts_min;
@@ -115,10 +114,9 @@ function scoreCourse(student: Student, uni: University, course: Course) {
     finalScore = Math.max(0, finalScore - 30);
   } else if (!budgetOk) {
     bucket = "pathway";
+    finalScore = Math.max(0, finalScore - 20);
   } else if (composite >= STRONG_BUCKET_MIN) {
     bucket = "strong";
-  } else if (composite >= STRETCH_BUCKET_MIN) {
-    bucket = "stretch";
   } else {
     bucket = "stretch";
   }

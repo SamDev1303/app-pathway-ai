@@ -1,7 +1,9 @@
-import { FlatList, ImageBackground, Pressable, Text, View, useWindowDimensions } from "react-native";
+import { FlatList, Pressable, Text, View, useWindowDimensions } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { ImageBackground } from "expo-image";
 import { MapPin, Wallet, Languages, CalendarClock } from "lucide-react-native";
 import { ScoreRing } from "@/components/ScoreRing";
+import { haptics } from "@/lib/haptics";
 import { universities } from "@/lib/mockData";
 import { colors, typography } from "@/lib/theme";
 
@@ -9,19 +11,22 @@ export default function MatchScreen() {
   const { height } = useWindowDimensions();
 
   return (
-    <SafeAreaView className="flex-1 bg-[#eceff7]">
+    <SafeAreaView className="flex-1 bg-[#eceff7]" edges={["top", "left", "right"]}>
       <FlatList
         data={universities}
         keyExtractor={(item) => item.id}
         pagingEnabled
         decelerationRate="fast"
         showsVerticalScrollIndicator={false}
+        onMomentumScrollEnd={() => haptics.light()}
+        contentContainerStyle={{ paddingBottom: 86 }}
         renderItem={({ item }) => (
-          <View style={{ height: height - 92 }} className="px-4 pb-4">
+          <View style={{ height: height - 100 }} className="px-4 pb-4">
             <ImageBackground
               source={{ uri: item.image }}
-              className="flex-1 justify-between overflow-hidden rounded-[34px]"
-              imageStyle={{ borderRadius: 34 }}
+              style={{ flex: 1, justifyContent: "space-between", overflow: "hidden", borderRadius: 34 }}
+              contentFit="cover"
+              transition={300}
             >
               <View className="px-5 pt-5">
                 <View className="self-start rounded-full bg-[#faf8f3]/90 px-4 py-2">
@@ -92,13 +97,16 @@ export default function MatchScreen() {
                     </Text>
                   </View>
                   <Pressable
+                    onPress={() => haptics.medium()}
                     android_ripple={{ color: "rgba(255,255,255,0.15)" }}
-                    style={{
+                    style={({ pressed }) => ({
                       backgroundColor: colors.gold,
                       paddingHorizontal: 22,
                       paddingVertical: 14,
-                      borderRadius: 999
-                    }}
+                      borderRadius: 999,
+                      opacity: pressed ? 0.86 : 1,
+                      transform: [{ scale: pressed ? 0.97 : 1 }]
+                    })}
                   >
                     <Text style={[typography.bodyBold, { color: colors.navy }]}>Apply</Text>
                   </Pressable>

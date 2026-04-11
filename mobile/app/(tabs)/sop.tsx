@@ -5,6 +5,7 @@ import { EditorialCard } from "@/components/EditorialCard";
 import { FormField } from "@/components/FormField";
 import { SectionHeader } from "@/components/SectionHeader";
 import { sopTemplate, universities } from "@/lib/mockData";
+import { haptics } from "@/lib/haptics";
 import { colors, typography } from "@/lib/theme";
 
 const steps = ["Target", "Background", "Goals", "Generate"];
@@ -24,8 +25,8 @@ export default function SopScreen() {
   }, [background, course, goals, university]);
 
   return (
-    <SafeAreaView className="flex-1 bg-cream">
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, gap: 20 }}>
+    <SafeAreaView className="flex-1 bg-cream" edges={["top", "left", "right"]}>
+      <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 120, gap: 20 }}>
         <SectionHeader
           eyebrow="Statement builder"
           title="Shape the SOP as you think."
@@ -95,25 +96,38 @@ export default function SopScreen() {
 
             <View className="flex-row justify-between">
               <Pressable
-                onPress={() => setStep((current) => Math.max(0, current - 1))}
-                style={{
+                onPress={() => {
+                  haptics.selection();
+                  setStep((current) => Math.max(0, current - 1));
+                }}
+                style={({ pressed }) => ({
                   borderRadius: 999,
                   borderWidth: 1,
                   borderColor: colors.line,
                   paddingHorizontal: 18,
-                  paddingVertical: 14
-                }}
+                  paddingVertical: 14,
+                  opacity: pressed ? 0.7 : 1
+                })}
               >
                 <Text style={[typography.bodySemiBold, { color: colors.navy }]}>Back</Text>
               </Pressable>
               <Pressable
-                onPress={() => setStep((current) => Math.min(3, current + 1))}
-                style={{
+                onPress={() => {
+                  if (step === 3) {
+                    haptics.success();
+                  } else {
+                    haptics.selection();
+                  }
+                  setStep((current) => Math.min(3, current + 1));
+                }}
+                style={({ pressed }) => ({
                   borderRadius: 999,
                   backgroundColor: colors.gold,
                   paddingHorizontal: 20,
-                  paddingVertical: 14
-                }}
+                  paddingVertical: 14,
+                  opacity: pressed ? 0.86 : 1,
+                  transform: [{ scale: pressed ? 0.97 : 1 }]
+                })}
               >
                 <Text style={[typography.bodyBold, { color: colors.navy }]}>
                   {step === 3 ? "Refine" : "Next"}

@@ -1,34 +1,54 @@
 import { Tabs } from "expo-router";
-import { House, MessageCircleHeart, ScrollText, SearchCheck, UserRound } from "lucide-react-native";
+import { BlurView } from "expo-blur";
+import { Platform, StyleSheet, View } from "react-native";
+import { TabIcon } from "@/lib/icons";
+import { haptics } from "@/lib/haptics";
 import { colors, typography } from "@/lib/theme";
 
-const iconProps = { size: 20, strokeWidth: 2.2 };
+const isIOS = Platform.OS === "ios";
+
+function TabBarBackground() {
+  if (!isIOS) {
+    return <View style={[StyleSheet.absoluteFill, { backgroundColor: "#fffdf9" }]} />;
+  }
+  return (
+    <BlurView
+      intensity={92}
+      tint="systemChromeMaterialLight"
+      style={StyleSheet.absoluteFill}
+    />
+  );
+}
 
 export default function TabsLayout() {
   return (
     <Tabs
+      screenListeners={{
+        tabPress: () => haptics.selection()
+      }}
       screenOptions={{
         headerShown: false,
+        tabBarBackground: () => <TabBarBackground />,
         tabBarStyle: {
-          backgroundColor: "#fffdf9",
+          position: "absolute",
+          borderTopWidth: StyleSheet.hairlineWidth,
           borderTopColor: "rgba(26,47,110,0.08)",
-          height: 78,
+          backgroundColor: isIOS ? "transparent" : "#fffdf9",
+          height: isIOS ? 86 : 78,
           paddingTop: 10,
-          paddingBottom: 12
+          paddingBottom: isIOS ? 28 : 12,
+          elevation: 0
         },
         tabBarLabelStyle: {
           ...typography.bodyMedium,
-          fontSize: 11
+          fontSize: 10.5,
+          letterSpacing: 0.2,
+          marginTop: 2
         },
-        tabBarActiveTintColor: colors.gold,
-        tabBarActiveBackgroundColor: colors.navy,
-        tabBarInactiveTintColor: colors.navyMuted,
+        tabBarActiveTintColor: colors.navy,
+        tabBarInactiveTintColor: "rgba(26,47,110,0.42)",
         sceneStyle: {
           backgroundColor: colors.ivory
-        },
-        tabBarItemStyle: {
-          marginHorizontal: 4,
-          borderRadius: 18
         }
       }}
     >
@@ -36,65 +56,35 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color, focused }) => (
-            <House
-              {...iconProps}
-              color={color}
-              fill={focused ? "rgba(26,47,110,0.12)" : "transparent"}
-            />
-          )
+          tabBarIcon: ({ color }) => <TabIcon name="home" color={color} />
         }}
       />
       <Tabs.Screen
         name="match"
         options={{
           title: "Match",
-          tabBarIcon: ({ color, focused }) => (
-            <SearchCheck
-              {...iconProps}
-              color={color}
-              fill={focused ? "rgba(26,47,110,0.12)" : "transparent"}
-            />
-          )
+          tabBarIcon: ({ color }) => <TabIcon name="match" color={color} />
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
           title: "Advisor",
-          tabBarIcon: ({ color, focused }) => (
-            <MessageCircleHeart
-              {...iconProps}
-              color={color}
-              fill={focused ? "rgba(26,47,110,0.12)" : "transparent"}
-            />
-          )
+          tabBarIcon: ({ color }) => <TabIcon name="advisor" color={color} />
         }}
       />
       <Tabs.Screen
         name="sop"
         options={{
           title: "SOP",
-          tabBarIcon: ({ color, focused }) => (
-            <ScrollText
-              {...iconProps}
-              color={color}
-              fill={focused ? "rgba(26,47,110,0.12)" : "transparent"}
-            />
-          )
+          tabBarIcon: ({ color }) => <TabIcon name="sop" color={color} />
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color, focused }) => (
-            <UserRound
-              {...iconProps}
-              color={color}
-              fill={focused ? "rgba(26,47,110,0.12)" : "transparent"}
-            />
-          )
+          tabBarIcon: ({ color }) => <TabIcon name="profile" color={color} />
         }}
       />
     </Tabs>

@@ -1,4 +1,5 @@
-import { Image, ImageBackground, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+import { Image, ImageBackground } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ArrowUpRight, CircleAlert, Sparkles } from "lucide-react-native";
 import { EditorialCard } from "@/components/EditorialCard";
@@ -11,14 +12,15 @@ const topMatch = universities[0];
 
 export default function HomeScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-ivory">
-      <ScrollView showsVerticalScrollIndicator={false}>
+    <SafeAreaView className="flex-1 bg-ivory" edges={["top", "left", "right"]}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
         <View className="px-5 pb-10">
           <View className="mt-2 overflow-hidden rounded-[30px] border border-[#e5ddc8]">
             <ImageBackground
               source={{ uri: topMatch.image }}
-              className="h-[360px] justify-between"
-              imageStyle={{ borderRadius: 30 }}
+              style={{ height: 360, justifyContent: "space-between", borderRadius: 30 }}
+              contentFit="cover"
+              transition={300}
             >
               <View className="bg-[#1a2f6e]/45 px-6 pb-6 pt-5">
                 <Text className="text-xs uppercase text-[#f8d585]" style={[typography.bodySemiBold, typography.eyebrow]}>
@@ -83,8 +85,9 @@ export default function HomeScreen() {
               <View className="flex-row">
                 <Image
                   source={{ uri: universities[4].image }}
-                  className="h-[180px] w-[34%]"
-                  resizeMode="cover"
+                  style={{ height: 180, width: "34%" }}
+                  contentFit="cover"
+                  transition={300}
                 />
                 <View className="flex-1 px-5 py-5">
                   <View className="flex-row items-center justify-between">

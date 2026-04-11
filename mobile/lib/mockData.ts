@@ -1,3 +1,5 @@
+import { auImages } from "./images";
+
 export type UniversityMatch = {
   id: string;
   university: string;
@@ -42,7 +44,7 @@ export const universities: UniversityMatch[] = [
     ielts: "6.5 overall",
     tuition: "Premium metro",
     intake: "Term 1 / 3",
-    image: "https://images.unsplash.com/photo-1519452575417-564c1401ecc0?auto=format&fit=crop&w=1200&q=80",
+    image: auImages.unsw,
     reasons: ["Strong English", "Career-led", "PR-aware"],
     summary: "Best aligned for software outcomes, Sydney internships, and a clean English threshold."
   },
@@ -57,7 +59,7 @@ export const universities: UniversityMatch[] = [
     ielts: "6.5 overall",
     tuition: "Premium metro",
     intake: "Feb / Jul",
-    image: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?auto=format&fit=crop&w=1200&q=80",
+    image: auImages.melbourneCbd,
     reasons: ["Prestige signal", "Research depth", "City network"],
     summary: "High-signal brand value with strong research and employer recognition."
   },
@@ -72,7 +74,7 @@ export const universities: UniversityMatch[] = [
     ielts: "6.5 overall",
     tuition: "Balanced",
     intake: "Feb / Jul / Nov",
-    image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80",
+    image: auImages.monashClayton,
     reasons: ["In budget", "Flexible intakes", "Tech fit"],
     summary: "Balanced choice for cost, intake flexibility, and technical alignment."
   },
@@ -87,7 +89,7 @@ export const universities: UniversityMatch[] = [
     ielts: "6.5 overall",
     tuition: "Balanced",
     intake: "Feb / Jul",
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
+    image: auImages.anuLibrary,
     reasons: ["Policy adjacency", "Capital city", "Security niche"],
     summary: "Strong option for cyber students interested in policy and government pathways."
   },
@@ -102,7 +104,7 @@ export const universities: UniversityMatch[] = [
     ielts: "6.5 overall",
     tuition: "Value metro",
     intake: "Feb / Jul",
-    image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=1200&q=80",
+    image: auImages.uqGreatCourt,
     reasons: ["Fast duration", "Warm market", "Budget fit"],
     summary: "Shorter duration with a softer cost profile and a strong Queensland market."
   },
@@ -117,7 +119,7 @@ export const universities: UniversityMatch[] = [
     ielts: "6.0 overall",
     tuition: "Regional value",
     intake: "Mar / Jul / Nov",
-    image: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=80",
+    image: auImages.melbourneTram,
     reasons: ["PR-eligible", "In budget", "Lower IELTS"],
     summary: "Value-led regional option with a practical entry threshold."
   },
@@ -132,7 +134,7 @@ export const universities: UniversityMatch[] = [
     ielts: "7.0 overall",
     tuition: "Regional value",
     intake: "Feb / Jul",
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
+    image: auImages.bondi,
     reasons: ["Healthcare demand", "Regional appeal", "Career clarity"],
     summary: "A practical healthcare pathway for students prioritising employability."
   },
@@ -147,7 +149,7 @@ export const universities: UniversityMatch[] = [
     ielts: "6.0 overall",
     tuition: "Most affordable",
     intake: "Feb / Jul",
-    image: "https://images.unsplash.com/photo-1488190211105-8b0e65b80b4e?auto=format&fit=crop&w=1200&q=80",
+    image: auImages.outback,
     reasons: ["Budget-first", "Regional pathway", "Accessible entry"],
     summary: "Most affordable pathway for students optimising around budget and regional points."
   }

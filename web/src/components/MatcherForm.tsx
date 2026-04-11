@@ -6,6 +6,7 @@ import { matchStudent } from "@/lib/matcher";
 import { universities } from "@/lib/universities";
 import type { CourseField, MatchResponse, Student } from "@/lib/types";
 import { UniCard } from "./UniCard";
+import { LeadModal } from "./LeadModal";
 
 const FIELDS: CourseField[] = [
   "IT",
@@ -23,6 +24,7 @@ export function MatcherForm() {
   const [wantsPR, setWantsPR] = useState(true);
   const [results, setResults] = useState<MatchResponse | null>(null);
   const [pending, startTransition] = useTransition();
+  const [modalOpen, setModalOpen] = useState(false);
 
   function handleMatch() {
     const student: Student = {
@@ -148,16 +150,18 @@ export function MatcherForm() {
               transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               className="mt-16"
             >
-              <ResultsView results={results} />
+              <ResultsView results={results} onBook={() => setModalOpen(true)} />
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      <LeadModal open={modalOpen} onClose={() => setModalOpen(false)} source="matcher-results" />
     </div>
   );
 }
 
-function ResultsView({ results }: { results: MatchResponse }) {
+function ResultsView({ results, onBook }: { results: MatchResponse; onBook: () => void }) {
   const total = results.strong.length + results.stretch.length + results.pathway.length;
 
   return (
@@ -214,6 +218,29 @@ function ResultsView({ results }: { results: MatchResponse }) {
           <p className="font-display text-2xl md:text-3xl mt-2 max-w-2xl">
             {results.upsell}
           </p>
+        </div>
+      )}
+
+      {total > 0 && (
+        <div className="border border-[var(--color-gold-500)]/30 bg-[var(--color-cream)] paper-grain p-8 md:p-10">
+          <div className="rail-gold w-20 mb-5" />
+          <p className="eyebrow" style={{ color: "var(--color-gold-500)" }}>
+            Next step
+          </p>
+          <h3 className="mt-3 font-display text-3xl md:text-4xl text-[var(--color-navy-950)] leading-[1.1] max-w-2xl">
+            Walk into Liverpool with your shortlist.
+          </h3>
+          <p className="mt-4 text-base text-[var(--color-navy-950)]/75 max-w-2xl leading-relaxed">
+            Bring these matches to a free consultation with a MARA-registered counsellor. We&apos;ll audit fees, scholarships, IELTS gaps, and your visa pathway in 30 minutes.
+          </p>
+          <button
+            type="button"
+            onClick={onBook}
+            className="mt-6 inline-flex items-center gap-3 bg-[var(--color-navy-950)] hover:bg-[var(--color-navy-900)] text-[var(--color-cream)] px-7 py-4 font-display text-lg transition-colors duration-300"
+          >
+            Book my free consultation
+            <span>→</span>
+          </button>
         </div>
       )}
 

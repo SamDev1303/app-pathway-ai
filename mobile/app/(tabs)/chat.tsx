@@ -11,6 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { advisorPrompts } from "@/lib/mockData";
+import { haptics } from "@/lib/haptics";
 import { colors, typography } from "@/lib/theme";
 
 type Message = {
@@ -65,6 +66,7 @@ export default function ChatScreen() {
     if (!canPrompt) {
       return;
     }
+    haptics.selection();
 
     const userId = `user-${Date.now()}`;
     const assistantId = `assistant-${Date.now()}`;
@@ -82,6 +84,7 @@ export default function ChatScreen() {
 
         if (index === response.length - 1) {
           setStreamingId(null);
+          haptics.light();
         }
       }, index * 16);
 
@@ -126,7 +129,7 @@ export default function ChatScreen() {
         </View>
       </LinearGradient>
 
-      <ScrollView className="flex-1 px-5" contentContainerStyle={{ paddingVertical: 20, gap: 14 }}>
+      <ScrollView className="flex-1 px-5" contentContainerStyle={{ paddingVertical: 20, paddingBottom: 120, gap: 14 }}>
         <View className="flex-row flex-wrap gap-3">
           {advisorPrompts.map((prompt) => (
             <Pressable

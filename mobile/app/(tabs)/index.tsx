@@ -12,38 +12,73 @@ const topMatch = universities[0];
 
 export default function HomeScreen() {
   return (
-    <SafeAreaView className="flex-1 bg-ivory" edges={["top", "left", "right"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.ivory }} edges={["top", "left", "right"]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 110 }}>
-        <View className="px-5 pb-10">
-          <View className="mt-2 overflow-hidden rounded-[30px] border border-[#e5ddc8]">
+        <View style={{ paddingHorizontal: 20, paddingBottom: 40 }}>
+          {/* Hero card */}
+          <View
+            style={{
+              marginTop: 8,
+              overflow: "hidden",
+              borderRadius: 30,
+              borderWidth: 1,
+              borderColor: "#e5ddc8"
+            }}
+          >
             <ImageBackground
               source={{ uri: topMatch.image }}
               style={{ height: 360, justifyContent: "space-between", borderRadius: 30 }}
               contentFit="cover"
               transition={300}
             >
-              <View className="bg-[#1a2f6e]/45 px-6 pb-6 pt-5">
-                <Text className="text-xs uppercase text-[#f8d585]" style={[typography.bodySemiBold, typography.eyebrow]}>
+              <View style={{ backgroundColor: "rgba(26,47,110,0.45)", paddingHorizontal: 24, paddingBottom: 24, paddingTop: 20 }}>
+                <Text
+                  style={[
+                    typography.bodySemiBold,
+                    typography.eyebrow,
+                    { fontSize: 12, textTransform: "uppercase", color: "#f8d585" }
+                  ]}
+                >
                   UniMate Australia
                 </Text>
-                <Text className="mt-4 max-w-[82%] text-[48px] text-white" style={[typography.display, { lineHeight: 52 }]}>
+                <Text
+                  style={[
+                    typography.display,
+                    { marginTop: 16, maxWidth: "82%", fontSize: 40, lineHeight: 44, color: "#ffffff" }
+                  ]}
+                >
                   Study migration, treated like a life editorial.
                 </Text>
               </View>
 
-              <View className="m-5 rounded-[28px] border border-white/20 bg-[#faf8f3]/92 p-5">
-                <Text className="text-xs uppercase text-gold" style={[typography.bodySemiBold, typography.eyebrow]}>
+              <View
+                style={{
+                  margin: 20,
+                  borderRadius: 28,
+                  borderWidth: 1,
+                  borderColor: "rgba(255,255,255,0.20)",
+                  backgroundColor: "rgba(250,248,243,0.92)",
+                  padding: 20
+                }}
+              >
+                <Text
+                  style={[
+                    typography.bodySemiBold,
+                    typography.eyebrow,
+                    { fontSize: 12, textTransform: "uppercase", color: colors.gold }
+                  ]}
+                >
                   Today&apos;s Match
                 </Text>
-                <View className="mt-3 flex-row items-center justify-between">
-                  <View className="max-w-[72%] gap-2">
-                    <Text className="text-3xl text-charcoal" style={typography.display}>
+                <View style={{ marginTop: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                  <View style={{ maxWidth: "72%", gap: 8 }}>
+                    <Text style={[typography.display, { fontSize: 30, lineHeight: 34, color: colors.charcoal }]}>
                       {topMatch.university}
                     </Text>
-                    <Text className="text-base text-[#30498f]" style={typography.bodyMedium}>
+                    <Text style={[typography.bodyMedium, { fontSize: 16, color: "#30498f" }]}>
                       {topMatch.course}
                     </Text>
-                    <Text className="text-sm leading-6 text-charcoal/80" style={typography.body}>
+                    <Text style={[typography.body, { fontSize: 14, lineHeight: 24, color: "rgba(26,26,26,0.80)" }]}>
                       {topMatch.summary}
                     </Text>
                   </View>
@@ -53,7 +88,8 @@ export default function HomeScreen() {
             </ImageBackground>
           </View>
 
-          <View className="mt-8">
+          {/* Section header */}
+          <View style={{ marginTop: 32 }}>
             <SectionHeader
               eyebrow="Curated for today"
               title="A warmer way to compare options."
@@ -61,49 +97,73 @@ export default function HomeScreen() {
             />
           </View>
 
-          <View className="mt-6 gap-5">
+          {/* Editorial cards */}
+          <View style={{ marginTop: 24, gap: 20 }}>
+            {/* Advisor tip card */}
             <EditorialCard>
-              <View className="flex-row items-center justify-between bg-cream px-5 py-4">
-                <View className="max-w-[80%]">
-                  <Text className="text-xs uppercase text-gold" style={[typography.bodySemiBold, typography.eyebrow]}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  backgroundColor: colors.cream,
+                  paddingHorizontal: 20,
+                  paddingVertical: 16
+                }}
+              >
+                <View style={{ maxWidth: "80%" }}>
+                  <Text
+                    style={[
+                      typography.bodySemiBold,
+                      typography.eyebrow,
+                      { fontSize: 12, textTransform: "uppercase", color: colors.gold }
+                    ]}
+                  >
                     AI advisor tip of the day
                   </Text>
-                  <Text className="mt-2 text-2xl text-charcoal" style={typography.display}>
+                  <Text style={[typography.display, { marginTop: 8, fontSize: 24, lineHeight: 28, color: colors.charcoal }]}>
                     Build a smarter shortlist.
                   </Text>
                 </View>
                 <Sparkles color={colors.gold} size={22} strokeWidth={2} />
               </View>
-              <View className="px-5 py-5">
-                <Text className="text-base leading-8 text-charcoal/85" style={typography.body}>
+              <View style={{ paddingHorizontal: 20, paddingVertical: 20 }}>
+                <Text style={[typography.body, { fontSize: 16, lineHeight: 32, color: "rgba(26,26,26,0.85)" }]}>
                   {advisorTip}
                 </Text>
               </View>
             </EditorialCard>
 
+            {/* Visa update card */}
             <EditorialCard>
-              <View className="flex-row">
+              <View style={{ flexDirection: "row" }}>
                 <Image
                   source={{ uri: universities[4].image }}
                   style={{ height: 180, width: "34%" }}
                   contentFit="cover"
                   transition={300}
                 />
-                <View className="flex-1 px-5 py-5">
-                  <View className="flex-row items-center justify-between">
-                    <Text className="text-xs uppercase text-gold" style={[typography.bodySemiBold, typography.eyebrow]}>
+                <View style={{ flex: 1, paddingHorizontal: 20, paddingVertical: 20 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                    <Text
+                      style={[
+                        typography.bodySemiBold,
+                        typography.eyebrow,
+                        { fontSize: 12, textTransform: "uppercase", color: colors.gold }
+                      ]}
+                    >
                       Visa update
                     </Text>
                     <CircleAlert color={colors.navy} size={18} />
                   </View>
-                  <Text className="mt-3 text-[30px] text-charcoal" style={[typography.display, { lineHeight: 34 }]}>
+                  <Text style={[typography.display, { marginTop: 12, fontSize: 30, lineHeight: 34, color: colors.charcoal }]}>
                     Clearer story, stronger file.
                   </Text>
-                  <Text className="mt-3 text-sm leading-7 text-charcoal/80" style={typography.body}>
+                  <Text style={[typography.body, { marginTop: 12, fontSize: 14, lineHeight: 28, color: "rgba(26,26,26,0.80)" }]}>
                     {visaUpdate.body}
                   </Text>
-                  <View className="mt-4 flex-row items-center gap-2">
-                    <Text className="text-sm text-[#30498f]" style={typography.bodySemiBold}>
+                  <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 8 }}>
+                    <Text style={[typography.bodySemiBold, { fontSize: 14, color: "#30498f" }]}>
                       Read how UniMate frames this
                     </Text>
                     <ArrowUpRight color={colors.gold} size={16} />
@@ -112,15 +172,22 @@ export default function HomeScreen() {
               </View>
             </EditorialCard>
 
+            {/* Why this app card */}
             <EditorialCard>
-              <View className="px-5 py-5">
-                <Text className="text-xs uppercase text-gold" style={[typography.bodySemiBold, typography.eyebrow]}>
+              <View style={{ paddingHorizontal: 20, paddingVertical: 20 }}>
+                <Text
+                  style={[
+                    typography.bodySemiBold,
+                    typography.eyebrow,
+                    { fontSize: 12, textTransform: "uppercase", color: colors.gold }
+                  ]}
+                >
                   Why this app
                 </Text>
-                <Text className="mt-3 text-[30px] text-charcoal" style={[typography.display, { lineHeight: 34 }]}>
+                <Text style={[typography.display, { marginTop: 12, fontSize: 30, lineHeight: 34, color: colors.charcoal }]}>
                   Prestige, budget, English, migration fit.
                 </Text>
-                <Text className="mt-3 text-base leading-8 text-charcoal/80" style={typography.body}>
+                <Text style={[typography.body, { marginTop: 12, fontSize: 16, lineHeight: 32, color: "rgba(26,26,26,0.80)" }]}>
                   UniMate folds your study ambition, budget comfort, IELTS reality, and PR intent into one narrative-friendly recommendation flow. The point is not more choices. The point is better choices.
                 </Text>
               </View>

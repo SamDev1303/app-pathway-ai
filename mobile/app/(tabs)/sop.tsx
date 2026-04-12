@@ -25,27 +25,38 @@ export default function SopScreen() {
   }, [background, course, goals, university]);
 
   return (
-    <SafeAreaView className="flex-1 bg-cream" edges={["top", "left", "right"]}>
-      <ScrollView className="flex-1" contentContainerStyle={{ padding: 20, paddingBottom: 120, gap: 20 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.cream }} edges={["top", "left", "right"]}>
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 120, gap: 20 }}>
         <SectionHeader
           eyebrow="Statement builder"
           title="Shape the SOP as you think."
           subtitle="Each step updates the draft in real time, so the final version feels intentional rather than generated."
         />
 
-        <View className="flex-row gap-2">
+        {/* Step indicators */}
+        <View style={{ flexDirection: "row", gap: 8 }}>
           {steps.map((label, index) => (
             <View
               key={label}
-              className="flex-1 rounded-full px-3 py-2"
-              style={{ backgroundColor: index <= step ? colors.navy : "rgba(26,47,110,0.08)" }}
+              style={{
+                flex: 1,
+                borderRadius: 999,
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                backgroundColor: index <= step ? colors.navy : "rgba(26,47,110,0.08)"
+              }}
             >
               <Text
-                className="text-center text-xs uppercase"
                 style={[
                   typography.bodySemiBold,
                   typography.eyebrow,
-                  { color: index <= step ? "#fff7e5" : colors.navy, letterSpacing: 1.2 }
+                  {
+                    textAlign: "center",
+                    fontSize: 12,
+                    textTransform: "uppercase",
+                    color: index <= step ? "#fff7e5" : colors.navy,
+                    letterSpacing: 1.2
+                  }
                 ]}
               >
                 {label}
@@ -54,8 +65,9 @@ export default function SopScreen() {
           ))}
         </View>
 
+        {/* Form card */}
         <EditorialCard>
-          <View className="gap-5 px-5 py-5">
+          <View style={{ gap: 20, paddingHorizontal: 20, paddingVertical: 20 }}>
             {step === 0 ? (
               <>
                 <FormField label="Target university" value={university} onChangeText={setUniversity} />
@@ -84,17 +96,24 @@ export default function SopScreen() {
             ) : null}
 
             {step === 3 ? (
-              <View className="gap-4">
-                <Text className="text-xs uppercase text-gold" style={[typography.bodySemiBold, typography.eyebrow]}>
+              <View style={{ gap: 16 }}>
+                <Text
+                  style={[
+                    typography.bodySemiBold,
+                    typography.eyebrow,
+                    { fontSize: 12, textTransform: "uppercase", color: colors.gold }
+                  ]}
+                >
                   Generated draft
                 </Text>
-                <Text className="text-base leading-8 text-charcoal/85" style={typography.body}>
+                <Text style={[typography.body, { fontSize: 16, lineHeight: 32, color: "rgba(26,26,26,0.85)" }]}>
                   {preview}
                 </Text>
               </View>
             ) : null}
 
-            <View className="flex-row justify-between">
+            {/* Nav buttons */}
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
               <Pressable
                 onPress={() => {
                   haptics.selection();
@@ -137,15 +156,22 @@ export default function SopScreen() {
           </View>
         </EditorialCard>
 
+        {/* Live preview */}
         <EditorialCard>
-          <View className="px-5 py-5">
-            <Text className="text-xs uppercase text-gold" style={[typography.bodySemiBold, typography.eyebrow]}>
+          <View style={{ paddingHorizontal: 20, paddingVertical: 20 }}>
+            <Text
+              style={[
+                typography.bodySemiBold,
+                typography.eyebrow,
+                { fontSize: 12, textTransform: "uppercase", color: colors.gold }
+              ]}
+            >
               Live preview
             </Text>
-            <Text className="mt-4 text-[30px] text-charcoal" style={[typography.display, { lineHeight: 34 }]}>
+            <Text style={[typography.display, { marginTop: 16, fontSize: 30, lineHeight: 34, color: colors.charcoal }]}>
               Draft in progress
             </Text>
-            <Text className="mt-4 text-base leading-8 text-charcoal/85" style={typography.body}>
+            <Text style={[typography.body, { marginTop: 16, fontSize: 16, lineHeight: 32, color: "rgba(26,26,26,0.85)" }]}>
               {preview}
             </Text>
           </View>

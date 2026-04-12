@@ -8,8 +8,14 @@ type Props = TextInputProps & {
 
 export function FormField({ label, hint, multiline, style, ...props }: Props) {
   return (
-    <View className="gap-2">
-      <Text className="text-xs uppercase text-gold" style={[typography.bodySemiBold, typography.eyebrow]}>
+    <View style={{ gap: 8 }}>
+      <Text
+        style={[
+          typography.bodySemiBold,
+          typography.eyebrow,
+          { fontSize: 12, textTransform: "uppercase", color: colors.gold }
+        ]}
+      >
         {label}
       </Text>
       <TextInput

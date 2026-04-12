@@ -4,19 +4,18 @@ import { colors, radius, shadow } from "@/lib/theme";
 
 export function EditorialCard({ children }: PropsWithChildren) {
   return (
-    <View
-      className="overflow-hidden"
-      style={[
-        shadow.card,
-        {
+    <View style={[shadow.card, { borderRadius: radius.md }]}>
+      <View
+        style={{
+          overflow: "hidden",
           backgroundColor: colors.white,
           borderRadius: radius.md,
           borderWidth: 1,
           borderColor: colors.line
-        }
-      ]}
-    >
-      {children}
+        }}
+      >
+        {children}
+      </View>
     </View>
   );
 }

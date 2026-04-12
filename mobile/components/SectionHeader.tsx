@@ -9,21 +9,26 @@ type Props = {
 
 export function SectionHeader({ eyebrow, title, subtitle }: Props) {
   return (
-    <View className="gap-2">
+    <View style={{ gap: 8 }}>
       <Text
-        className="text-xs uppercase text-gold"
-        style={[typography.bodySemiBold, typography.eyebrow]}
+        style={[
+          typography.bodySemiBold,
+          typography.eyebrow,
+          { fontSize: 12, textTransform: "uppercase", color: colors.gold }
+        ]}
       >
         {eyebrow}
       </Text>
       <Text
-        className="text-4xl text-charcoal"
-        style={[typography.display, { lineHeight: 44 }]}
+        style={[
+          typography.display,
+          { fontSize: 34, lineHeight: 44, color: colors.charcoal }
+        ]}
       >
         {title}
       </Text>
       {subtitle ? (
-        <Text className="text-base leading-7" style={[typography.body, { color: colors.navy }]}>
+        <Text style={[typography.body, { fontSize: 16, lineHeight: 28, color: colors.navy }]}>
           {subtitle}
         </Text>
       ) : null}

@@ -64,6 +64,7 @@ export default function ChatScreen() {
     setMessages((current) => [...current, { id: userId, role: "user", text: label }, { id: assistantId, role: "assistant", text: "" }]);
     setStreamingId(assistantId);
 
+    const ids: number[] = [];
     response.split("").forEach((char, index) => {
       const timeout = setTimeout(() => {
         setMessages((current) =>
@@ -78,15 +79,16 @@ export default function ChatScreen() {
         }
       }, index * 16);
 
-      timeouts.current.push(timeout as unknown as number);
+      ids.push(timeout as unknown as number);
     });
+    timeouts.current = ids;
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-ivory">
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.ivory }}>
       <LinearGradient colors={["#f6e8bf", "#d8b360", "#1a2f6e"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
-        <View className="px-5 pb-7 pt-3">
-          <View className="flex-row items-center gap-4">
+        <View style={{ paddingHorizontal: 20, paddingBottom: 28, paddingTop: 12 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 16 }}>
             <Animated.View
               style={{
                 transform: [{ scale: pulse }],
@@ -103,14 +105,20 @@ export default function ChatScreen() {
             >
               <Text style={[typography.display, { color: "#fff8e4", fontSize: 28 }]}>✦</Text>
             </Animated.View>
-            <View className="flex-1">
-              <Text className="text-xs uppercase text-[#fff1c5]" style={[typography.bodySemiBold, typography.eyebrow]}>
+            <View style={{ flex: 1 }}>
+              <Text
+                style={[
+                  typography.bodySemiBold,
+                  typography.eyebrow,
+                  { fontSize: 12, textTransform: "uppercase", color: "#fff1c5" }
+                ]}
+              >
                 AI advisor
               </Text>
-              <Text className="mt-2 text-[34px] text-white" style={[typography.display, { lineHeight: 36 }]}>
+              <Text style={[typography.display, { marginTop: 8, fontSize: 34, lineHeight: 36, color: "#ffffff" }]}>
                 UniMate Counsel
               </Text>
-              <Text className="mt-2 text-sm leading-6 text-white/80" style={typography.body}>
+              <Text style={[typography.body, { marginTop: 8, fontSize: 14, lineHeight: 24, color: "rgba(255,255,255,0.80)" }]}>
                 Ask short, practical migration-study questions and watch the answer compose live.
               </Text>
             </View>
@@ -118,8 +126,8 @@ export default function ChatScreen() {
         </View>
       </LinearGradient>
 
-      <ScrollView className="flex-1 px-5" contentContainerStyle={{ paddingVertical: 20, paddingBottom: 120, gap: 14 }}>
-        <View className="flex-row flex-wrap gap-3">
+      <ScrollView style={{ flex: 1, paddingHorizontal: 20 }} contentContainerStyle={{ paddingVertical: 20, paddingBottom: 120, gap: 14 }}>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
           {advisorPrompts.map((prompt) => (
             <Pressable
               key={prompt.id}
@@ -144,8 +152,13 @@ export default function ChatScreen() {
           return (
             <View
               key={message.id}
-              className={`max-w-[88%] rounded-[26px] px-5 py-4 ${assistant ? "self-start bg-white" : "self-end bg-[#1a2f6e]"}`}
               style={{
+                maxWidth: "88%",
+                borderRadius: 26,
+                paddingHorizontal: 20,
+                paddingVertical: 16,
+                alignSelf: assistant ? "flex-start" : "flex-end",
+                backgroundColor: assistant ? "#ffffff" : "#1a2f6e",
                 borderWidth: 1,
                 borderColor: assistant ? "rgba(26,47,110,0.08)" : "transparent"
               }}
@@ -166,8 +179,16 @@ export default function ChatScreen() {
         })}
       </ScrollView>
 
-      <View className="border-t border-[#d9deec] bg-[#fffdf9] px-5 py-4">
-        <Text className="text-center text-sm text-[#445891]" style={typography.body}>
+      <View
+        style={{
+          borderTopWidth: 1,
+          borderTopColor: "#d9deec",
+          backgroundColor: "#fffdf9",
+          paddingHorizontal: 20,
+          paddingVertical: 16
+        }}
+      >
+        <Text style={[typography.body, { textAlign: "center", fontSize: 14, color: "#445891" }]}>
           Not legal advice — book a free consultation.
         </Text>
       </View>

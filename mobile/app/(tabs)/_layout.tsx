@@ -1,5 +1,4 @@
 import { Tabs } from "expo-router";
-import { BlurView } from "expo-blur";
 import { Platform, StyleSheet, View } from "react-native";
 import { TabIcon } from "@/lib/icons";
 import { haptics } from "@/lib/haptics";
@@ -8,14 +7,12 @@ import { colors, typography } from "@/lib/theme";
 const isIOS = Platform.OS === "ios";
 
 function TabBarBackground() {
-  if (!isIOS) {
-    return <View style={[StyleSheet.absoluteFill, { backgroundColor: "#fffdf9" }]} />;
-  }
   return (
-    <BlurView
-      intensity={92}
-      tint="systemChromeMaterialLight"
-      style={StyleSheet.absoluteFill}
+    <View
+      style={[
+        StyleSheet.absoluteFill,
+        { backgroundColor: isIOS ? "rgba(255,253,249,0.92)" : "#fffdf9" }
+      ]}
     />
   );
 }
@@ -33,7 +30,7 @@ export default function TabsLayout() {
           position: "absolute",
           borderTopWidth: StyleSheet.hairlineWidth,
           borderTopColor: "rgba(26,47,110,0.08)",
-          backgroundColor: isIOS ? "transparent" : "#fffdf9",
+          backgroundColor: "transparent",
           height: isIOS ? 86 : 78,
           paddingTop: 10,
           paddingBottom: isIOS ? 28 : 12,

@@ -118,10 +118,14 @@ export default function ProfileScreen() {
     AsyncStorage.getItem(STORAGE_KEY)
       .then((raw) => {
         if (raw) {
-          const parsed = JSON.parse(raw) as Onboarding;
-          setData(parsed);
-          if (parsed.completedAt) {
-            setStep(3);
+          try {
+            const parsed = JSON.parse(raw) as Onboarding;
+            setData(parsed);
+            if (parsed.completedAt) {
+              setStep(3);
+            }
+          } catch {
+            AsyncStorage.removeItem(STORAGE_KEY).catch(() => undefined);
           }
         }
       })
@@ -187,8 +191,9 @@ export default function ProfileScreen() {
           : auImages.usydQuad;
 
   return (
-    <SafeAreaView className="flex-1 bg-ivory" edges={["top", "left", "right"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.ivory }} edges={["top", "left", "right"]}>
       <ScrollView contentContainerStyle={{ paddingBottom: 130 }} showsVerticalScrollIndicator={false}>
+        {/* Hero banner */}
         <ImageBackground
           source={{ uri: stepImage }}
           style={{ height: 240 }}
@@ -211,8 +216,9 @@ export default function ProfileScreen() {
           </LinearGradient>
         </ImageBackground>
 
+        {/* Progress bar */}
         {step < 3 ? (
-          <View className="flex-row gap-2 px-5 pt-5">
+          <View style={{ flexDirection: "row", gap: 8, paddingHorizontal: 20, paddingTop: 20 }}>
             {[0, 1, 2].map((i) => (
               <View
                 key={i}
@@ -227,9 +233,10 @@ export default function ProfileScreen() {
           </View>
         ) : null}
 
-        <View className="px-5 py-6">
+        <View style={{ paddingHorizontal: 20, paddingVertical: 24 }}>
+          {/* Step 0: Field selection */}
           {step === 0 ? (
-            <View className="gap-4">
+            <View style={{ gap: 16 }}>
               {fieldOptions.map((option) => {
                 const selected = data.field === option.id;
                 return (
@@ -269,10 +276,11 @@ export default function ProfileScreen() {
             </View>
           ) : null}
 
+          {/* Step 1: IELTS slider */}
           {step === 1 ? (
-            <View className="gap-6">
+            <View style={{ gap: 24 }}>
               <EditorialCard>
-                <View className="px-6 py-7">
+                <View style={{ paddingHorizontal: 24, paddingVertical: 28 }}>
                   <Text style={[typography.bodySemiBold, typography.eyebrow, { color: colors.gold, fontSize: 11, textTransform: "uppercase" }]}>
                     IELTS overall band
                   </Text>
@@ -280,7 +288,7 @@ export default function ProfileScreen() {
                     {data.ielts.toFixed(1)}
                   </Text>
                   <SliderRow value={data.ielts} onChange={setIelts} />
-                  <View className="mt-5 rounded-2xl bg-ivory px-4 py-4">
+                  <View style={{ marginTop: 20, borderRadius: 16, backgroundColor: colors.ivory, paddingHorizontal: 16, paddingVertical: 16 }}>
                     <Text style={[typography.bodyMedium, { color: colors.navy, fontSize: 14, lineHeight: 22 }]}>
                       {ieltsCaption(data.ielts).line}
                     </Text>
@@ -293,8 +301,9 @@ export default function ProfileScreen() {
             </View>
           ) : null}
 
+          {/* Step 2: Intake selection */}
           {step === 2 ? (
-            <View className="gap-4">
+            <View style={{ gap: 16 }}>
               {intakeOptions.map((option) => {
                 const selected = data.intake === option.id;
                 return (
@@ -316,7 +325,7 @@ export default function ProfileScreen() {
                       contentFit="cover"
                       transition={300}
                     >
-                      <View className="self-start rounded-full bg-[#faf8f3]/92 px-3 py-1.5">
+                      <View style={{ alignSelf: "flex-start", borderRadius: 999, backgroundColor: "rgba(250,248,243,0.92)", paddingHorizontal: 12, paddingVertical: 6 }}>
                         <Text style={[typography.bodySemiBold, typography.eyebrow, { color: colors.gold, fontSize: 10, textTransform: "uppercase" }]}>
                           Intake
                         </Text>
@@ -339,14 +348,15 @@ export default function ProfileScreen() {
             </View>
           ) : null}
 
+          {/* Step 3: Completed profile */}
           {step === 3 ? (
-            <View className="gap-5">
+            <View style={{ gap: 20 }}>
               <EditorialCard>
-                <View className="px-6 py-6">
+                <View style={{ paddingHorizontal: 24, paddingVertical: 24 }}>
                   <Text style={[typography.bodySemiBold, typography.eyebrow, { color: colors.gold, fontSize: 11, textTransform: "uppercase" }]}>
                     Your top match
                   </Text>
-                  <View className="mt-3 flex-row items-center justify-between">
+                  <View style={{ marginTop: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                     <View style={{ flex: 1, paddingRight: 12 }}>
                       <Text style={[typography.display, { color: colors.charcoal, fontSize: 26, lineHeight: 30 }]}>
                         {universities[0].university}
@@ -364,7 +374,7 @@ export default function ProfileScreen() {
               </EditorialCard>
 
               <EditorialCard>
-                <View className="px-6 py-6 gap-3">
+                <View style={{ paddingHorizontal: 24, paddingVertical: 24, gap: 12 }}>
                   <Text style={[typography.bodySemiBold, typography.eyebrow, { color: colors.gold, fontSize: 11, textTransform: "uppercase" }]}>
                     Your profile
                   </Text>
@@ -392,6 +402,7 @@ export default function ProfileScreen() {
         </View>
       </ScrollView>
 
+      {/* Bottom nav buttons */}
       {step < 3 ? (
         <View
           style={{
@@ -447,7 +458,7 @@ export default function ProfileScreen() {
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <View className="flex-row items-center justify-between">
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
       <Text style={[typography.body, { color: "rgba(26,26,26,0.55)", fontSize: 13 }]}>{label}</Text>
       <Text style={[typography.bodySemiBold, { color: colors.navy, fontSize: 14 }]}>{value}</Text>
     </View>
@@ -465,13 +476,13 @@ function SliderRow({ value, onChange }: { value: number; onChange: (n: number) =
   const fillWidth = fillPct.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"], extrapolate: "clamp" });
 
   return (
-    <View className="mt-6">
-      <View className="h-2 w-full rounded-full bg-[#eceff7]">
+    <View style={{ marginTop: 24 }}>
+      <View style={{ height: 8, width: "100%", borderRadius: 999, backgroundColor: "#eceff7" }}>
         <Animated.View
           style={{ width: fillWidth, height: 8, borderRadius: 999, backgroundColor: colors.gold }}
         />
       </View>
-      <View className="mt-4 flex-row justify-between">
+      <View style={{ marginTop: 16, flexDirection: "row", justifyContent: "space-between" }}>
         {stops.map((stop) => {
           const active = Math.abs(stop - value) < 0.05;
           return (
@@ -480,9 +491,9 @@ function SliderRow({ value, onChange }: { value: number; onChange: (n: number) =
               onPress={() => onChange(stop)}
               hitSlop={8}
               style={{
-                width: 28,
-                height: 28,
-                borderRadius: 14,
+                width: 24,
+                height: 24,
+                borderRadius: 12,
                 alignItems: "center",
                 justifyContent: "center",
                 backgroundColor: active ? colors.navy : "transparent"

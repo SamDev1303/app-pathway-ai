@@ -11,7 +11,7 @@ export default function MatchScreen() {
   const { height } = useWindowDimensions();
 
   return (
-    <SafeAreaView className="flex-1 bg-[#eceff7]" edges={["top", "left", "right"]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.ivory }} edges={["top", "left", "right"]}>
       <FlatList
         data={universities}
         keyExtractor={(item) => item.id}
@@ -21,33 +21,57 @@ export default function MatchScreen() {
         onMomentumScrollEnd={() => haptics.light()}
         contentContainerStyle={{ paddingBottom: 86 }}
         renderItem={({ item }) => (
-          <View style={{ height: height - 100 }} className="px-4 pb-4">
+          <View style={{ height: height - 100, paddingHorizontal: 16, paddingBottom: 16 }}>
             <ImageBackground
               source={{ uri: item.image }}
               style={{ flex: 1, justifyContent: "space-between", overflow: "hidden", borderRadius: 34 }}
               contentFit="cover"
               transition={300}
             >
-              <View className="px-5 pt-5">
-                <View className="self-start rounded-full bg-[#faf8f3]/90 px-4 py-2">
-                  <Text className="text-xs uppercase text-gold" style={[typography.bodySemiBold, typography.eyebrow]}>
+              <View style={{ paddingHorizontal: 20, paddingTop: 20 }}>
+                <View
+                  style={{
+                    alignSelf: "flex-start",
+                    borderRadius: 999,
+                    backgroundColor: "rgba(250,248,243,0.90)",
+                    paddingHorizontal: 16,
+                    paddingVertical: 8
+                  }}
+                >
+                  <Text
+                    style={[
+                      typography.bodySemiBold,
+                      typography.eyebrow,
+                      { fontSize: 12, textTransform: "uppercase", color: colors.gold }
+                    ]}
+                  >
                     UniMatch deck
                   </Text>
                 </View>
               </View>
 
-              <View className="mx-4 mb-4 rounded-[30px] border border-white/15 bg-[#13275f]/82 p-5">
-                <View className="flex-row items-start justify-between">
-                  <View className="max-w-[73%]">
-                    <Text className="text-[38px] text-white" style={[typography.display, { lineHeight: 42 }]}>
+              <View
+                style={{
+                  marginHorizontal: 16,
+                  marginBottom: 16,
+                  borderRadius: 30,
+                  borderWidth: 1,
+                  borderColor: "rgba(255,255,255,0.15)",
+                  backgroundColor: "rgba(19,39,95,0.82)",
+                  padding: 20
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between" }}>
+                  <View style={{ maxWidth: "73%" }}>
+                    <Text style={[typography.display, { fontSize: 32, lineHeight: 36, color: "#ffffff" }]}>
                       {item.university}
                     </Text>
-                    <Text className="mt-2 text-base text-[#f3d37d]" style={typography.bodyMedium}>
+                    <Text style={[typography.bodyMedium, { marginTop: 8, fontSize: 16, color: "#f3d37d" }]}>
                       {item.course}
                     </Text>
-                    <View className="mt-3 flex-row items-center gap-2">
+                    <View style={{ marginTop: 12, flexDirection: "row", alignItems: "center", gap: 8 }}>
                       <MapPin color="#fff7e7" size={16} />
-                      <Text className="text-sm text-white/80" style={typography.body}>
+                      <Text style={[typography.body, { fontSize: 14, color: "rgba(255,255,255,0.80)" }]}>
                         {item.location}
                       </Text>
                     </View>
@@ -55,7 +79,8 @@ export default function MatchScreen() {
                   <ScoreRing score={item.score} />
                 </View>
 
-                <View className="mt-5 flex-row flex-wrap gap-3">
+                {/* Info pills */}
+                <View style={{ marginTop: 20, flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
                   {[
                     { icon: Wallet, value: item.budget },
                     { icon: Languages, value: item.ielts },
@@ -63,36 +88,67 @@ export default function MatchScreen() {
                   ].map(({ icon: Icon, value }) => (
                     <View
                       key={value}
-                      className="min-w-[31%] flex-1 rounded-[20px] bg-white/10 px-4 py-3"
+                      style={{
+                        minWidth: "31%",
+                        flex: 1,
+                        borderRadius: 20,
+                        backgroundColor: "rgba(255,255,255,0.10)",
+                        paddingHorizontal: 16,
+                        paddingVertical: 12
+                      }}
                     >
                       <Icon color="#f3d37d" size={16} />
-                      <Text className="mt-2 text-sm text-white/85" style={typography.body}>
+                      <Text style={[typography.body, { marginTop: 8, fontSize: 14, color: "rgba(255,255,255,0.85)" }]}>
                         {value}
                       </Text>
                     </View>
                   ))}
                 </View>
 
-                <View className="mt-5 flex-row flex-wrap gap-2">
+                {/* Reason tags */}
+                <View style={{ marginTop: 20, flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
                   {item.reasons.map((reason) => (
-                    <View key={reason} className="rounded-full border border-[#f3d37d]/40 bg-[#faf8f3]/10 px-3 py-2">
-                      <Text className="text-xs uppercase text-[#f7dfa1]" style={[typography.bodySemiBold, typography.eyebrow, { letterSpacing: 1.4 }]}>
+                    <View
+                      key={reason}
+                      style={{
+                        borderRadius: 999,
+                        borderWidth: 1,
+                        borderColor: "rgba(243,211,125,0.40)",
+                        backgroundColor: "rgba(250,248,243,0.10)",
+                        paddingHorizontal: 12,
+                        paddingVertical: 8
+                      }}
+                    >
+                      <Text
+                        style={[
+                          typography.bodySemiBold,
+                          typography.eyebrow,
+                          { fontSize: 12, textTransform: "uppercase", color: "#f7dfa1", letterSpacing: 1.4 }
+                        ]}
+                      >
                         {reason}
                       </Text>
                     </View>
                   ))}
                 </View>
 
-                <Text className="mt-5 text-sm leading-7 text-white/82" style={typography.body}>
+                <Text style={[typography.body, { marginTop: 20, fontSize: 14, lineHeight: 28, color: "rgba(255,255,255,0.82)" }]}>
                   {item.summary}
                 </Text>
 
-                <View className="mt-5 flex-row items-center justify-between">
+                {/* Intake + Apply */}
+                <View style={{ marginTop: 20, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                   <View>
-                    <Text className="text-xs uppercase text-white/55" style={[typography.bodySemiBold, typography.eyebrow, { letterSpacing: 1.4 }]}>
+                    <Text
+                      style={[
+                        typography.bodySemiBold,
+                        typography.eyebrow,
+                        { fontSize: 12, textTransform: "uppercase", color: "rgba(255,255,255,0.55)", letterSpacing: 1.4 }
+                      ]}
+                    >
                       Intake
                     </Text>
-                    <Text className="mt-1 text-sm text-white" style={typography.bodyMedium}>
+                    <Text style={[typography.bodyMedium, { marginTop: 4, fontSize: 14, color: "#ffffff" }]}>
                       {item.intake}
                     </Text>
                   </View>

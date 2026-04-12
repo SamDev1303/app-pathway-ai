@@ -1,14 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Animated, Easing, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, {
-  Easing,
-  useAnimatedStyle,
-  useSharedValue,
-  withRepeat,
-  withSequence,
-  withTiming
-} from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
 import { advisorPrompts } from "@/lib/mockData";
 import { haptics } from "@/lib/haptics";
@@ -32,33 +24,31 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [streamingId, setStreamingId] = useState<string | null>(null);
   const timeouts = useRef<number[]>([]);
-  const pulse = useSharedValue(1);
-  const glow = useSharedValue(0.65);
+  const pulse = useRef(new Animated.Value(1)).current;
+  const glow = useRef(new Animated.Value(0.65)).current;
 
   useEffect(() => {
-    pulse.value = withRepeat(
-      withSequence(
-        withTiming(1.05, { duration: 1100, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 1100, easing: Easing.inOut(Easing.ease) })
-      ),
-      -1,
-      false
+    const pulseAnim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulse, { toValue: 1.05, duration: 1100, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(pulse, { toValue: 1, duration: 1100, easing: Easing.inOut(Easing.ease), useNativeDriver: true })
+      ])
     );
-    glow.value = withRepeat(
-      withSequence(withTiming(1, { duration: 900 }), withTiming(0.55, { duration: 900 })),
-      -1,
-      true
+    const glowAnim = Animated.loop(
+      Animated.sequence([
+        Animated.timing(glow, { toValue: 1, duration: 900, useNativeDriver: true }),
+        Animated.timing(glow, { toValue: 0.55, duration: 900, useNativeDriver: true })
+      ])
     );
+    pulseAnim.start();
+    glowAnim.start();
 
     return () => {
+      pulseAnim.stop();
+      glowAnim.stop();
       timeouts.current.forEach(clearTimeout);
     };
   }, [glow, pulse]);
-
-  const avatarStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: pulse.value }],
-    opacity: glow.value
-  }));
 
   const canPrompt = useMemo(() => !streamingId, [streamingId]);
 
@@ -98,19 +88,18 @@ export default function ChatScreen() {
         <View className="px-5 pb-7 pt-3">
           <View className="flex-row items-center gap-4">
             <Animated.View
-              style={[
-                avatarStyle,
-                {
-                  width: 62,
-                  height: 62,
-                  borderRadius: 31,
-                  backgroundColor: "rgba(255,248,230,0.18)",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.35)"
-                }
-              ]}
+              style={{
+                transform: [{ scale: pulse }],
+                opacity: glow,
+                width: 62,
+                height: 62,
+                borderRadius: 31,
+                backgroundColor: "rgba(255,248,230,0.18)",
+                alignItems: "center",
+                justifyContent: "center",
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.35)"
+              }}
             >
               <Text style={[typography.display, { color: "#fff8e4", fontSize: 28 }]}>✦</Text>
             </Animated.View>

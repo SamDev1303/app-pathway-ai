@@ -1,15 +1,9 @@
-import { useEffect, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { Animated, Easing, Pressable, ScrollView, Text, View } from "react-native";
 import { ImageBackground } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-  Easing
-} from "react-native-reanimated";
 import { EditorialCard } from "@/components/EditorialCard";
 import { ScoreRing } from "@/components/ScoreRing";
 import { auImages } from "@/lib/images";
@@ -462,21 +456,19 @@ function Row({ label, value }: { label: string; value: string }) {
 
 function SliderRow({ value, onChange }: { value: number; onChange: (n: number) => void }) {
   const stops = [5.0, 5.5, 6.0, 6.5, 7.0, 7.5, 8.0, 8.5, 9.0];
-  const fillPct = useSharedValue((value - 5.0) / 4.0);
+  const fillPct = useRef(new Animated.Value((value - 5.0) / 4.0)).current;
 
   useEffect(() => {
-    fillPct.value = withTiming((value - 5.0) / 4.0, { duration: 200, easing: Easing.out(Easing.cubic) });
+    Animated.timing(fillPct, { toValue: (value - 5.0) / 4.0, duration: 200, easing: Easing.out(Easing.cubic), useNativeDriver: false }).start();
   }, [fillPct, value]);
 
-  const fillStyle = useAnimatedStyle(() => ({
-    width: `${Math.max(0, Math.min(1, fillPct.value)) * 100}%`
-  }));
+  const fillWidth = fillPct.interpolate({ inputRange: [0, 1], outputRange: ["0%", "100%"], extrapolate: "clamp" });
 
   return (
     <View className="mt-6">
       <View className="h-2 w-full rounded-full bg-[#eceff7]">
         <Animated.View
-          style={[fillStyle, { height: 8, borderRadius: 999, backgroundColor: colors.gold }]}
+          style={{ width: fillWidth, height: 8, borderRadius: 999, backgroundColor: colors.gold }}
         />
       </View>
       <View className="mt-4 flex-row justify-between">

@@ -68,7 +68,7 @@ export default function HomeScreen() {
                     { fontSize: 12, textTransform: "uppercase", color: colors.gold }
                   ]}
                 >
-                  Today&apos;s Match
+                  Today's Match
                 </Text>
                 <View style={{ marginTop: 12, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                   <View style={{ maxWidth: "72%", gap: 8 }}>

@@ -119,9 +119,16 @@ export default function ProfileScreen() {
       .then((raw) => {
         if (raw) {
           try {
-            const parsed = JSON.parse(raw) as Onboarding;
-            setData(parsed);
-            if (parsed.completedAt) {
+            const parsed = JSON.parse(raw) as Partial<Onboarding>;
+            // Shape-guard: merge with defaults so stale/partial payloads never crash later reads
+            // (e.g. data.ielts.toFixed()). If critical fields are the wrong type, fall back cleanly.
+            const safe: Onboarding = {
+              ...defaultOnboarding,
+              ...parsed,
+              ielts: typeof parsed.ielts === "number" ? parsed.ielts : defaultOnboarding.ielts,
+            };
+            setData(safe);
+            if (safe.completedAt) {
               setStep(3);
             }
           } catch {

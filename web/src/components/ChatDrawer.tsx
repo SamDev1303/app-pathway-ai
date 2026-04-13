@@ -142,7 +142,7 @@ export function ChatDrawer() {
                 />
                 <button
                   type="submit"
-                  disabled={!input.trim() || status === "submitted"}
+                  disabled={!input.trim() || status === "submitted" || status === "streaming"}
                   className="bg-[var(--color-navy-950)] hover:bg-[var(--color-navy-900)] disabled:opacity-50 text-[var(--color-cream)] px-5 py-3 font-display"
                 >
                   Send →

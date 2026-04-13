@@ -6,6 +6,7 @@ const LeadSchema = z.object({
   email: z.string().email(),
   phone: z.string().min(6).max(40),
   message: z.string().min(0).max(2000).optional().default(""),
+  source: z.string().max(120).optional().default("footer modal"),
   consent: z.literal(true)
 });
 
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
         `Message:`,
         lead.message || "(none)",
         ``,
-        `Source: unimate-demo.vercel.app footer modal`,
+        `Source: unimate-demo.vercel.app ${lead.source}`,
         `Privacy consent: yes (Privacy Act 1988 (Cth))`,
         `Submitted: ${new Date().toISOString()}`
       ].join("\n")

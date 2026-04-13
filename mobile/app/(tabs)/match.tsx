@@ -57,7 +57,7 @@ export default function MatchScreen() {
                   borderRadius: 30,
                   borderWidth: 1,
                   borderColor: "rgba(255,255,255,0.15)",
-                  backgroundColor: "rgba(19,39,95,0.82)",
+                  backgroundColor: "rgba(11,23,60,0.92)",
                   padding: 20
                 }}
               >
@@ -71,7 +71,7 @@ export default function MatchScreen() {
                     </Text>
                     <View style={{ marginTop: 12, flexDirection: "row", alignItems: "center", gap: 8 }}>
                       <MapPin color="#fff7e7" size={16} />
-                      <Text style={[typography.body, { fontSize: 14, color: "rgba(255,255,255,0.80)" }]}>
+                      <Text style={[typography.body, { fontSize: 14, color: "#f3e4c3" }]}>
                         {item.location}
                       </Text>
                     </View>
@@ -92,13 +92,13 @@ export default function MatchScreen() {
                         minWidth: "31%",
                         flex: 1,
                         borderRadius: 20,
-                        backgroundColor: "rgba(255,255,255,0.10)",
+                        backgroundColor: "rgba(255,255,255,0.14)",
                         paddingHorizontal: 16,
                         paddingVertical: 12
                       }}
                     >
                       <Icon color="#f3d37d" size={16} />
-                      <Text style={[typography.body, { marginTop: 8, fontSize: 14, color: "rgba(255,255,255,0.85)" }]}>
+                      <Text style={[typography.body, { marginTop: 8, fontSize: 14, color: "#ffffff" }]}>
                         {value}
                       </Text>
                     </View>
@@ -132,7 +132,7 @@ export default function MatchScreen() {
                   ))}
                 </View>
 
-                <Text style={[typography.body, { marginTop: 20, fontSize: 14, lineHeight: 28, color: "rgba(255,255,255,0.82)" }]}>
+                <Text style={[typography.body, { marginTop: 20, fontSize: 14, lineHeight: 28, color: "#f5ecd4" }]}>
                   {item.summary}
                 </Text>
 

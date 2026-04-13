@@ -272,7 +272,7 @@ export default function ProfileScreen() {
                         <Text style={[typography.display, { color: "#fff", fontSize: 22, lineHeight: 24 }]}>
                           {option.title}
                         </Text>
-                        <Text style={[typography.body, { color: "rgba(255,255,255,0.82)", fontSize: 13, lineHeight: 18, marginTop: 4 }]}>
+                        <Text style={[typography.body, { color: "#f3e4c3", fontSize: 13, lineHeight: 18, marginTop: 4 }]}>
                           {option.blurb}
                         </Text>
                       </LinearGradient>
@@ -344,7 +344,7 @@ export default function ProfileScreen() {
                         <Text style={[typography.display, { color: "#fff", fontSize: 24, lineHeight: 26 }]}>
                           {option.label}
                         </Text>
-                        <Text style={[typography.body, { color: "rgba(255,255,255,0.82)", fontSize: 12, lineHeight: 18, marginTop: 4 }]}>
+                        <Text style={[typography.body, { color: "#f3e4c3", fontSize: 12, lineHeight: 18, marginTop: 4 }]}>
                           {option.caption}
                         </Text>
                       </LinearGradient>
@@ -371,7 +371,7 @@ export default function ProfileScreen() {
                       <Text style={[typography.bodyMedium, { color: colors.navy, fontSize: 14, marginTop: 4 }]}>
                         {universities[0].course}
                       </Text>
-                      <Text style={[typography.body, { color: "rgba(26,26,26,0.7)", fontSize: 13, lineHeight: 19, marginTop: 8 }]}>
+                      <Text style={[typography.body, { color: "#2b2f3a", fontSize: 13, lineHeight: 19, marginTop: 8 }]}>
                         {universities[0].summary}
                       </Text>
                     </View>
@@ -466,7 +466,7 @@ export default function ProfileScreen() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-      <Text style={[typography.body, { color: "rgba(26,26,26,0.55)", fontSize: 13 }]}>{label}</Text>
+      <Text style={[typography.body, { color: "#4a5068", fontSize: 13 }]}>{label}</Text>
       <Text style={[typography.bodySemiBold, { color: colors.navy, fontSize: 14 }]}>{value}</Text>
     </View>
   );

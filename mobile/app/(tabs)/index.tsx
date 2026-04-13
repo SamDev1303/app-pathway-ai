@@ -31,7 +31,7 @@ export default function HomeScreen() {
               contentFit="cover"
               transition={300}
             >
-              <View style={{ backgroundColor: "rgba(26,47,110,0.45)", paddingHorizontal: 24, paddingBottom: 24, paddingTop: 20 }}>
+              <View style={{ backgroundColor: "rgba(15,31,85,0.65)", paddingHorizontal: 24, paddingBottom: 24, paddingTop: 20 }}>
                 <Text
                   style={[
                     typography.bodySemiBold,
@@ -57,7 +57,7 @@ export default function HomeScreen() {
                   borderRadius: 28,
                   borderWidth: 1,
                   borderColor: "rgba(255,255,255,0.20)",
-                  backgroundColor: "rgba(250,248,243,0.92)",
+                  backgroundColor: "#faf8f3",
                   padding: 20
                 }}
               >
@@ -78,7 +78,7 @@ export default function HomeScreen() {
                     <Text style={[typography.bodyMedium, { fontSize: 16, color: "#30498f" }]}>
                       {topMatch.course}
                     </Text>
-                    <Text style={[typography.body, { fontSize: 14, lineHeight: 24, color: "rgba(26,26,26,0.80)" }]}>
+                    <Text style={[typography.body, { fontSize: 14, lineHeight: 24, color: colors.textPrimary }]}>
                       {topMatch.summary}
                     </Text>
                   </View>
@@ -128,7 +128,7 @@ export default function HomeScreen() {
                 <Sparkles color={colors.gold} size={22} strokeWidth={2} />
               </View>
               <View style={{ paddingHorizontal: 20, paddingVertical: 20 }}>
-                <Text style={[typography.body, { fontSize: 16, lineHeight: 32, color: "rgba(26,26,26,0.85)" }]}>
+                <Text style={[typography.body, { fontSize: 16, lineHeight: 32, color: colors.textPrimary }]}>
                   {advisorTip}
                 </Text>
               </View>
@@ -159,7 +159,7 @@ export default function HomeScreen() {
                   <Text style={[typography.display, { marginTop: 12, fontSize: 30, lineHeight: 34, color: colors.charcoal }]}>
                     Clearer story, stronger file.
                   </Text>
-                  <Text style={[typography.body, { marginTop: 12, fontSize: 14, lineHeight: 28, color: "rgba(26,26,26,0.80)" }]}>
+                  <Text style={[typography.body, { marginTop: 12, fontSize: 14, lineHeight: 28, color: colors.textPrimary }]}>
                     {visaUpdate.body}
                   </Text>
                   <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 8 }}>
@@ -187,7 +187,7 @@ export default function HomeScreen() {
                 <Text style={[typography.display, { marginTop: 12, fontSize: 30, lineHeight: 34, color: colors.charcoal }]}>
                   Prestige, budget, English, migration fit.
                 </Text>
-                <Text style={[typography.body, { marginTop: 12, fontSize: 16, lineHeight: 32, color: "rgba(26,26,26,0.80)" }]}>
+                <Text style={[typography.body, { marginTop: 12, fontSize: 16, lineHeight: 32, color: colors.textPrimary }]}>
                   UniMate folds your study ambition, budget comfort, IELTS reality, and PR intent into one narrative-friendly recommendation flow. The point is not more choices. The point is better choices.
                 </Text>
               </View>

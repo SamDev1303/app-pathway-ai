@@ -13,13 +13,24 @@ const steps = ["Target", "Background", "Goals", "Generate"];
 
 export default function SopScreen() {
   const [step, setStep] = useState(0);
-  const [university, setUniversity] = useState(universities[0].university);
-  const [course, setCourse] = useState(universities[0].course);
-  const [background, setBackground] = useState("a strong academic base in computing and an active interest in collaborative projects, problem solving, and practical software outcomes");
-  const [goals, setGoals] = useState("build a software career in Australia that combines technical depth with long-term migration stability");
+  const [university, _setUniversity] = useState(universities[0].university);
+  const [course, _setCourse] = useState(universities[0].course);
+  const [background, _setBackground] = useState("a strong academic base in computing and an active interest in collaborative projects, problem solving, and practical software outcomes");
+  const [goals, _setGoals] = useState("build a software career in Australia that combines technical depth with long-term migration stability");
   const [aiDraft, setAiDraft] = useState<string | null>(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Invalidate any existing AI draft whenever an input changes — stops a stale
+  // SOP from a prior profile showing on step 3 after the user edits inputs.
+  const invalidateDraft = () => {
+    if (aiDraft) setAiDraft(null);
+    if (error) setError(null);
+  };
+  const setUniversity = (v: string) => { invalidateDraft(); _setUniversity(v); };
+  const setCourse = (v: string) => { invalidateDraft(); _setCourse(v); };
+  const setBackground = (v: string) => { invalidateDraft(); _setBackground(v); };
+  const setGoals = (v: string) => { invalidateDraft(); _setGoals(v); };
 
   // Template preview shown on steps 0-2 as a "live fill" — gives the form instant feel.
   // On step 3, we replace it with the real AI draft.

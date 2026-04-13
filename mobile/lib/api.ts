@@ -4,16 +4,46 @@
 
 const API_BASE = "https://unimate-demo.vercel.app";
 
-export async function askAdvisor(prompt: string): Promise<string> {
-  const res = await fetch(`${API_BASE}/api/chat-simple`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt }),
-  });
-  if (!res.ok) {
-    throw new Error(`Advisor unavailable (${res.status})`);
+// Client-side hard timeouts prevent the demo UI from hanging on weak venue wifi.
+// Chat is interactive and should feel snappy — shorter cap. SOP is a longer
+// generation task so we give it more headroom.
+const CHAT_TIMEOUT_MS = 15_000;
+const SOP_TIMEOUT_MS = 30_000;
+
+async function postJson<T>(
+  path: string,
+  body: unknown,
+  timeoutMs: number,
+): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      throw new Error(`Endpoint ${path} failed (${res.status})`);
+    }
+    return (await res.json()) as T;
+  } catch (err) {
+    if ((err as Error).name === "AbortError") {
+      throw new Error("Network timed out — please try again.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
   }
-  const data = (await res.json()) as { text?: string; error?: string };
+}
+
+export async function askAdvisor(prompt: string): Promise<string> {
+  const data = await postJson<{ text?: string; error?: string }>(
+    "/api/chat-simple",
+    { prompt },
+    CHAT_TIMEOUT_MS,
+  );
   if (data.error) throw new Error(data.error);
   return data.text ?? "";
 }
@@ -26,15 +56,11 @@ export type SopInput = {
 };
 
 export async function generateSop(input: SopInput): Promise<string> {
-  const res = await fetch(`${API_BASE}/api/sop`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(input),
-  });
-  if (!res.ok) {
-    throw new Error(`SOP generator unavailable (${res.status})`);
-  }
-  const data = (await res.json()) as { draft?: string; error?: string };
+  const data = await postJson<{ draft?: string; error?: string }>(
+    "/api/sop",
+    input,
+    SOP_TIMEOUT_MS,
+  );
   if (data.error) throw new Error(data.error);
   return data.draft ?? "";
 }

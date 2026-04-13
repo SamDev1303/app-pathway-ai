@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { EditorialCard } from "@/components/EditorialCard";
 import { FormField } from "@/components/FormField";
@@ -7,6 +7,7 @@ import { SectionHeader } from "@/components/SectionHeader";
 import { sopTemplate, universities } from "@/lib/mockData";
 import { haptics } from "@/lib/haptics";
 import { colors, typography } from "@/lib/theme";
+import { generateSop } from "@/lib/api";
 
 const steps = ["Target", "Background", "Goals", "Generate"];
 
@@ -16,13 +17,49 @@ export default function SopScreen() {
   const [course, setCourse] = useState(universities[0].course);
   const [background, setBackground] = useState("a strong academic base in computing and an active interest in collaborative projects, problem solving, and practical software outcomes");
   const [goals, setGoals] = useState("build a software career in Australia that combines technical depth with long-term migration stability");
+  const [aiDraft, setAiDraft] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const preview = useMemo(() => {
+  // Template preview shown on steps 0-2 as a "live fill" — gives the form instant feel.
+  // On step 3, we replace it with the real AI draft.
+  const templatePreview = useMemo(() => {
     const intro = sopTemplate.intro.replace("{course}", course).replace("{university}", university);
     const bg = sopTemplate.background.replace("{background}", background || "a focused academic foundation");
     const career = sopTemplate.goals.replace("{goals}", goals || "build a meaningful long-term career");
     return [intro, bg, career].join("\n\n");
   }, [background, course, goals, university]);
+
+  const runGenerate = async () => {
+    if (generating) return;
+    setError(null);
+    setGenerating(true);
+    haptics.selection();
+    try {
+      const draft = await generateSop({ university, course, background, goals });
+      setAiDraft(draft);
+      haptics.success();
+    } catch (e) {
+      setError(
+        "Our SOP generator is briefly unavailable. Try again in a moment, or book a free consultation at our Liverpool office.",
+      );
+      haptics.error();
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const handleNextOrRefine = () => {
+    if (step < 3) {
+      haptics.selection();
+      setStep((c) => Math.min(3, c + 1));
+      // Auto-kick AI generation when arriving on step 3.
+      if (step === 2) runGenerate();
+    } else {
+      // Already on step 3 — button reads "Refine", regenerate with same inputs.
+      runGenerate();
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.cream }} edges={["top", "left", "right"]}>
@@ -104,11 +141,28 @@ export default function SopScreen() {
                     { fontSize: 12, textTransform: "uppercase", color: colors.gold }
                   ]}
                 >
-                  Generated draft
+                  AI-generated draft
                 </Text>
-                <Text style={[typography.body, { fontSize: 16, lineHeight: 32, color: "rgba(26,26,26,0.85)" }]}>
-                  {preview}
-                </Text>
+                {generating ? (
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 12 }}>
+                    <ActivityIndicator size="small" color={colors.navy} />
+                    <Text style={[typography.body, { fontSize: 14, color: "#445891" }]}>
+                      Drafting your SOP with MARA-trained guidance…
+                    </Text>
+                  </View>
+                ) : error ? (
+                  <Text style={[typography.body, { fontSize: 15, lineHeight: 24, color: "#b8491f" }]}>
+                    {error}
+                  </Text>
+                ) : aiDraft ? (
+                  <Text style={[typography.body, { fontSize: 16, lineHeight: 30, color: "#1a1a1a" }]}>
+                    {aiDraft}
+                  </Text>
+                ) : (
+                  <Text style={[typography.body, { fontSize: 15, lineHeight: 24, color: "#667199" }]}>
+                    Tap Refine to generate your draft.
+                  </Text>
+                )}
               </View>
             ) : null}
 
@@ -131,17 +185,11 @@ export default function SopScreen() {
                 <Text style={[typography.bodySemiBold, { color: colors.navy }]}>Back</Text>
               </Pressable>
               <Pressable
-                onPress={() => {
-                  if (step === 3) {
-                    haptics.success();
-                  } else {
-                    haptics.selection();
-                  }
-                  setStep((current) => Math.min(3, current + 1));
-                }}
+                onPress={handleNextOrRefine}
+                disabled={generating}
                 style={({ pressed }) => ({
                   borderRadius: 999,
-                  backgroundColor: colors.gold,
+                  backgroundColor: generating ? "#d4b87a" : colors.gold,
                   paddingHorizontal: 20,
                   paddingVertical: 14,
                   opacity: pressed ? 0.86 : 1,
@@ -149,7 +197,7 @@ export default function SopScreen() {
                 })}
               >
                 <Text style={[typography.bodyBold, { color: colors.navy }]}>
-                  {step === 3 ? "Refine" : "Next"}
+                  {generating ? "Drafting…" : step === 3 ? "Refine" : "Next"}
                 </Text>
               </Pressable>
             </View>
@@ -168,11 +216,11 @@ export default function SopScreen() {
             >
               Live preview
             </Text>
-            <Text style={[typography.display, { marginTop: 16, fontSize: 30, lineHeight: 34, color: colors.charcoal }]}>
-              Draft in progress
+            <Text style={[typography.display, { marginTop: 16, fontSize: 28, lineHeight: 32, color: "#1a1a1a" }]}>
+              {aiDraft && step === 3 ? "Your SOP draft" : "Draft in progress"}
             </Text>
-            <Text style={[typography.body, { marginTop: 16, fontSize: 16, lineHeight: 32, color: "rgba(26,26,26,0.85)" }]}>
-              {preview}
+            <Text style={[typography.body, { marginTop: 16, fontSize: 16, lineHeight: 30, color: "#1a1a1a" }]}>
+              {aiDraft && step === 3 ? aiDraft : templatePreview}
             </Text>
           </View>
         </EditorialCard>

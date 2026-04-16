@@ -59,19 +59,23 @@ P9 lands an automated regenerator for this table. Until then, every author of an
 A phase moves from `in_progress` → `done` only when BOTH of these are present in `PHASE.md`:
 
 ```
-**Phase verify sign-off:** Gideon {YYYY-MM-DD} | Atlas {YYYY-MM-DD}
+**Phase verify sign-off:** Gideon {YYYY-MM-DD} | Neo {YYYY-MM-DD}
 ```
 
-- Koda cannot sign off on a phase (no self-signoff)
-- Sam cannot override a unanimous veto from Gideon + Atlas without writing a documented rationale in PHASE.md
-- If Gideon + Atlas disagree, Koda escalates to Sam
+**Dual-seat roles (updated 2026-04-16 after P0):**
+- **Primary seat 1:** Gideon (Codex CLI, `gpt-5.4-mini` default for review/verify, `gpt-5.4` for deep implementation)
+- **Primary seat 2:** Neo (OpenCode CLI, free models — DeepSeek R1 / Qwen tier)
+- **NeMo Tron fallback:** Specter (NVIDIA `nemotron-3-super-120b-a12b` via NIM) fills Neo's seat when OpenCode infrastructure blocks the task (sandbox rejects, model unavailable, etc.). Sam's rule 2026-04-16: "NVIDIA Nemotron free models if Gemini doesn't work." Atlas (Gemini) is retired from this project due to quota/capacity issues.
+- **Koda cannot sign off** on a phase (no self-signoff)
+- Sam cannot override a unanimous veto from the dual-seat pair without writing a documented rationale in PHASE.md
+- If the dual-seat pair disagrees, Koda escalates to Sam
 - "Small change" is not an exemption — every phase close needs both sign-offs
 
-Research sign-off (Neo + NIM minis) and plan-check sign-off (Gideon + Atlas) are also recorded in the phase row before `in_progress` → `done`.
+Research sign-off (NIM minis) and plan-check sign-off (Gideon + Neo, or Gideon + Specter fallback) are also recorded in the phase row before `in_progress` → `done`.
 
 ### 4a. Koda is the ONLY agent that writes to PHASE.md (HARD RULE)
 
-Gideon, Atlas, Neo, and NIM minis MUST NOT edit `PHASE.md` directly. Every dispatched agent returns its verdict + sign-off line inside a single response file (the "output contract" in its prompt). **Koda transcribes** the sign-off into the appropriate PHASE.md row AFTER verifying:
+Gideon, Neo, Specter, Atlas (if ever re-enabled), and NIM minis MUST NOT edit `PHASE.md` directly. Every dispatched agent returns its verdict + sign-off line inside a single response file (the "output contract" in its prompt). **Koda transcribes** the sign-off into the appropriate PHASE.md row AFTER verifying:
 
 1. The response file exists at the contract path
 2. The verdict is present and well-formed (`APPROVE | APPROVE WITH NOTES | BLOCK` for plan-check; `PASS | FAIL` for phase verify)
@@ -110,12 +114,13 @@ Universal Context7 gate (from global feedback memory): BEFORE any external API /
 
 ---
 
-## 7. Gideon + Atlas are final-say agents
+## 7. Gideon + Neo are final-say agents (Specter/NeMo Tron fallback)
 
 - Code that Sam can't do in Lovable/Bolt → Gideon writes it (TS APIs, SQL migrations, react-pdf, anything outside no-code reach)
-- UX copy, MARA-safe tone, landing text, SOW wording → Atlas
-- Plan checks before `/gsd-execute-phase` → BOTH Gideon + Atlas
-- Phase verify before `done` → BOTH Gideon + Atlas
+- UX copy, MARA-safe tone, landing text, SOW wording → Neo
+- Plan checks before `/gsd-execute-phase` → BOTH Gideon + Neo
+- Phase verify before `done` → BOTH Gideon + Neo
+- **NeMo Tron fallback:** when Neo/OpenCode infrastructure fails (sandbox rejects external dirs, model unreachable, etc.), Specter (NVIDIA `nemotron-3-super-120b-a12b` via NIM `nim-dispatch.py --agents specter`) serves as the second seat. Koda notes the fallback in the PHASE.md sign-off row.
 
 Koda orchestrates but does not override. Sam signs invoices and holds ultimate veto.
 
@@ -124,7 +129,7 @@ Koda orchestrates but does not override. Sam signs invoices and holds ultimate v
 ## 8. AU compliance is non-negotiable
 
 - **MARA Code of Conduct:** chat must NEVER give migration advice. System prompt hard rule + per-turn footer disclaimer: "This is not migration advice. Consult a registered MARA agent." UniMate's MARA number must be visible in page footer.
-- **Privacy Act 1988:** lead capture stores `consent_given_at` + `consent_wording_version`. Consent wording reviewed by Neo + signed off by Atlas.
+- **Privacy Act 1988:** lead capture stores `consent_given_at` + `consent_wording_version` + `consent_service` + `consent_marketing`. Consent wording drafted + signed off by Neo.
 - **QEAC:** only CRICOS-registered courses surface. "CRICOS-registered" badge visible. No ranking claims beyond QS WUR public data.
 - **Data residency:** Supabase region `ap-southeast-2` (Sydney). Do not change without Sam's approval.
 - **No unauthorised scraping:** AU uni data is 43 manually seeded rows from CRICOS open data + public pages. Never auto-scrape uni sites in v1.

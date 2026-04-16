@@ -51,7 +51,7 @@ Vercel project: `prj_A6cObazFvum7qN49jOm8UiDFIBbH` (renamed display → `atlas-a
 
 ## Governance
 
-Every commit must update [`PHASE.md`](./PHASE.md) and [`SOURCECODE.md`](./SOURCECODE.md). Phase transitions require dual sign-off (Gideon + Atlas) in PHASE.md. Hard rules in [`CLAUDE.md`](./CLAUDE.md).
+Every commit must update [`PHASE.md`](./PHASE.md) and [`SOURCECODE.md`](./SOURCECODE.md). Phase transitions require dual sign-off (Gideon + Neo; Specter/NeMo Tron as fallback when Neo/OpenCode infra stalls) in PHASE.md. Hard rules in [`CLAUDE.md`](./CLAUDE.md).
 
 Demo / pre-rename history archived in [`_reference/archive/`](./_reference/archive/).
 

@@ -1,7 +1,7 @@
 # PHASE.md — Atlas AI v1 Phase Tracker
 
 **Plan locked:** 2026-04-16 · **Granularity:** fine · **Research + plan-check + verifier:** enabled
-**Sign-off rule:** Gideon AND Atlas must both sign off in a phase before it moves to `done`. No self-signoff by Koda. If they disagree, escalate to Sam.
+**Sign-off rule:** Gideon AND Neo must both sign off in a phase before it moves to `done` (Specter / NVIDIA Nemotron via NIM serves as NeMo Tron fallback if Neo/OpenCode infra is unavailable). No self-signoff by Koda. If they disagree, escalate to Sam.
 **Update rule:** Every commit that maps to a phase MUST update that phase's row in the same commit. If it can't be mapped, STOP and add a new phase or flag off-plan (CLAUDE.md §3).
 
 ---
@@ -16,13 +16,13 @@
 ---
 
 ### Phase 0: Repo restructure + governance
-**Status:** in_progress
+**Status:** done
 **Started:** 2026-04-16 22:59 AEDT
-**Completed:** —
+**Completed:** 2026-04-16 23:50 AEDT
 **Owner:** Sam (file moves) + Koda (orchestration) + Gideon (string updates in later steps if needed)
 **Research sign-off:** n/a (no research phase)
-**Plan check sign-off:** Gideon 2026-04-16 (APPROVE WITH NOTES, round 2 — transcribed by Koda from `org/reviews/2026-04-16-atlas-ai-p0-plan-check/gideon-round-2.md`) | Atlas 2026-04-16 (APPROVE, round 2 — transcribed by Koda from `org/reviews/2026-04-16-atlas-ai-p0-plan-check/atlas-round-2.md`). Round 1 (Atlas APPROVE WITH NOTES, Gideon BLOCK) archived at same dir.
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon 2026-04-16 (APPROVE WITH NOTES, round 2 — transcribed by Koda from `org/reviews/2026-04-16-atlas-ai-p0-plan-check/gideon-round-2.md`) | Atlas 2026-04-16 (APPROVE, round 2 — transcribed from `atlas-round-2.md`). Round 1 (Atlas APPROVE WITH NOTES, Gideon BLOCK) archived at same dir. **Atlas retired from this project after round 2** (Gemini quota/capacity issues); Neo replaces Atlas for all future phases per Sam 2026-04-16.
+**Phase verify sign-off:** Gideon 2026-04-16 (PASS — `gpt-5.4-mini`, transcribed from `gideon-verify-v2-pass.md`) | Specter 2026-04-16 (PASS — NVIDIA `nemotron-3-super-120b-a12b` served as NeMo Tron fallback when Neo/OpenCode sandbox blocked external-dir reads; 14/14 checklist items; transcribed from `specter.md`)
 **Files touched:** (see final commit for exact list)
 **Tasks:**
 - [x] Rename `~/Desktop/Unimate-demo/` → `~/Desktop/atlas-ai/`
@@ -45,7 +45,8 @@
 - [x] Plan-check round 2 dispatched (Gideon + Atlas on revised plan)
 - [x] Gideon + Atlas plan-check sign-off recorded (both non-blocking — P1 unblocked after P0.5)
 - [x] Absorb round 2 non-blocking notes (expanded P0.5 scope, SOURCECODE tree fix, APP 5 collection notice)
-- [ ] Gideon + Atlas phase verify sign-off (closes P0)
+- [x] Phase verify dispatched — Gideon PASS (`gpt-5.4-mini`) + Specter PASS (NeMo Tron fallback after Neo/OpenCode sandbox blocked `.vercel/` read)
+- [x] Swap Atlas → Neo globally in PHASE.md + CLAUDE.md for all future phases (Specter as NeMo Tron fallback documented)
 - [ ] Write `planning/atlas-ai/APPROVAL.md` on Sam's Telegram "proceed" before `/gsd-execute-phase 0.5`
 
 ---
@@ -54,10 +55,10 @@
 **Status:** not_started
 **Started:** —
 **Completed:** —
-**Owner:** Gideon (code) + Atlas (copy review) + Neo (MARA legal check)
+**Owner:** Gideon (code) + Neo (copy review + MARA legal check)
 **Research sign-off:** Neo — (MARA Code of Conduct check vs current scaffold)
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Why this exists:** Gideon P0 plan-check BLOCK — the scaffold ships migration-advice strings (`web/src/lib/content.ts:33,61`; `web/src/app/api/chat/route.ts:21, 35-37`). These violate MARA Code of Conduct and must be removed before P1 commits to a schema that amplifies them.
 **Tasks:**
 - [ ] Scrub `web/src/lib/content.ts`: remove "real PR pathways" (L33), "98% student visa success rate" (L61), audit L69 and any other migration/visa claims
@@ -77,8 +78,8 @@
 **Status:** not_started
 **Owner:** Gideon (migrations + seed script) + Sam (Supabase dashboard)
 **Research topic:** CRICOS open dataset; Supabase schema patterns for AU uni data; pgvector enablement
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Tasks:**
 - [ ] Neo + Vector research — CRICOS public data shape, consent wording patterns
 - [ ] Provision Supabase project in `ap-southeast-2`
@@ -93,8 +94,8 @@
 **Status:** not_started
 **Owner:** Sam (Lovable) + Gideon (server validation)
 **Research topic:** Supabase Auth v2 magic link patterns; RLS policies per role
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Tasks:**
 - [ ] Echo research — AU-compliant session token handling
 - [ ] Email-only magic link working on web
@@ -105,10 +106,10 @@
 
 ### Phase 3: Lead capture (5-step + progressive save + scoring)
 **Status:** not_started
-**Owner:** Sam (Lovable form) + Gideon (API + scoring) + Atlas (UX copy + consent wording)
+**Owner:** Sam (Lovable form) + Gideon (API + scoring) + Neo (UX copy + consent wording)
 **Research topic:** Privacy Act 1988 consent wording; lead scoring heuristics for AU edu market
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Tasks:**
 - [ ] Neo research — consent wording per Privacy Act 1988 s.6 + APP 3/5; service-vs-marketing split
 - [ ] Step 1 shows explicit APP 5 collection notice BEFORE user enters personal info: "Atlas AI collects this information so UniMate's MARA-registered agents can respond. Stored only after you tick consent on step 5." (Gideon round 2 non-blocking note)
@@ -116,7 +117,7 @@
 - [ ] Steps 1-4 persist only to `localStorage` client-side — zero server writes pre-consent
 - [ ] Step 5: single atomic `INSERT` into `leads` with form fields + `consent_given_at` + `consent_wording_version` + `consent_service` (required true) + `consent_marketing` (bool)
 - [ ] Consent UX: required checkbox (service) + optional checkbox (marketing) on step 5 — submit blocked until service ticked
-- [ ] Submission emails Sam + UniMate via Resend (copy by Atlas)
+- [ ] Submission emails Sam + UniMate via Resend (copy by Neo)
 - [ ] Lead score computed server-side in the same atomic write
 - [ ] Verification: DB audit shows zero rows with `consent_service=false`
 - [ ] Commit `feat(phase-3): lead capture — localStorage progressive save + consent-gated atomic write`
@@ -125,10 +126,10 @@
 
 ### Phase 4: UniMatch engine (backend API)
 **Status:** not_started
-**Owner:** Gideon (port matcher to API) + Atlas (weighting validation)
+**Owner:** Gideon (port matcher to API) + Neo (weighting validation)
 **Research topic:** Weighting strategy; QS WUR public data; CRICOS metadata
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Tasks:**
 - [ ] Port existing JS matcher to `/api/match` reading from Supabase
 - [ ] Returns ranked list with match % + reason text
@@ -139,10 +140,10 @@
 
 ### Phase 4.5: Compliance gate (HARD BLOCK on P5)
 **Status:** not_started
-**Owner:** Atlas (MARA-safe copy sign-off) + Gideon (code enforcement) + Neo (legal re-check)
+**Owner:** Gideon (code enforcement) + Neo (MARA-safe copy sign-off + legal re-check)
 **Research sign-off:** Neo — (final MARA / QEAC / Privacy Act verification before chat goes live)
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Why this exists:** Gideon P0 plan-check — compliance cannot sit at P8 while P5 is the chat surface. This gate verifies compliance BEFORE chat launches, not after.
 **Tasks:**
 - [ ] Site-wide MARA disclaimer footer wired (every page, not just chat routes)
@@ -158,10 +159,10 @@
 
 ### Phase 5: AI Advisor Chat + basic RAG
 **Status:** not_started
-**Owner:** Gideon (AI SDK wiring) + Atlas (system prompt + MARA-safe tone)
+**Owner:** Gideon (AI SDK wiring) + Neo (system prompt + MARA-safe tone)
 **Research topic:** MARA-safe prompt patterns; streaming chat latency; pgvector retrieval
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Tasks:**
 - [ ] Switch demo OpenRouter → OpenAI `gpt-4o-mini`
 - [ ] Embed 43 unis + CRICOS course metadata ONLY — no visa/PR/migration content (MARA rule from P0.5 + P4.5)
@@ -174,10 +175,10 @@
 
 ### Phase 6: SOP Generator + PDF export
 **Status:** not_started
-**Owner:** Gideon (react-pdf component) + Atlas (SOP template voice)
+**Owner:** Gideon (react-pdf component) + Neo (SOP template voice)
 **Research topic:** SOP best practices for AU uni applications; react-pdf layout
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Tasks:**
 - [ ] Install `react-pdf` in `web/package.json` (NOT present today — this is net-new, not a "lift" per Gideon P0 plan-check)
 - [ ] Rebuild SOP generator API off Supabase lead profile (replaces demo's shallow string-coercion approach in `web/src/app/api/sop/route.ts`)
@@ -191,8 +192,8 @@
 **Status:** not_started — **CAN RUN IN PARALLEL with P1–P4** (both Atlas + Gideon plan-check flagged: Play/App Store review adds 3–7 day latency; starting P7 only after P6 risks blocking ship)
 **Owner:** Sam (Lovable/manual) + Gideon (asset pipeline)
 **Research topic:** Expo OTA vs re-submit thresholds; Play Store review impact
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Tasks:**
 - [ ] `mobile/app.json`: name → "Atlas AI", slug → "atlas-ai", scheme → "atlasai"
 - [ ] Bundle ID + package: `cloud.claudeking.atlasai`
@@ -205,16 +206,16 @@
 
 ### Phase 8: Compliance final audit + pre-handover pack
 **Status:** not_started — primary compliance work moved to P0.5 (scaffold scrub) + P4.5 (pre-chat gate); this phase is the final audit before client handover
-**Owner:** Atlas (audit sweep) + Gideon (code verification) + Neo (legal re-scan)
+**Owner:** Gideon (code verification) + Neo (audit sweep + legal re-scan)
 **Research topic:** MARA Code of Conduct delta since P4.5; QEAC 2026 guideline updates
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Tasks:**
 - [ ] Re-verify MARA disclaimer footer site-wide + per chat turn (regression check vs P4.5)
 - [ ] Re-verify consent flags on every `leads` row (`consent_service=true` 100%)
 - [ ] Verify UniMate MARA number + registration link in page footer
 - [ ] Full fact-check pass — `grep -riE "(subclass|MLTSSL|STSOL|PR points|PR pathway|visa success|migration advice)" web/src/ mobile/` returns zero hits
-- [ ] Generate compliance attestation doc for client handover pack (signed by Gideon + Atlas + Neo)
+- [ ] Generate compliance attestation doc for client handover pack (signed by Gideon + Neo)
 - [ ] Commit `feat(phase-8): compliance final audit + attestation`
 
 ---
@@ -222,8 +223,8 @@
 ### Phase 9: QA, handover docs, deploy
 **Status:** not_started
 **Owner:** Full org review (10 agents) + Sam for client handover
-**Plan check sign-off:** Gideon — | Atlas —
-**Phase verify sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Tasks:**
 - [ ] Full org review via `/org-dispatch`
 - [ ] Generate `~/Desktop/clients/unimate/ATLAS-AI-SOW.pdf` from PRD.md + plan §10

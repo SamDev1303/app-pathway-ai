@@ -17,12 +17,12 @@ const plusJakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "UniMate Australia — Your gateway to Australian education & migration",
+  title: "Atlas AI — Your gateway to Australian education",
   description:
-    "MARA-registered, QEAC-certified migration consultancy in Liverpool NSW. Get matched to Australian universities in under 30 seconds — no signup, no forms, no gate.",
-  metadataBase: new URL("https://unimate-demo.vercel.app"),
+    "MARA-registered, QEAC-certified guidance for Australian university admissions. Match to CRICOS-registered courses in under 30 seconds — no signup, no forms, no gate.",
+  metadataBase: new URL("https://atlas-ai.vercel.app"),
   openGraph: {
-    title: "UniMate Australia",
+    title: "Atlas AI",
     description:
       "Find your Australian university. No forms. No waiting. No gate.",
     type: "website",

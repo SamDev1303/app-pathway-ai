@@ -71,6 +71,7 @@ src/
 │       ├── chat/route.ts        ← full advisor chat (AI SDK streaming)
 │       ├── chat-simple/route.ts ← lightweight chat fallback
 │       ├── leads/route.ts       ← 5-step lead capture POST handler
+│       ├── match/route.ts       ← UniMatch ranking (demo JS matcher)
 │       └── sop/route.ts         ← SOP generator endpoint
 ├── lib/
 │   ├── content.ts               ← landing copy + CTA strings

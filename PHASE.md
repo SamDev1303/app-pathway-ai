@@ -21,7 +21,7 @@
 **Completed:** —
 **Owner:** Sam (file moves) + Koda (orchestration) + Gideon (string updates in later steps if needed)
 **Research sign-off:** n/a (no research phase)
-**Plan check sign-off:** Gideon — | Atlas — (round 1: Atlas APPROVE WITH NOTES, Gideon BLOCK — Sam accepted the block on 2026-04-16; PRD + PHASE + SOURCECODE + CLAUDE revised; round 2 re-dispatch pending. Round 1 verdicts archived at `org/reviews/2026-04-16-atlas-ai-p0-plan-check/`)
+**Plan check sign-off:** Gideon 2026-04-16 (APPROVE WITH NOTES, round 2 — transcribed by Koda from `org/reviews/2026-04-16-atlas-ai-p0-plan-check/gideon-round-2.md`) | Atlas 2026-04-16 (APPROVE, round 2 — transcribed by Koda from `org/reviews/2026-04-16-atlas-ai-p0-plan-check/atlas-round-2.md`). Round 1 (Atlas APPROVE WITH NOTES, Gideon BLOCK) archived at same dir.
 **Phase verify sign-off:** Gideon — | Atlas —
 **Files touched:** (see final commit for exact list)
 **Tasks:**
@@ -42,8 +42,9 @@
 - [x] Revise SOURCECODE.md (add `/api/match` + accuracy rule reference)
 - [x] Revise CLAUDE.md (add §3a route-table accuracy rule)
 - [x] Insert P0.5 (scaffold scrub) + P4.5 (compliance gate); reshape P3/P5/P6/P7/P8
-- [ ] Plan-check round 2 — re-dispatch Gideon + Atlas on revised plan
-- [ ] Gideon + Atlas plan-check sign-off (pre P1)
+- [x] Plan-check round 2 dispatched (Gideon + Atlas on revised plan)
+- [x] Gideon + Atlas plan-check sign-off recorded (both non-blocking — P1 unblocked after P0.5)
+- [x] Absorb round 2 non-blocking notes (expanded P0.5 scope, SOURCECODE tree fix, APP 5 collection notice)
 - [ ] Gideon + Atlas phase verify sign-off (closes P0)
 - [ ] Write `planning/atlas-ai/APPROVAL.md` on Sam's Telegram "proceed" before `/gsd-execute-phase 0.5`
 
@@ -62,10 +63,13 @@
 - [ ] Scrub `web/src/lib/content.ts`: remove "real PR pathways" (L33), "98% student visa success rate" (L61), audit L69 and any other migration/visa claims
 - [ ] Scrub `web/src/app/api/chat/route.ts` system prompt: remove MLTSSL/STSOL, subclass 500/485, PR points, post-study work references (L21, L35-37)
 - [ ] Scrub `web/src/app/api/chat-simple/route.ts` system prompt under the same rule
+- [ ] Scrub `web/src/components/ChatDrawer.tsx` (L7-12, 140): chip suggestions + placeholder currently reference PR / subclass 500 / subclass 485 / visas (Gideon round-2 citation)
+- [ ] Scrub `web/src/components/MatcherForm.tsx` (L24, 35, 119-120, 165, 180, 201-207, 234, 260-264): `wantsPR` toggle + "visa pathway" CTA + pathway-result sections need MARA-safe rewrite
 - [ ] Audit `web/src/components/LeadModal.tsx` L197-199: split "study and migration enquiry" checkbox into separate service/marketing consents (preps P3)
 - [ ] Scrub `web/src/app/api/sop/route.ts` and `web/src/app/api/match/route.ts` for migration-advice leakage
-- [ ] Grep gate: `grep -riE "(subclass|MLTSSL|STSOL|PR points|PR pathway|visa success|migration advice)" web/src/` returns zero hits before phase closes
-- [ ] Commit `fix(phase-0.5): scaffold scrub — remove migration-advice strings per MARA Code of Conduct`
+- [ ] Scrub mobile side: `mobile/lib/mockData.ts` (L48, 94, 123, 139, 153-154, 162, 166-167, 172) + `mobile/app/(tabs)/profile.tsx` (L58-66) — PR-aware / migration outcomes / pathway references
+- [ ] Grep gate (WIDENED per Atlas + Gideon round 2): `grep -riE "(subclass|MLTSSL|STSOL|PR points|PR pathway|visa success|migration advice|DoHA|points test|Permanent Residency|visa pathway|post-study work|migration outcomes|PR-aware|PR-eligible|wants_pr|wantsPR)" web/src/ mobile/` returns zero hits before phase closes
+- [ ] Commit `fix(phase-0.5): scaffold scrub — remove migration-advice strings per MARA Code of Conduct (web + mobile)`
 
 ---
 
@@ -107,6 +111,8 @@
 **Phase verify sign-off:** Gideon — | Atlas —
 **Tasks:**
 - [ ] Neo research — consent wording per Privacy Act 1988 s.6 + APP 3/5; service-vs-marketing split
+- [ ] Step 1 shows explicit APP 5 collection notice BEFORE user enters personal info: "Atlas AI collects this information so UniMate's MARA-registered agents can respond. Stored only after you tick consent on step 5." (Gideon round 2 non-blocking note)
+- [ ] UX copy surfaces the localStorage trade-off: "Progress saved locally on this device only — clear browser data / private mode / device switch will lose your draft until you submit step 5." (Atlas + Gideon round 2)
 - [ ] Steps 1-4 persist only to `localStorage` client-side — zero server writes pre-consent
 - [ ] Step 5: single atomic `INSERT` into `leads` with form fields + `consent_given_at` + `consent_wording_version` + `consent_service` (required true) + `consent_marketing` (bool)
 - [ ] Consent UX: required checkbox (service) + optional checkbox (marketing) on step 5 — submit blocked until service ticked

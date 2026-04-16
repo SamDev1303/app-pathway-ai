@@ -21,7 +21,7 @@
 **Completed:** —
 **Owner:** Sam (file moves) + Koda (orchestration) + Gideon (string updates in later steps if needed)
 **Research sign-off:** n/a (no research phase)
-**Plan check sign-off:** Gideon — | Atlas —
+**Plan check sign-off:** Gideon — | Atlas 2026-04-16 (APPROVE WITH NOTES — transcribed by Koda from `org/reviews/2026-04-16-atlas-ai-p0-plan-check/atlas.md`; see §4a)
 **Phase verify sign-off:** Gideon — | Atlas —
 **Files touched:** (see final commit for exact list)
 **Tasks:**

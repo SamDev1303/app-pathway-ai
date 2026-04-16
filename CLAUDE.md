@@ -54,6 +54,20 @@ A phase moves from `in_progress` → `done` only when BOTH of these are present 
 
 Research sign-off (Neo + NIM minis) and plan-check sign-off (Gideon + Atlas) are also recorded in the phase row before `in_progress` → `done`.
 
+### 4a. Koda is the ONLY agent that writes to PHASE.md (HARD RULE)
+
+Gideon, Atlas, Neo, and NIM minis MUST NOT edit `PHASE.md` directly. Every dispatched agent returns its verdict + sign-off line inside a single response file (the "output contract" in its prompt). **Koda transcribes** the sign-off into the appropriate PHASE.md row AFTER verifying:
+
+1. The response file exists at the contract path
+2. The verdict is present and well-formed (`APPROVE | APPROVE WITH NOTES | BLOCK` for plan-check; `PASS | FAIL` for phase verify)
+3. The signature line matches the expected agent name + date
+
+Reason: agents dispatched in parallel cannot see each other's work. If both Gideon and Atlas edit PHASE.md simultaneously, they race. If one agent marks a team task `[x]` when only it has signed, that's a governance breach and a false "done" — Sam loses the ability to trust PHASE.md as the source of truth.
+
+**Prompt-template rule for every dispatch:** include an explicit "DO NOT modify any file under `~/Desktop/atlas-ai/`. Write ONLY to your designated output path — no other files." If an agent mutates PHASE.md anyway, Koda reverts and re-dispatches with a tighter prompt.
+
+Exception: Koda itself writes to PHASE.md as part of every commit (per §3). That's the whole point — one writer, no races.
+
 ---
 
 ## 5. Commit discipline

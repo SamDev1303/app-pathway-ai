@@ -21,7 +21,7 @@
 **Completed:** —
 **Owner:** Sam (file moves) + Koda (orchestration) + Gideon (string updates in later steps if needed)
 **Research sign-off:** n/a (no research phase)
-**Plan check sign-off:** Gideon — | Atlas 2026-04-16 (APPROVE WITH NOTES — transcribed by Koda from `org/reviews/2026-04-16-atlas-ai-p0-plan-check/atlas.md`; see §4a)
+**Plan check sign-off:** Gideon — | Atlas — (round 1: Atlas APPROVE WITH NOTES, Gideon BLOCK — Sam accepted the block on 2026-04-16; PRD + PHASE + SOURCECODE + CLAUDE revised; round 2 re-dispatch pending. Round 1 verdicts archived at `org/reviews/2026-04-16-atlas-ai-p0-plan-check/`)
 **Phase verify sign-off:** Gideon — | Atlas —
 **Files touched:** (see final commit for exact list)
 **Tasks:**
@@ -36,9 +36,36 @@
 - [x] Update `.vercel/project.json` projectName → `atlas-ai`
 - [x] Atomic commit: `chore(phase-0): rename Unimate-demo → atlas-ai + add governance docs`
 - [ ] Push to GitHub (existing `unimate-demo` remote) — pending Sam's push approval per CLAUDE.md §5
+- [x] Plan-check round 1 dispatched (Gideon + Atlas) — Atlas APPROVE WITH NOTES, Gideon BLOCK
+- [x] Sam accepted Gideon's 3 blockers (consent pattern, compliance sequencing, SOURCECODE drift) on 2026-04-16
+- [x] Revise PRD.md (V1.1/V1.2 user stories + §6 Privacy Act row)
+- [x] Revise SOURCECODE.md (add `/api/match` + accuracy rule reference)
+- [x] Revise CLAUDE.md (add §3a route-table accuracy rule)
+- [x] Insert P0.5 (scaffold scrub) + P4.5 (compliance gate); reshape P3/P5/P6/P7/P8
+- [ ] Plan-check round 2 — re-dispatch Gideon + Atlas on revised plan
 - [ ] Gideon + Atlas plan-check sign-off (pre P1)
 - [ ] Gideon + Atlas phase verify sign-off (closes P0)
-- [ ] Write `planning/atlas-ai/APPROVAL.md` on Sam's Telegram "proceed" before `/gsd-execute-phase 1`
+- [ ] Write `planning/atlas-ai/APPROVAL.md` on Sam's Telegram "proceed" before `/gsd-execute-phase 0.5`
+
+---
+
+### Phase 0.5: Scaffold scrub + copy audit (HARD BLOCK on P1)
+**Status:** not_started
+**Started:** —
+**Completed:** —
+**Owner:** Gideon (code) + Atlas (copy review) + Neo (MARA legal check)
+**Research sign-off:** Neo — (MARA Code of Conduct check vs current scaffold)
+**Plan check sign-off:** Gideon — | Atlas —
+**Phase verify sign-off:** Gideon — | Atlas —
+**Why this exists:** Gideon P0 plan-check BLOCK — the scaffold ships migration-advice strings (`web/src/lib/content.ts:33,61`; `web/src/app/api/chat/route.ts:21, 35-37`). These violate MARA Code of Conduct and must be removed before P1 commits to a schema that amplifies them.
+**Tasks:**
+- [ ] Scrub `web/src/lib/content.ts`: remove "real PR pathways" (L33), "98% student visa success rate" (L61), audit L69 and any other migration/visa claims
+- [ ] Scrub `web/src/app/api/chat/route.ts` system prompt: remove MLTSSL/STSOL, subclass 500/485, PR points, post-study work references (L21, L35-37)
+- [ ] Scrub `web/src/app/api/chat-simple/route.ts` system prompt under the same rule
+- [ ] Audit `web/src/components/LeadModal.tsx` L197-199: split "study and migration enquiry" checkbox into separate service/marketing consents (preps P3)
+- [ ] Scrub `web/src/app/api/sop/route.ts` and `web/src/app/api/match/route.ts` for migration-advice leakage
+- [ ] Grep gate: `grep -riE "(subclass|MLTSSL|STSOL|PR points|PR pathway|visa success|migration advice)" web/src/` returns zero hits before phase closes
+- [ ] Commit `fix(phase-0.5): scaffold scrub — remove migration-advice strings per MARA Code of Conduct`
 
 ---
 
@@ -79,11 +106,14 @@
 **Plan check sign-off:** Gideon — | Atlas —
 **Phase verify sign-off:** Gideon — | Atlas —
 **Tasks:**
-- [ ] Neo research — consent wording signed off against Privacy Act 1988 s.6
-- [ ] Form step 1-5 persists to Supabase on each step
+- [ ] Neo research — consent wording per Privacy Act 1988 s.6 + APP 3/5; service-vs-marketing split
+- [ ] Steps 1-4 persist only to `localStorage` client-side — zero server writes pre-consent
+- [ ] Step 5: single atomic `INSERT` into `leads` with form fields + `consent_given_at` + `consent_wording_version` + `consent_service` (required true) + `consent_marketing` (bool)
+- [ ] Consent UX: required checkbox (service) + optional checkbox (marketing) on step 5 — submit blocked until service ticked
 - [ ] Submission emails Sam + UniMate via Resend (copy by Atlas)
-- [ ] Lead score computed + stored
-- [ ] Commit `feat(phase-3): lead capture 5-step + consent + score`
+- [ ] Lead score computed server-side in the same atomic write
+- [ ] Verification: DB audit shows zero rows with `consent_service=false`
+- [ ] Commit `feat(phase-3): lead capture — localStorage progressive save + consent-gated atomic write`
 
 ---
 
@@ -101,6 +131,25 @@
 
 ---
 
+### Phase 4.5: Compliance gate (HARD BLOCK on P5)
+**Status:** not_started
+**Owner:** Atlas (MARA-safe copy sign-off) + Gideon (code enforcement) + Neo (legal re-check)
+**Research sign-off:** Neo — (final MARA / QEAC / Privacy Act verification before chat goes live)
+**Plan check sign-off:** Gideon — | Atlas —
+**Phase verify sign-off:** Gideon — | Atlas —
+**Why this exists:** Gideon P0 plan-check — compliance cannot sit at P8 while P5 is the chat surface. This gate verifies compliance BEFORE chat launches, not after.
+**Tasks:**
+- [ ] Site-wide MARA disclaimer footer wired (every page, not just chat routes)
+- [ ] UniMate MARA registration number displayed in page footer with live registration link
+- [ ] Chat system prompt (staging for P5): MARA-safe — deflects all visa/PR/migration questions; no hedged answers
+- [ ] Per-turn chat-message footer disclaimer rendered in DOM (audit via screenshot diff)
+- [ ] Privacy consent wording (service + marketing split) live on lead form step 5
+- [ ] RLS policies verified: anon role has INSERT-only on `leads`; service role owns all reads
+- [ ] Data residency verified: Supabase project region is `ap-southeast-2` (not the us-east default)
+- [ ] Commit `feat(phase-4.5): compliance gate — MARA + Privacy Act + RLS verification`
+
+---
+
 ### Phase 5: AI Advisor Chat + basic RAG
 **Status:** not_started
 **Owner:** Gideon (AI SDK wiring) + Atlas (system prompt + MARA-safe tone)
@@ -109,9 +158,11 @@
 **Phase verify sign-off:** Gideon — | Atlas —
 **Tasks:**
 - [ ] Switch demo OpenRouter → OpenAI `gpt-4o-mini`
-- [ ] Embed 43 unis + visa subclass 500 basics into `embeddings` table
-- [ ] `/api/chat` streams with RAG retrieval + MARA disclaimer on every turn
-- [ ] Commit `feat(phase-5): chat with RAG + MARA disclaimer`
+- [ ] Embed 43 unis + CRICOS course metadata ONLY — no visa/PR/migration content (MARA rule from P0.5 + P4.5)
+- [ ] System prompt enforces deflection: visa/PR/migration questions → "Consult a registered MARA agent" + UniMate link
+- [ ] `/api/chat` streams with RAG retrieval + MARA disclaimer footer on every turn
+- [ ] Abort/disconnect/backpressure handling + per-IP rate limit (Gideon P0 plan-check non-blocking note)
+- [ ] Commit `feat(phase-5): chat with RAG + MARA-safe deflection + resilience`
 
 ---
 
@@ -122,15 +173,16 @@
 **Plan check sign-off:** Gideon — | Atlas —
 **Phase verify sign-off:** Gideon — | Atlas —
 **Tasks:**
-- [ ] Lift existing SOP generator from demo
-- [ ] react-pdf client-side export
-- [ ] Edit + regenerate loop preserves section state
-- [ ] Commit `feat(phase-6): SOP generator + PDF export`
+- [ ] Install `react-pdf` in `web/package.json` (NOT present today — this is net-new, not a "lift" per Gideon P0 plan-check)
+- [ ] Rebuild SOP generator API off Supabase lead profile (replaces demo's shallow string-coercion approach in `web/src/app/api/sop/route.ts`)
+- [ ] react-pdf client-side export with font preload + large-doc memory guard
+- [ ] Edit + regenerate loop preserves section state via draft versioning
+- [ ] Commit `feat(phase-6): SOP rebuild + react-pdf client export`
 
 ---
 
 ### Phase 7: Mobile rebrand (Expo app)
-**Status:** not_started
+**Status:** not_started — **CAN RUN IN PARALLEL with P1–P4** (both Atlas + Gideon plan-check flagged: Play/App Store review adds 3–7 day latency; starting P7 only after P6 risks blocking ship)
 **Owner:** Sam (Lovable/manual) + Gideon (asset pipeline)
 **Research topic:** Expo OTA vs re-submit thresholds; Play Store review impact
 **Plan check sign-off:** Gideon — | Atlas —
@@ -145,18 +197,19 @@
 
 ---
 
-### Phase 8: AU compliance + disclaimers
-**Status:** not_started
-**Owner:** Atlas (compliance copy) + Gideon (enforcement in code) + Neo (legal scan)
-**Research topic:** MARA Code of Conduct latest; QEAC 2026 guidelines
+### Phase 8: Compliance final audit + pre-handover pack
+**Status:** not_started — primary compliance work moved to P0.5 (scaffold scrub) + P4.5 (pre-chat gate); this phase is the final audit before client handover
+**Owner:** Atlas (audit sweep) + Gideon (code verification) + Neo (legal re-scan)
+**Research topic:** MARA Code of Conduct delta since P4.5; QEAC 2026 guideline updates
 **Plan check sign-off:** Gideon — | Atlas —
 **Phase verify sign-off:** Gideon — | Atlas —
 **Tasks:**
-- [ ] MARA disclaimer footer on every page + every chat turn
-- [ ] Consent checkboxes + `consent_given_at` + `consent_wording_version` live
-- [ ] UniMate MARA number displayed in page footer
-- [ ] Fact-check pass — no migration advice anywhere in the app
-- [ ] Commit `feat(phase-8): AU compliance + MARA disclaimers`
+- [ ] Re-verify MARA disclaimer footer site-wide + per chat turn (regression check vs P4.5)
+- [ ] Re-verify consent flags on every `leads` row (`consent_service=true` 100%)
+- [ ] Verify UniMate MARA number + registration link in page footer
+- [ ] Full fact-check pass — `grep -riE "(subclass|MLTSSL|STSOL|PR points|PR pathway|visa success|migration advice)" web/src/ mobile/` returns zero hits
+- [ ] Generate compliance attestation doc for client handover pack (signed by Gideon + Atlas + Neo)
+- [ ] Commit `feat(phase-8): compliance final audit + attestation`
 
 ---
 

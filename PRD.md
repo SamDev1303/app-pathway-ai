@@ -17,8 +17,8 @@ Atlas AI is a MARA-safe, QEAC-aligned AI advisor that helps international studen
 
 | # | Module | Outcome | Success metric |
 |---|---|---|---|
-| V1.1 | **AI Advisor Chat** | Student asks questions, gets streamed answers grounded in 43 AU unis + basic visa subclass 500 info | Response time <3s to first token; MARA disclaimer on every turn |
-| V1.2 | **Lead Capture** | 5-step progressive form persists to Supabase, emails lead to Sam + UniMate via Resend | 100% leads land in DB + email; consent timestamp stored |
+| V1.1 | **AI Advisor Chat** | Student asks questions about CRICOS-registered Australian courses/unis; streamed answers grounded in the 43-uni seed. **Chat does NOT give visa or migration advice** — any such question is deflected to "Consult a registered MARA agent" + link to UniMate's MARA registration | Response time <3s to first token; MARA disclaimer on every turn; zero visa/migration advice strings in audit |
+| V1.2 | **Lead Capture** | 5-step progressive form. Each step persists **client-side only** (`localStorage`) so back-button doesn't lose data. PII hits Supabase in a single atomic write on step 5 AFTER consent tick, alongside `consent_given_at` + `consent_wording_version`. Lead emailed to Sam + UniMate via Resend | 100% leads land in DB + email post-consent; zero pre-consent PII rows in `leads` |
 | V1.3 | **UniMatch Engine** | `/api/match` returns ranked AU universities with match % and reason text | Top-3 results under 500ms from Supabase |
 | V1.4 | **SOP Generator** | Generate draft SOP from lead profile, export to PDF client-side via react-pdf | PDF downloads in <2s; edit + regenerate loop works |
 
@@ -46,12 +46,13 @@ Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversat
 ### V1.1 — AI Advisor Chat
 - As a prospective student, I ask "Which Australian unis teach AI?" and get a streamed, MARA-safe answer listing CRICOS-registered options with match reasoning.
 - As a student, every chat turn I see ends with "This is not migration advice. Consult a registered MARA agent." — no exceptions.
-- As UniMate, I can trust that the chatbot will never give subclass 500 visa advice beyond pointing to official resources.
+- As UniMate, I can trust that the chatbot will **never** give migration advice. Visa subclass, PR pathway, MLTSSL/STSOL occupation list, post-study work visa, and points-test questions are deflected to "Consult a registered MARA agent" with link to UniMate's registration. No hedged answers, no summaries of visa rules, no gestures at the DoHA website beyond the MARA link.
 
 ### V1.2 — Lead Capture
-- As a prospective student, I fill a 5-step form (personal → academic → preferences → budget → contact) that auto-saves each step so I don't lose progress on back-button.
-- As Sam, I get a Resend email with the lead the moment step 5 submits; UniMate gets a copy; both include a lead score.
-- As a compliance auditor, I can see `consent_given_at` + `consent_wording_version` columns on every row of `leads`.
+- As a prospective student, I fill a 5-step form (personal → academic → preferences → budget → contact). Each step saves to my browser (`localStorage`) so the back-button doesn't lose progress; nothing reaches Atlas AI's server until I tick the consent box on step 5.
+- As a prospective student, the consent wording on step 5 is split into two explicit ticks: (a) required — "I consent to Atlas AI storing this enquiry so UniMate's MARA agents can respond" (service consent); (b) optional — "I consent to marketing emails about Australian study options" (marketing consent). I can submit without the marketing tick.
+- As Sam, I get a Resend email with the lead the moment step 5 submits with BOTH consent flags ticked where applicable; UniMate gets a copy; both include a lead score.
+- As a compliance auditor, I can see `consent_given_at`, `consent_wording_version`, `consent_service` (true), and `consent_marketing` (bool) columns on every row of `leads`. There are zero rows where `consent_service = false`.
 
 ### V1.3 — UniMatch Engine
 - As a student, after step 3 of the lead form I see my top-3 AU unis with match % + one-line reason each.
@@ -85,8 +86,8 @@ Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversat
 
 | Requirement | Implementation |
 |---|---|
-| **MARA Code of Conduct** — chat must NOT give migration advice | System prompt hard rule + per-turn footer: "This is not migration advice. Consult a registered MARA agent." UniMate's MARA number displayed in page footer with registration link. |
-| **Privacy Act 1988** — explicit consent on lead capture | Consent checkbox on step 5 of lead form; wording reviewed by Neo; stored with `consent_given_at` timestamp + `consent_wording_version` |
+| **MARA Code of Conduct** — chat must NOT give migration advice | System prompt hard rule + per-turn footer: "This is not migration advice. Consult a registered MARA agent." UniMate's MARA number displayed in page footer with registration link. **Scaffold audit (P0.5):** existing demo strings in `web/src/lib/content.ts` + `web/src/app/api/chat/route.ts` mentioning PR pathways, subclass 500/485, MLTSSL/STSOL, or PR points are removed BEFORE P1 starts. Compliance gate (P4.5) re-verifies before P5 chat goes live. |
+| **Privacy Act 1988** — explicit consent on lead capture | No PII is persisted to Supabase before step 5 consent. Steps 1–4 persist only to `localStorage` client-side. On step 5, a single atomic write stores `consent_given_at`, `consent_wording_version`, `consent_service` (required), and `consent_marketing` (optional). Wording reviewed by Neo + signed off by Atlas. |
 | **QEAC standards** — no misleading course claims | Only surface CRICOS-registered courses; show "CRICOS-registered" badge; no ranking claims beyond QS WUR public data |
 | **Data residency** (AU preference) | Supabase region `ap-southeast-2` (Sydney); Vercel Edge requests route through Sydney POP |
 | **No unauthorised scraping** | 43 AU unis seeded manually from CRICOS open data + public uni pages. Scraper module cut to v2. |

@@ -37,6 +37,21 @@ If a change can't be mapped to a phase in `PHASE.md`:
 - Either add a new phase/task to PHASE.md before coding, OR
 - Log the change under PHASE.md's "Off-plan register" and flag for Sam
 
+### 3a. SOURCECODE.md route table must match `web/src/app/api/` (HARD RULE)
+
+The "Active HTTP endpoints" table in `SOURCECODE.md` is the audit surface. Before any commit that touches `web/src/app/api/`, verify:
+
+```bash
+# One row per route.ts file; row count must match file count
+routes=$(ls ~/Desktop/atlas-ai/web/src/app/api/*/route.ts 2>/dev/null | wc -l | tr -d ' ')
+rows=$(grep -c '^| POST\|^| GET\|^| DELETE' ~/Desktop/atlas-ai/SOURCECODE.md | head -1)
+[ "$routes" = "$rows" ] || echo "MISMATCH: $routes route files vs $rows table rows"
+```
+
+Reason: Gideon's P0 plan-check caught that `SOURCECODE.md` listed 4 routes but 5 existed (`/api/match` was missing). If the living arch doc is wrong, every agent downstream inherits the wrong map. This rule is the mechanical check that prevents doc drift.
+
+P9 lands an automated regenerator for this table. Until then, every author of an API-touching commit runs the check above and fixes the table in the same commit.
+
 ---
 
 ## 4. Phase transitions require dual sign-off

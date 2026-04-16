@@ -86,12 +86,14 @@ Per-file purpose is kept in sync by CLAUDE.md rule §3 — if a file's role chan
 
 | Method | Path | Purpose | Auth | Status |
 |---|---|---|---|---|
-| POST | `/api/chat` | Streaming advisor chat | public (rate-limited P5) | demo |
-| POST | `/api/chat-simple` | Non-streaming chat fallback | public | demo |
-| POST | `/api/leads` | 5-step lead capture | public + captcha P3 | demo |
-| POST | `/api/sop` | Generate SOP draft | public | demo |
+| POST | `/api/chat` | Streaming advisor chat | public (rate-limited P5) | demo — needs MARA-safe rewrite in P0.5 + P5 |
+| POST | `/api/chat-simple` | Non-streaming chat fallback | public | demo — needs MARA-safe rewrite in P0.5 + P5 |
+| POST | `/api/leads` | 5-step lead capture | public + captcha P3 | demo — needs consent-then-write rewrite in P3 |
+| POST | `/api/match` | UniMatch ranking (demo JS matcher) | public | demo — ports to Supabase in P4 |
+| POST | `/api/sop` | Generate SOP draft | public | demo — rebuilds + react-pdf export in P6 (net-new, not a "lift") |
 
-"demo" = exists from pre-rename demo, needs P3–P6 rebuild per PRD.md.
+"demo" = exists from pre-rename demo; each row notes which phase rebuilds it.
+**Accuracy rule (CLAUDE.md §3a):** the set of rows above must equal the set of `route.ts` files under `web/src/app/api/`. If `ls web/src/app/api/*/route.ts | wc -l` != row count, the commit fails.
 
 ---
 

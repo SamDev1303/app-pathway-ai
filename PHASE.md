@@ -52,8 +52,8 @@
 ---
 
 ### Phase 0.5: Scaffold scrub + copy audit (HARD BLOCK on P1)
-**Status:** not_started
-**Started:** —
+**Status:** in_progress (autonomous partial execution 2026-04-17 — 3 of 8 files scrubbed; 5 remain; awaiting Sam APPROVAL.md + plan-check round)
+**Started:** 2026-04-17 00:05 AEDT (autonomous partial)
 **Completed:** —
 **Owner:** Gideon (code) + Neo (copy review + MARA legal check)
 **Research sign-off:** Neo — (MARA Code of Conduct check vs current scaffold)
@@ -61,31 +61,36 @@
 **Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Why this exists:** Gideon P0 plan-check BLOCK — the scaffold ships migration-advice strings (`web/src/lib/content.ts:33,61`; `web/src/app/api/chat/route.ts:21, 35-37`). These violate MARA Code of Conduct and must be removed before P1 commits to a schema that amplifies them.
 **Tasks:**
-- [ ] Scrub `web/src/lib/content.ts`: remove "real PR pathways" (L33), "98% student visa success rate" (L61), audit L69 and any other migration/visa claims
-- [ ] Scrub `web/src/app/api/chat/route.ts` system prompt: remove MLTSSL/STSOL, subclass 500/485, PR points, post-study work references (L21, L35-37)
-- [ ] Scrub `web/src/app/api/chat-simple/route.ts` system prompt under the same rule
-- [ ] Scrub `web/src/components/ChatDrawer.tsx` (L7-12, 140): chip suggestions + placeholder currently reference PR / subclass 500 / subclass 485 / visas (Gideon round-2 citation)
-- [ ] Scrub `web/src/components/MatcherForm.tsx` (L24, 35, 119-120, 165, 180, 201-207, 234, 260-264): `wantsPR` toggle + "visa pathway" CTA + pathway-result sections need MARA-safe rewrite
-- [ ] Audit `web/src/components/LeadModal.tsx` L197-199: split "study and migration enquiry" checkbox into separate service/marketing consents (preps P3)
-- [ ] Scrub `web/src/app/api/sop/route.ts` and `web/src/app/api/match/route.ts` for migration-advice leakage
-- [ ] Scrub mobile side: `mobile/lib/mockData.ts` (L48, 94, 123, 139, 153-154, 162, 166-167, 172) + `mobile/app/(tabs)/profile.tsx` (L58-66) — PR-aware / migration outcomes / pathway references
+- [x] Scrub `web/src/lib/content.ts` — full rewrite 2026-04-17 (removed PR pathway claim + visa success stat + visa-pathway CTA; replaced brand to Atlas AI powered by UniMate; MARA numbers now `{PENDING_FROM_UNIMATE}` placeholders until client provides)
+- [x] Scrub `web/src/app/api/chat/route.ts` system prompt — full rewrite 2026-04-17 (removed MLTSSL/STSOL/subclass/PR-points/post-study-work; added hard deflection rule + per-turn disclaimer footer)
+- [x] Scrub `web/src/app/api/chat-simple/route.ts` system prompt — mirrors chat/route.ts scrub 2026-04-17
+- [ ] Scrub `web/src/components/ChatDrawer.tsx` (L7-12, 140): chip suggestions + placeholder currently reference PR / subclass 500 / subclass 485 / visas (Gideon round-2 citation) **← REMAINING**
+- [ ] Scrub `web/src/components/MatcherForm.tsx` (L24, 35, 119-120, 165, 180, 201-207, 234, 260-264): `wantsPR` toggle + "visa pathway" CTA + pathway-result sections need MARA-safe rewrite **← REMAINING**
+- [ ] Audit `web/src/components/LeadModal.tsx` L197-199: split "study and migration enquiry" checkbox into separate service/marketing consents (preps P3) **← REMAINING**
+- [ ] Scrub `web/src/app/api/sop/route.ts` and `web/src/app/api/match/route.ts` for migration-advice leakage **← REMAINING**
+- [ ] Scrub mobile side: `mobile/lib/mockData.ts` (L48, 94, 123, 139, 153-154, 162, 166-167, 172) + `mobile/app/(tabs)/profile.tsx` (L58-66) — PR-aware / migration outcomes / pathway references **← REMAINING**
 - [ ] Grep gate (WIDENED per Atlas + Gideon round 2): `grep -riE "(subclass|MLTSSL|STSOL|PR points|PR pathway|visa success|migration advice|DoHA|points test|Permanent Residency|visa pathway|post-study work|migration outcomes|PR-aware|PR-eligible|wants_pr|wantsPR)" web/src/ mobile/` returns zero hits before phase closes
 - [ ] Commit `fix(phase-0.5): scaffold scrub — remove migration-advice strings per MARA Code of Conduct (web + mobile)`
+- [ ] Plan-check round (Gideon + Neo) on the completed scrub
+- [ ] Phase-verify (Gideon + Neo, Specter as NeMo Tron fallback)
 
 ---
 
 ### Phase 1: Supabase project + AU universities seed
-**Status:** not_started
+**Status:** prep-complete (2026-04-17 — SQL migration + seed data + env template staged; execution blocked on Sam creating Supabase project + providing keys)
 **Owner:** Gideon (migrations + seed script) + Sam (Supabase dashboard)
 **Research topic:** CRICOS open dataset; Supabase schema patterns for AU uni data; pgvector enablement
 **Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
 **Tasks:**
 - [ ] Neo + Vector research — CRICOS public data shape, consent wording patterns
-- [ ] Provision Supabase project in `ap-southeast-2`
-- [ ] Enable pgvector extension
-- [ ] Migrations: `universities`, `courses`, `leads`, `embeddings` tables + RLS
-- [ ] Seed 43 AU universities from CRICOS + public uni pages
+- [ ] **Sam-blocked:** Provision Supabase project in `ap-southeast-2`; paste URL + keys into `web/.env.local`
+- [x] Schema drafted: `supabase/migrations/001_initial_schema.sql` — universities / courses / leads / embeddings + pgvector + RLS policies (anon INSERT-only on leads, no reads; no anon access to embeddings)
+- [x] Seed data drafted: `web/src/lib/universities-seed.ts` — 43 AU unis w/ CRICOS provider codes + QS 2025 rankings + state/regional flags
+- [x] Env template: `web/.env.example` — Supabase, OpenAI, Resend, Make.com webhook
+- [ ] **Sam-blocked after project provisioned:** apply migration via `supabase db push` (or dashboard SQL editor)
+- [ ] Write + run `scripts/seed-universities.ts` that reads `universities-seed.ts` and inserts rows
+- [ ] Plan-check + phase-verify
 - [ ] Commit `feat(phase-1): Supabase schema + 43 AU unis seeded`
 
 ---
@@ -153,7 +158,8 @@
 - [ ] Privacy consent wording (service + marketing split) live on lead form step 5
 - [ ] RLS policies verified: anon role has INSERT-only on `leads`; service role owns all reads
 - [ ] Data residency verified: Supabase project region is `ap-southeast-2` (not the us-east default)
-- [ ] Commit `feat(phase-4.5): compliance gate — MARA + Privacy Act + RLS verification`
+- [ ] **APP encryption verification** (Vector mini round-2 finding 2026-04-17): verify Supabase Postgres encryption at rest (AES-256 by default) + TLS 1.2+ in transit; document in compliance attestation
+- [ ] Commit `feat(phase-4.5): compliance gate — MARA + Privacy Act + RLS + APP encryption verification`
 
 ---
 
@@ -231,8 +237,9 @@
 - [ ] Deploy to `atlas-ai.vercel.app`
 - [ ] Keep `unimate-demo.vercel.app` aliased for 30 days
 - [ ] Client walkthrough pack + 30-day bug-fix support note
+- [ ] **OAIC Notifiable Data Breaches plan** (Echo mini round-2 finding 2026-04-17): draft + hand UniMate a documented NDB response plan (who detects, who notifies OAIC within 72h, template notification wording). Not optional under Privacy Amendment 2017.
 - [ ] Post-v1 retrospective — dispatch Haiku + `/skill-creator` per plan §15
-- [ ] Commit `chore(phase-9): v1 handover + SOW generated`
+- [ ] Commit `chore(phase-9): v1 handover + SOW generated + NDB plan delivered`
 
 ---
 

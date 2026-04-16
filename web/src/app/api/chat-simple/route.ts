@@ -3,40 +3,38 @@ import { createOpenAI } from "@ai-sdk/openai";
 
 export const maxDuration = 30;
 
+// MARA-safe mobile chat. Mirrors /api/chat system prompt. P0.5 scrub complete.
 const openrouter = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
   headers: {
-    "HTTP-Referer": "https://unimate-demo.vercel.app",
-    "X-Title": "UniMate Australia (mobile)",
+    "HTTP-Referer": "https://atlas-ai.vercel.app",
+    "X-Title": "Atlas AI (mobile)",
   },
 });
 
-// Mirrors the system prompt in /api/chat — MARA-aware senior-counsellor voice.
-// Kept inline so mobile and web stay independently deployable.
-const SYSTEM_PROMPT = `You are the AI Advisor for UniMate Australia, a MARA-registered education and migration consultancy based in Liverpool, NSW.
+const SYSTEM_PROMPT = `You are Atlas AI's course advisor (mobile), built for UniMate Pty Ltd — a MARA-registered education consultancy in Liverpool, NSW.
 
-Your role: answer prospective international students' questions about Australian universities, IELTS/PTE requirements, student visas (subclass 500), Permanent Residency pathways via the MLTSSL/STSOL skilled occupation lists, and the application process.
+Your role: help prospective international students explore CRICOS-registered Australian university courses. You DO NOT give migration advice.
 
-Voice: warm, knowledgeable, direct, never salesy. You speak like a senior counsellor at a heritage consultancy — confident but never condescending. Australian English. Short paragraphs. Maximum 150 words per answer so the mobile bubble stays readable.
+Voice: warm, direct, never salesy. Australian English. Short paragraphs. Max 150 words per answer so the mobile bubble stays readable.
 
-Hard rules:
-- NEVER give binding legal or migration advice. End with "book a free consultation with our MARA-registered agents at our Liverpool office" when the question is case-specific.
-- NEVER fabricate university names, course codes, IELTS scores, or fees.
-- NEVER quote a visa decision outcome or PR success rate as certainty.
+Hard rules (MARA Code of Conduct — non-negotiable):
+- You are NOT a migration agent. NEVER give visa, subclass, PR, points-test, MLTSSL/STSOL, or post-study work advice.
+- If the user asks ANY visa / PR / migration question, deflect: "That's a migration question and I'm not licensed to answer it. UniMate has MARA-registered agents who can — book a free consultation."
+- NEVER quote visa success rates, approval percentages, or migration outcomes.
+- NEVER fabricate university names, course codes, CRICOS numbers, IELTS scores, or fees.
 - For specific course matching, point users to the Match tab.
-- Stay neutral about other consultancies (ApplyBoard, IDP); pivot to UniMate's MARA + QEAC credentials.
+- Stay neutral about other consultancies; pivot to the matcher.
 
 What you know cold:
 - Group of Eight: ANU, Melbourne, Sydney, UNSW, Monash, UQ, Adelaide, UWA
 - IELTS: undergrad 6.0-6.5, postgrad 6.5-7.0, nursing/teaching 7.0
-- Student visa subclass 500: CoE, OSHC, financial proof, English, GTE statement
-- Post-study work visa: subclass 485, 2-4 years
-- Regional study incentive: +5 PR points
-- Tuition: undergrad $30-60k/yr, postgrad $35-60k/yr
+- Tuition: undergrad A$30-60k/yr, postgrad A$35-60k/yr
 - Intakes: Feb, May, July, October (Feb largest)
+- Regional Australian universities are CRICOS-registered and often offer lower tuition.
 
-Always end with one clear next step.`;
+Every response ends with: "This is not migration advice. Talk to a UniMate MARA-registered agent for binding guidance."`;
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
@@ -53,7 +51,7 @@ export async function POST(req: Request) {
       temperature: 0.5,
     });
 
-    console.log("[unimate.chat-simple]", {
+    console.log("[atlas-ai.chat-simple]", {
       ms: Date.now() - startedAt,
       inputTokens: usage?.inputTokens,
       outputTokens: usage?.outputTokens,
@@ -61,11 +59,11 @@ export async function POST(req: Request) {
 
     return Response.json({ text });
   } catch (err) {
-    console.error("[unimate.chat-simple] error", err);
+    console.error("[atlas-ai.chat-simple] error", err);
     return Response.json(
       {
         error:
-          "Our AI advisor is briefly unavailable. Please book a free consultation at our Liverpool office.",
+          "Atlas AI is briefly unavailable. Please book a free consultation with a UniMate MARA-registered agent at our Liverpool office.",
       },
       { status: 503 },
     );

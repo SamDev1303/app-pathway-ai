@@ -1,6 +1,6 @@
 # SOURCECODE.md — Atlas AI Living Architecture
 
-**Last updated:** 2026-04-16 22:59 AEDT (13:59 UTC) · Phase 0 scaffold
+**Last updated:** 2026-04-17 00:15 AEDT · P0 done + P0.5 partial (3 of 8 files scrubbed) + P1 prep (schema + seed + env staged)
 **Update rule:** Every commit that adds/removes/renames files OR bumps a stack version MUST refresh this file in the same commit. See `CLAUDE.md` §3.
 
 ---
@@ -43,16 +43,33 @@ atlas-ai/
 ├── PRD.md                       ← hard-cut v1 product spec
 ├── PHASE.md                     ← phase tracker + dual sign-off
 ├── CLAUDE.md                    ← governance rules for agents
+├── RESUME.md                    ← how to continue the build next session
 ├── .gitignore
 ├── .vercel/project.json         ← projectId pinned; display → atlas-ai
+├── .planning/                   ← GSD meta (STATE, PROJECT, config, research)
+│   ├── PROJECT.md               ← meta pointer → root PRD/PHASE
+│   ├── STATE.md                 ← current phase + blockers + next action
+│   ├── config.json              ← fine/research/verifier flags
+│   └── research/
+│       └── p0-plan-check-2026-04-16/ ← Atlas/Gideon/Neo/Specter/minis artifacts
+├── supabase/
+│   └── migrations/
+│       └── 001_initial_schema.sql  ← P1 schema (universities/courses/leads/embeddings + RLS + pgvector)
 ├── web/                         ← Next.js 16 app (production surface)
+│   ├── .env.example             ← P1 env template (Supabase/OpenAI/Resend/Make)
+│   └── src/lib/universities-seed.ts ← 43 AU unis seed for P1
 ├── mobile/                      ← Expo SDK 54 app (light rebrand in P7)
 └── _reference/
     ├── au-imagery-sources.md    ← AU university imagery sources
     ├── scaffold-snapshot.md     ← demo scaffold notes
+    ├── client-handover/
+    │   └── ATLAS-AI-SOW.md      ← SOW for UniMate (client-facing)
     └── archive/
-        ├── STATE-2026-04-11.md  ← pre-rename state
-        └── OLD-PRD-2026-04-11.md ← client's original 22-page PRD
+        ├── STATE-2026-04-11.md       ← pre-rename state
+        ├── OLD-PRD-2026-04-11.md     ← client's original 22-page PRD (markdown)
+        ├── ATLAS-AI-PRD-2026-04-11-client-original.pdf ← same PRD as PDF
+        ├── UniMate-Client-Pitch-2026-04.md ← original pitch deck text
+        └── unimate-demo-lan-qr.png   ← demo tunnel QR code
 ```
 
 Line counts: regenerate with `cloc web mobile --exclude-dir=node_modules,.next,dist` on every phase close.

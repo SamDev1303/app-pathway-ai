@@ -1,0 +1,25 @@
+{
+  "project": "atlas-ai",
+  "version": "v1",
+  "granularity": "fine",
+  "research": true,
+  "plan_check": true,
+  "verifier": true,
+  "model_profile": "balanced",
+  "locked_at": "2026-04-16",
+  "locked_by": "sam",
+  "dual_seat_agents": {
+    "seat_1": "gideon",
+    "seat_2": "neo",
+    "fallback": "specter"
+  },
+  "source_of_truth": {
+    "requirements": "PRD.md",
+    "roadmap": "PHASE.md",
+    "architecture": "SOURCECODE.md",
+    "governance": "CLAUDE.md",
+    "state": ".planning/STATE.md"
+  },
+  "approval_gate": "planning/atlas-ai/APPROVAL.md",
+  "notes": "GSD .planning/ is a thin layer; canonical docs live at project root per CLAUDE.md §1. Do not duplicate content here — point to the root files."
+}

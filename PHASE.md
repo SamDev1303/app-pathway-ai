@@ -117,17 +117,38 @@
 
 ---
 
-### Phase 2: Supabase Auth magic link
-**Status:** not_started
-**Owner:** Sam (Lovable) + Gideon (server validation)
-**Research topic:** Supabase Auth v2 magic link patterns; RLS policies per role
-**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
-**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+### Phase 2: Supabase Auth magic link (infrastructure only)
+**Status:** done (2026-04-17 13:05 AEDT — dual-seat PASS, infrastructure-only scope per Koda push-back + Sam approval)
+**Started:** 2026-04-17 13:00 AEDT
+**Completed:** 2026-04-17 13:05 AEDT
+**Owner:** Koda (implementation) + Gideon + Specter (review)
+**Research topic:** Supabase SSR v2 (`@supabase/ssr`) patterns for Next.js 16 App Router; magic link PKCE/OTP flow
+**Plan check sign-off:** Gideon APPROVE-WITH-NOTES (`.planning/research/p2-plan-check/gideon-v1.md`) | Specter APPROVE-WITH-NOTES (`.planning/research/p2-plan-check/specter-v1.md`)
+**Phase verify sign-off:** Gideon PASS (`.planning/research/p2-phase-verify/gideon-v1.md`, 10/10) | Specter PASS (`.planning/research/p2-phase-verify/specter-v1.md`, 10/10)
+**Commit:** `809d7dc feat(phase-2): Supabase Auth magic link infrastructure`
+**Scope decision:** Koda pushed back on "Auth magic link" as a user-facing feature given admin dashboard (X.1) was cut to v2 + V1.1–V1.4 anonymous by design. Sam directed: build as INFRASTRUCTURE ONLY. Result: auth plumbing wired + config applied, no user-facing login wall. Satisfies PRD §4 stack requirement while preserving anonymous-first UX.
 **Tasks:**
-- [ ] Echo research — AU-compliant session token handling
-- [ ] Email-only magic link working on web
-- [ ] RLS policies protect `leads` from public read
-- [ ] Commit `feat(phase-2): Supabase Auth magic link + RLS`
+- [x] Install `@supabase/ssr` (current Next.js SSR helper, replaces deprecated auth-helpers-nextjs)
+- [x] `src/lib/supabase/client.ts` — browser client factory
+- [x] `src/lib/supabase/server.ts` — server client factory with cookies.getAll/setAll
+- [x] `src/lib/supabase/middleware.ts` — `updateSession()` helper; calls `auth.getUser()` immediately; NO redirect (anonymous-first design)
+- [x] `web/middleware.ts` — Next.js middleware entrypoint
+- [x] `src/app/auth/callback/route.ts` — GET handler using `verifyOtp({ type, token_hash })`, redirects via pathname (no open-redirect)
+- [x] `src/app/auth/auth-code-error/page.tsx` — error page with "Request a new link" CTA
+- [x] `src/app/login/page.tsx` — magic link request form with "check your email" confirmation state
+- [x] Supabase config via Management API: site_url, uri_allow_list (localhost + prod + preview), external_email_enabled, 1h OTP expiry
+- [x] `next build` + `tsc --noEmit` clean
+- [x] Magic link generation tested via Admin API (test user created + deleted clean)
+- [x] Plan-check dual-seat PASS (Gideon + Specter)
+- [x] Phase-verify dual-seat PASS (Gideon + Specter, 10/10 each)
+
+**Non-blocking note from both seats (P4 improvement):**
+- Prefer `auth.getClaims()` over `auth.getUser()` in middleware per latest Supabase SSR guide. Non-blocker for P2 close; consider swapping when P4 adds auth-gated server logic.
+
+**Known gaps (intentional, v2 scope):**
+- No admin page (admin dashboard X.1 cut to v2)
+- No `@me` profile page (no use case in v1)
+- Middleware does NOT redirect (would break anonymous UX)
 
 ---
 

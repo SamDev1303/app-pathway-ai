@@ -72,7 +72,7 @@ Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversat
 | Web framework | Next.js 16 (existing) | Already scaffolded; App Router + AI SDK v6 works cleanly |
 | Mobile | Expo SDK 54 (existing) | Don't rewrite; light rebrand in P7 |
 | Auth | Supabase Auth magic link | Replaces Better Auth — identical UX, zero integration cost |
-| Database | Supabase Postgres + pgvector (region `ap-southeast-2`) | Single vendor, RLS, data residency in Sydney |
+| Database | Supabase Postgres + pgvector (region `ap-southeast-1`, Singapore — deviation from PRD target `ap-southeast-2`; see §6 data residency row + `planning/atlas-ai/DEVIATIONS.md`) | Single vendor, RLS, cross-border disclosure disclosed per APP 8 |
 | LLM (chat) | OpenAI `gpt-4o-mini` | Production-grade replacement for OpenRouter free-tier |
 | LLM (embeddings) | OpenAI `text-embedding-3-small` (1536-dim) | Cheap, fits pgvector, fast |
 | PDF | react-pdf (client-side) | No server work; SOP exports in-browser |
@@ -89,7 +89,7 @@ Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversat
 | **MARA Code of Conduct** — chat must NOT give migration advice | System prompt hard rule + per-turn footer: "This is not migration advice. Consult a registered MARA agent." UniMate's MARA number displayed in page footer with registration link. **Scaffold audit (P0.5):** existing demo strings in `web/src/lib/content.ts` + `web/src/app/api/chat/route.ts` mentioning PR pathways, subclass 500/485, MLTSSL/STSOL, or PR points are removed BEFORE P1 starts. Compliance gate (P4.5) re-verifies before P5 chat goes live. |
 | **Privacy Act 1988** — explicit consent on lead capture | No PII is persisted to Supabase before step 5 consent. Steps 1–4 persist only to `localStorage` client-side. On step 5, a single atomic write stores `consent_given_at`, `consent_wording_version`, `consent_service` (required), and `consent_marketing` (optional). Wording reviewed by Neo + signed off by Atlas. |
 | **QEAC standards** — no misleading course claims | Only surface CRICOS-registered courses; show "CRICOS-registered" badge; no ranking claims beyond QS WUR public data |
-| **Data residency** (AU preference) | Supabase region `ap-southeast-2` (Sydney); Vercel Edge requests route through Sydney POP |
+| **Data residency** (AU preference) | Supabase region `ap-southeast-2` (Sydney) — **DEVIATION 2026-04-17:** Sam provisioned the project in `ap-southeast-1` (Singapore) and explicitly directed Koda to proceed. Cross-border disclosure obligation per APP 8 now applies — UniMate MUST add Singapore data hosting to their collection notice BEFORE any real leads are captured. Audit trail: `planning/atlas-ai/DEVIATIONS.md`. Vercel Edge requests still route through Sydney POP. |
 | **No unauthorised scraping** | 43 AU unis seeded manually from CRICOS open data + public uni pages. Scraper module cut to v2. |
 
 ---

@@ -185,10 +185,10 @@ export default function HomeScreen() {
                   Why this app
                 </Text>
                 <Text style={[typography.display, { marginTop: 12, fontSize: 30, lineHeight: 34, color: colors.charcoal }]}>
-                  Prestige, budget, English, migration fit.
+                  Prestige, budget, English, outcomes fit.
                 </Text>
                 <Text style={[typography.body, { marginTop: 12, fontSize: 16, lineHeight: 32, color: colors.textPrimary }]}>
-                  UniMate folds your study ambition, budget comfort, IELTS reality, and PR intent into one narrative-friendly recommendation flow. The point is not more choices. The point is better choices.
+                  UniMate folds your study ambition, budget comfort, IELTS reality, and graduate-outcomes focus into one narrative-friendly recommendation flow. The point is not more choices. The point is better choices.
                 </Text>
               </View>
             </EditorialCard>

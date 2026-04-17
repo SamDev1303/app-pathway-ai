@@ -189,9 +189,23 @@ export function LeadModal({
                     />
                   </Field>
 
-                  <p className="text-[11px] text-[var(--color-navy-950)]/70 pt-2 leading-relaxed">
-                    Atlas AI collects this information so UniMate&apos;s MARA-registered agents can respond to your enquiry. Your details are stored only after you tick the required consent below. We handle your data under the <em>Privacy Act 1988 (Cth)</em> and will never share it with third parties without your written consent.
-                  </p>
+                  <div className="text-[11px] text-[var(--color-navy-950)]/70 pt-2 leading-relaxed space-y-2">
+                    <p>
+                      <span className="font-semibold">Collection notice (APP 5).</span> UniMate Australia (MARN 1798425, QEAC P538, Liverpool NSW) collects the information on this form so our MARA-registered counsellors can contact you about your enquiry.
+                    </p>
+                    <p>
+                      <span className="font-semibold">Why we need it.</span> Your name, email, and phone are required to respond to you. Declining means we cannot follow up on your enquiry.
+                    </p>
+                    <p>
+                      <span className="font-semibold">Who we share it with.</span> Your details stay with UniMate&apos;s counsellors and the service providers who help us operate this platform (email + database hosting). We do not sell or disclose your information to third-party marketers. Disclosure may occur where required by Australian law.
+                    </p>
+                    <p>
+                      <span className="font-semibold">Your rights.</span> You can request access or correction, or ask us to delete your record, by emailing <a className="underline" href="mailto:privacy@unimate.com.au">privacy@unimate.com.au</a>. Our full APP Privacy Policy is available on request.
+                    </p>
+                    <p>
+                      We handle your data under the <em>Privacy Act 1988 (Cth)</em>.
+                    </p>
+                  </div>
 
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input

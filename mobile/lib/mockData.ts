@@ -164,7 +164,7 @@ export const advisorPrompts: ChatPrompt[] = [
   {
     id: "outcomes-courses",
     label: "Strong graduate outcomes",
-    response: "For graduate-outcomes-focused planning, UniMate tends to favour regional study options, nursing, software, cyber, and select business analytics pathways where industry placement, employer networks, and campus employability services stack more cleanly. A MARA-registered counsellor handles any migration-related questions in consultation."
+    response: "For graduate-outcomes-focused planning, UniMate tends to favour regional study options, nursing, software, cyber, and select business analytics pathways where industry placement, employer networks, and campus employability services stack more cleanly. A MARA-registered counsellor handles anything beyond course selection in consultation."
   },
   {
     id: "budget-options",

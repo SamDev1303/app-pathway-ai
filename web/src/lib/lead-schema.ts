@@ -64,7 +64,15 @@ export const LeadInputSchema = z.object({
   notes: z.string().max(2000).optional(),
   consent_service: z.literal(true),
   consent_marketing: z.boolean().default(false),
-  consent_wording_version: z.literal(CONSENT_WORDING_VERSION),
+  /**
+   * Client may send this as a hint for debugging (expected to equal
+   * CONSENT_WORDING_VERSION), but the server IGNORES the value and pins
+   * the canonical constant in `buildLeadRow()` on every INSERT. Accepting
+   * any string here prevents "valid but off-by-one" client payloads from
+   * silently drifting the audit trail — the DB row always carries the
+   * server-owned canonical hash.
+   */
+  consent_wording_version: z.string().max(40).optional(),
 
   // Meta (client-observable, server-validates)
   source: z.string().max(120).optional().default("lead-modal"),

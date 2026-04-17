@@ -86,7 +86,7 @@ export function Step5Contact({ values, onChange }: StepProps) {
           onChange={(e) => onChange({ notes: e.target.value })}
           maxLength={2000}
           rows={4}
-          placeholder="Target intake, deadlines, visa history if relevant to study — whatever helps us prepare."
+          placeholder="Target intake, application deadlines, prior study, scholarships you're chasing — anything that helps us prepare."
           className="w-full bg-white border border-[var(--color-navy-950)]/15 px-4 py-3 text-[var(--color-navy-950)] focus:border-[var(--color-gold-500)] outline-none transition-colors resize-none"
         />
       </Field>

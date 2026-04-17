@@ -86,7 +86,9 @@ export interface LeadInput {
   email: string;
   phone?: string;
   message?: string;
-  privacy_consent: boolean;
+  consent_service: true;
+  consent_marketing: boolean;
+  consent_wording_version: string;
   source_match?: {
     field: CourseField;
     ielts: number;

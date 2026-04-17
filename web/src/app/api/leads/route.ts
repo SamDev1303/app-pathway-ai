@@ -7,7 +7,9 @@ const LeadSchema = z.object({
   phone: z.string().min(6).max(40),
   message: z.string().min(0).max(2000).optional().default(""),
   source: z.string().max(120).optional().default("footer modal"),
-  consent: z.literal(true)
+  consent_service: z.literal(true),
+  consent_marketing: z.boolean().optional().default(false),
+  consent_wording_version: z.string().min(1).max(40)
 });
 
 export async function POST(req: Request) {
@@ -55,8 +57,10 @@ export async function POST(req: Request) {
         `Message:`,
         lead.message || "(none)",
         ``,
-        `Source: unimate-demo.vercel.app ${lead.source}`,
-        `Privacy consent: yes (Privacy Act 1988 (Cth))`,
+        `Source: atlas-ai ${lead.source}`,
+        `Service consent: yes (required, Privacy Act 1988 (Cth), APP 5)`,
+        `Marketing consent: ${lead.consent_marketing ? "yes" : "no"} (optional)`,
+        `Consent wording version: ${lead.consent_wording_version}`,
         `Submitted: ${new Date().toISOString()}`
       ].join("\n")
     });

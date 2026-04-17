@@ -1,48 +1,47 @@
 {
   "version": "1.0",
-  "timestamp": "2026-04-17T12:43:22.151Z",
-  "phase": "P3",
-  "phase_name": "Lead capture (5-step + progressive save + scoring)",
-  "phase_dir": "(flat roadmap — see PHASE.md P3 section)",
+  "timestamp": "2026-04-18T02:56:00+11:00",
+  "phase": "P4",
+  "phase_name": "UniMatch engine (backend API)",
+  "phase_dir": "(flat roadmap — see PHASE.md P4 section)",
   "plan": null,
   "task": 0,
-  "total_tasks": 9,
+  "total_tasks": 3,
   "status": "paused_at_phase_boundary",
   "completed_phases": [
     {"phase": "P0", "name": "Repo restructure + governance", "status": "done", "date": "2026-04-16"},
     {"phase": "P0.5", "name": "Scaffold scrub MARA", "status": "done", "commits": ["f425837", "2bedf83", "4a81cc8", "12755ed", "c03e81d"], "closed_at": "2026-04-17T01:36:00Z"},
     {"phase": "P1", "name": "Supabase project + seed", "status": "done", "commits": ["32ad7bb", "5ac9bf7", "911379b"], "closed_at": "2026-04-17T01:58:00Z"},
-    {"phase": "P2", "name": "Supabase Auth infrastructure", "status": "done", "commits": ["809d7dc", "93f9631"], "closed_at": "2026-04-17T02:05:00Z"}
+    {"phase": "P2", "name": "Supabase Auth infrastructure", "status": "done", "commits": ["809d7dc", "93f9631"], "closed_at": "2026-04-17T02:05:00Z"},
+    {"phase": "P3", "name": "Lead capture (5-step + progressive save + scoring)", "status": "done", "commits": ["8c01d3d", "e93202a", "818fafa", "3a82436", "b210d69", "68a9a9b"], "closed_at": "2026-04-17T15:56:00Z"}
   ],
-  "remaining_tasks_p3": [
-    {"id": 1, "name": "Neo research — consent wording per Privacy Act 1988 s.6 + APP 3/5", "status": "not_started"},
-    {"id": 2, "name": "Step 1 APP 5 collection notice BEFORE user enters PII", "status": "not_started"},
-    {"id": 3, "name": "UX copy surfaces localStorage trade-off (device-only drafts)", "status": "not_started"},
-    {"id": 4, "name": "Steps 1-4 localStorage only, zero pre-consent server writes", "status": "not_started"},
-    {"id": 5, "name": "Step 5 atomic INSERT with consent_service + consent_wording_version + consent_marketing", "status": "not_started"},
-    {"id": 6, "name": "Consent UX: required service + optional marketing checkbox", "status": "not_started"},
-    {"id": 7, "name": "Submission emails Sam + UniMate via Resend", "status": "partial", "note": "Resend wiring already in /api/leads/route.ts from P0.5 commit 4a81cc8"},
-    {"id": 8, "name": "Lead score computed server-side in same atomic write", "status": "not_started"},
-    {"id": 9, "name": "DB audit: zero rows with consent_service=false", "status": "not_started"}
+  "remaining_tasks_p4": [
+    {"id": 1, "name": "Port existing JS matcher to /api/match reading from Supabase (pgvector + CRICOS seed)", "status": "not_started"},
+    {"id": 2, "name": "Return ranked list with match % + reason text", "status": "not_started"},
+    {"id": 3, "name": "Cache per-user match result for 24h", "status": "not_started"}
   ],
   "blockers": [],
   "human_actions_pending": [
-    {"action": "Test magic link end-to-end with real email (P2 validation)", "context": "P2 closed via Admin API generate_link test + dual-seat PASS; real email flow not tested. Low priority — infrastructure only, not user-facing yet.", "blocking": false}
+    {"action": "Test magic link end-to-end with real email (P2 validation)", "context": "P2 closed via Admin API generate_link test + dual-seat PASS; real email flow not tested. Low priority — infrastructure only, not user-facing yet.", "blocking": false},
+    {"action": "End-to-end UAT of P3 lead capture locally (pnpm dev → fill form → check Supabase row + Resend email)", "context": "P3 phase-verify PASSED on code inspection + invariant analysis; live runtime UAT not run this session. Blocking for first real lead; non-blocking for continuing P4 development.", "blocking": false},
+    {"action": "Ask UniMate for real LEAD_NOTIFY_EMAILS value (their MARA ops inbox)", "context": "Currently falls back to sam@claudeking.org. Non-blocking for dev; blocking for launch.", "blocking": false}
   ],
-  "decisions": [
-    {"decision": "P2 shipped as INFRASTRUCTURE ONLY (no admin UI, no redirect)", "rationale": "PRD §4 lists auth in stack but V1.1-V1.4 are anonymous; admin dashboard X.1 cut to v2", "phase": "P2"},
-    {"decision": "Region ap-southeast-1 accepted as DEV-001 deviation", "rationale": "Sam override of PRD §6 after Koda push-back; 4 downstream APP 8 obligations documented for P4.5 gate", "phase": "P1"},
-    {"decision": "12 unis seeded, not 43", "rationale": "seed file reality vs aspirational PRD number; P4.5 backfill task documented", "phase": "P1"},
-    {"decision": "wants_pr → prioritize_outcomes + pr_eligible → industry_placement", "rationale": "MARA Code of Conduct: app must not score on migration-relevant criteria; preserves matcher 5-dim scoring with legitimate academic attributes", "phase": "P0.5"}
+  "decisions_p3": [
+    {"decision": "Single-seat Gideon on gpt-5.4 full supersedes dual-seat", "rationale": "Sam directive 2026-04-17 session 4 — prefer depth over cross-check, reduce ops surface. Memory: feedback_agent-model-calibration.md", "phase": "P3"},
+    {"decision": "PRD v1.1 — Make.com removed from §5; N8N X.1.1 +$200 dormant add-on", "rationale": "Client-hosted Hostinger N8N avoids Sam-Mac-uptime risk while preserving Sheet-mirror optionality. Budget unchanged on v1; new priced escape hatch post-launch.", "phase": "P3"},
+    {"decision": "consent_wording_version — server IGNORES client value, not validates", "rationale": "Defense in depth by deletion: ingress z.string().max(40).optional() prevents silent client/server cadence coupling. Server always pins canonical CONSENT_WORDING_VERSION in buildLeadRow(). Defensive pattern caught by Gideon phase-verify S6 round 1.", "phase": "P3"},
+    {"decision": "Lead score NOT surfaced to students — internal-only", "rationale": "Avoids perverse incentives (lie about budget to get higher tier) + MARA Code ambiguity around scoring as advisory-adjacent. Stored as lead_score (int) in DB, shown in Sam+UniMate email only.", "phase": "P3"},
+    {"decision": "Step-3 uni-match teaser = client-side deterministic stub", "rationale": "PRD V1.2 requires top-3 teaser after step 3 but the matcher engine is P4. Stub reads from 12-uni seed, computes field-coverage overlap, displays with 'Preview only' disclaimer. P4 replaces stub with /api/match call.", "phase": "P3"}
   ],
   "uncommitted_files": [],
-  "next_action": "Start P3 with `/gsd-discuss-phase 3` to lock scope (Lovable form vs hand-coded 5-step wizard), then `/gsd-plan-phase 3`",
-  "context_notes": "Session 3 shipped 3 phases (P0.5 + P1 + P2) in ~59 min with dual-seat Gideon+Specter review on each. 10 commits pushed clean. P3 is the revenue module ($3k deliverable) — lead capture 5-step progressive form. Much of the DB + API infrastructure from P0.5 + P1 is ready (consent_service/consent_marketing/consent_wording_version fields exist; /api/leads route already accepts new consent shape; RLS lets anon INSERT; Resend wired). The main P3 work is front-end: convert LeadModal.tsx from 1-step to 5-step progressive with localStorage persistence. PRD.md §5 + §6 and planning/atlas-ai/DEVIATIONS.md must be re-read before starting. Non-blocker note from P2: consider migrating middleware to auth.getClaims() when P4 adds auth-gated logic.",
+  "next_action": "Start P4 with `/gsd-discuss-phase 4` to lock pgvector/matcher scope, then `/gsd-plan-phase 4`",
+  "context_notes": "Session 4 shipped P3 end-to-end in ~3h wall clock: plan-lock + 4 code waves (foundations, step components, LeadModal refactor, API route atomic INSERT) + 2 Gideon review cycles (plan-check r1 BLOCK→r2 APPROVE, phase-verify r1 FAIL→r2 PASS). 7 commits pushed clean to main. PRD v1.1 ships with N8N X.1.1 +$200 dormant add-on. Review protocol flipped to single-seat Gideon gpt-5.4 full (supersedes dual-seat + mini pattern from P0–P2). P4 replaces the client-side match-stub.ts with real /api/match — schema is ready (pgvector enabled, embeddings table at migrations/001:107), the JS matcher exists at ~/Desktop/atlas-ai/web/src/lib/universities.ts, and the 12-uni seed is live in Supabase ap-southeast-1. Non-blocker from P3 phase-verify: consider adding a CI grep gate for MARA-forbidden strings (visa/migration/PR/subclass) to prevent future copy-regressions — fold into P4.5 gate, not P4.",
   "p45_production_gates": [
-    {"gate": "APP 8 disclosure", "origin": "P1 DEV-001", "description": "LeadModal APP 5 notice must add Singapore hosting disclosure"},
+    {"gate": "APP 8 disclosure", "origin": "P1 DEV-001", "description": "LeadModal APP 5 notice adds Singapore hosting disclosure", "status": "SHIPPED in P3 — verbatim per DEVIATIONS.md:42 in Step5Contact.tsx:39-43; re-verify during P4.5"},
     {"gate": "43-uni backfill", "origin": "P1 scope gap", "description": "Seed file has 12 unis vs PRD aspiration of 43"},
     {"gate": "per-course CRICOS codes", "origin": "P1 known limitation", "description": "All 48 courses have cricos_code NULL; PRD §5 + QEAC requires per-course codes"},
     {"gate": "industry_placement DB column", "origin": "P0.5 rename", "description": "Field exists in web Course type but not DB schema; P4 matcher server-migration adds column"},
-    {"gate": "getClaims migration", "origin": "P2 reviewer note", "description": "Middleware uses auth.getUser(); newer Supabase SSR guide prefers auth.getClaims() for token refresh + verification"}
+    {"gate": "getClaims migration", "origin": "P2 reviewer note", "description": "Middleware uses auth.getUser(); newer Supabase SSR guide prefers auth.getClaims() for token refresh + verification"},
+    {"gate": "MARA-forbidden copy CI grep", "origin": "P3 phase-verify round 1", "description": "Add scripts/mara-grep-check.sh + CI hook that fails on visa/migration/PR/subclass/485/500/MLTSSL/STSOL strings in user-facing copy. Regression caught manually in P3 Step5Contact.tsx:89 placeholder — should be automated before real leads land."}
   ]
 }

@@ -153,23 +153,23 @@
 ---
 
 ### Phase 3: Lead capture (5-step + progressive save + scoring)
-**Status:** in_progress (plan locked 2026-04-17 23:41 AEST — Wave A pending)
-**Owner:** Sam (product decisions + Telegram approval) + Koda (hand-coded Next.js extensions — no Lovable per `feedback_atlas-ai-hand-coded.md`)
+**Status:** ✅ done (closed 2026-04-18 02:56 AEST — single-seat Gideon PASS round 2)
+**Owner:** Sam (product + approval) + Koda (hand-coded Next.js extensions — no Lovable per `feedback_atlas-ai-hand-coded.md`)
 **Research topic:** APP 8 Singapore disclosure verbatim per DEV-001; lead scoring heuristics validated against 12-uni G8-heavy seed (see `.planning/3-PLAN.md` Delta #3)
 **Review protocol:** **Single-seat Gideon on `gpt-5.4` full** (supersedes P0–P2 dual-seat; reference `feedback_agent-model-calibration.md` updated 2026-04-17)
 **Plan check sign-off:** Gideon APPROVE round 2 (2026-04-17 23:40 AEST) — transcripts `/tmp/atlas-p3-plancheck-output.md` + `/tmp/atlas-p3-plancheck-r2-output.md`
-**Phase verify sign-off:** pending Wave G (Gideon on `gpt-5.4` full)
+**Phase verify sign-off:** Gideon PASS round 2 (2026-04-18 02:56 AEST) — transcripts `/tmp/atlas-p3-phaseverify-output.md` + `/tmp/atlas-p3-phaseverify-r2-output.md`
 **Tasks:**
-- [ ] Neo research — consent wording per Privacy Act 1988 s.6 + APP 3/5; service-vs-marketing split
-- [ ] Step 1 shows explicit APP 5 collection notice BEFORE user enters personal info: "Atlas AI collects this information so UniMate's MARA-registered agents can respond. Stored only after you tick consent on step 5." (Gideon round 2 non-blocking note)
-- [ ] UX copy surfaces the localStorage trade-off: "Progress saved locally on this device only — clear browser data / private mode / device switch will lose your draft until you submit step 5." (Atlas + Gideon round 2)
-- [ ] Steps 1-4 persist only to `localStorage` client-side — zero server writes pre-consent
-- [ ] Step 5: single atomic `INSERT` into `leads` with form fields + `consent_given_at` + `consent_wording_version` + `consent_service` (required true) + `consent_marketing` (bool)
-- [ ] Consent UX: required checkbox (service) + optional checkbox (marketing) on step 5 — submit blocked until service ticked
-- [ ] Submission emails Sam + UniMate via Resend (copy by Neo)
-- [ ] Lead score computed server-side in the same atomic write
-- [ ] Verification: DB audit shows zero rows with `consent_service=false`
-- [ ] Commit `feat(phase-3): lead capture — localStorage progressive save + consent-gated atomic write`
+- [x] Neo research — consent wording per Privacy Act 1988 s.6 + APP 3/5; service-vs-marketing split *(reassigned to Gideon per single-seat protocol — verbatim APP 5 + APP 8 notice in `web/src/components/lead/Step5Contact.tsx:23-53`)*
+- [x] Step 1 shows explicit APP 5 collection notice BEFORE user enters personal info *(`web/src/components/lead/Step1Personal.tsx:14-27`)*
+- [x] UX copy surfaces the localStorage trade-off *(`web/src/components/lead/Step1Personal.tsx:23-26`)*
+- [x] Steps 1-4 persist only to `localStorage` client-side — zero server writes pre-consent *(`LeadModal.tsx:82-149, 194-198, 235-256`)*
+- [x] Step 5: single atomic `INSERT` into `leads` with form fields + consent fields *(`/api/leads/route.ts:56-83, 95-137`; consent fields at 124-130)*
+- [x] Consent UX: required + optional checkboxes on step 5, submit blocked until service ticked *(`Step5Contact.tsx:96-123`; gating in `LeadModal.tsx:45-47, 237-239, 401-407`)*
+- [x] Submission emails Sam + UniMate via Resend *(`/api/leads/route.ts:157-176`; env wiring `.env.example:21-25`)*
+- [x] Lead score computed server-side in the same atomic write *(`/api/leads/route.ts:46-47` calls `lead-score.ts:computeScore`)*
+- [x] Verification: DB audit enforced via CHECK constraint — zero rows with `consent_service=false` possible *(`supabase/migrations/001_initial_schema.sql:96`)*
+- [x] Commit `feat(phase-3): lead capture ...` *(commit chain: 8c01d3d plan-lock, e93202a Wave A, 818fafa Wave B, 3a82436 Wave C, b210d69 Wave D, 68a9a9b phase-verify fixes)*
 
 ---
 

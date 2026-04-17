@@ -153,11 +153,12 @@
 ---
 
 ### Phase 3: Lead capture (5-step + progressive save + scoring)
-**Status:** not_started
-**Owner:** Sam (Lovable form) + Gideon (API + scoring) + Neo (UX copy + consent wording)
-**Research topic:** Privacy Act 1988 consent wording; lead scoring heuristics for AU edu market
-**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
-**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Status:** in_progress (plan locked 2026-04-17 23:41 AEST — Wave A pending)
+**Owner:** Sam (product decisions + Telegram approval) + Koda (hand-coded Next.js extensions — no Lovable per `feedback_atlas-ai-hand-coded.md`)
+**Research topic:** APP 8 Singapore disclosure verbatim per DEV-001; lead scoring heuristics validated against 12-uni G8-heavy seed (see `.planning/3-PLAN.md` Delta #3)
+**Review protocol:** **Single-seat Gideon on `gpt-5.4` full** (supersedes P0–P2 dual-seat; reference `feedback_agent-model-calibration.md` updated 2026-04-17)
+**Plan check sign-off:** Gideon APPROVE round 2 (2026-04-17 23:40 AEST) — transcripts `/tmp/atlas-p3-plancheck-output.md` + `/tmp/atlas-p3-plancheck-r2-output.md`
+**Phase verify sign-off:** pending Wave G (Gideon on `gpt-5.4` full)
 **Tasks:**
 - [ ] Neo research — consent wording per Privacy Act 1988 s.6 + APP 3/5; service-vs-marketing split
 - [ ] Step 1 shows explicit APP 5 collection notice BEFORE user enters personal info: "Atlas AI collects this information so UniMate's MARA-registered agents can respond. Stored only after you tick consent on step 5." (Gideon round 2 non-blocking note)

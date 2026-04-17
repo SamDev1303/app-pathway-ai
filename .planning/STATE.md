@@ -1,9 +1,11 @@
 # STATE.md — Atlas AI planning state
 
-**Last updated:** 2026-04-17 13:05 AEDT (Koda session 3)
-**Current phase:** P3 not_started (ready to begin — Lead capture 5-step progressive save)
+**Last updated:** 2026-04-17 23:41 AEST (Koda session 4)
+**Current phase:** P3 in_progress (plan locked, Gideon APPROVE r2, Wave A pending)
 **Last completed phase:** P2 (done 2026-04-17 13:05 AEDT — dual-seat PASS, infrastructure-only scope)
-**Next blocker:** none for starting P3. P4.5 compliance gate carries 4 items from P1 + 1 improvement note from P2 (getClaims migration)
+**Next blocker:** none — Sam approved plan 23:41 AEST; PRD v1.1 shipped with N8N X.1.1 +$200 dormant add-on. P4.5 compliance gate carries 4 items from P1 + 1 improvement note from P2 (getClaims migration)
+
+**Review protocol change (2026-04-17 session 4):** Single-seat Gideon on `gpt-5.4` full supersedes dual-seat + mini-for-review pattern used in P0–P2. See `feedback_agent-model-calibration.md`.
 
 ---
 
@@ -15,8 +17,7 @@
 | P0.5 | ✅ done | Gideon APPROVE-WITH-NOTES (round 2) + Specter APPROVE-WITH-NOTES | Gideon PASS (round 2) + Specter PASS |
 | P1 | ✅ done | Gideon APPROVE-WITH-NOTES + Specter APPROVE-WITH-NOTES | Gideon PASS + Specter PASS (12/12) |
 | P2 | ✅ done (infrastructure only) | Gideon APPROVE-WITH-NOTES + Specter APPROVE-WITH-NOTES | Gideon PASS + Specter PASS (10/10) |
-| P3 | not_started (ready to begin) | — | — |
-| P3 | not_started | — | — |
+| P3 | 🟡 in_progress (plan locked) | Gideon APPROVE round 2 (single-seat, 2026-04-17 23:40 AEST) | pending Wave G |
 | P4 | not_started | — | — |
 | P4.5 | not_started | — | — |
 | P5 | not_started | — | — |

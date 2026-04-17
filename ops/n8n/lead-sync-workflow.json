@@ -1,0 +1,378 @@
+{
+  "name": "Atlas AI — Lead Sync (Supabase → Google Sheet)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "atlas-lead-sync",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "1a2b3c4d-webhook-lead-sync",
+      "name": "Supabase DB Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 340],
+      "webhookId": "atlas-lead-sync"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-type",
+              "leftValue": "={{ $json.body.type }}",
+              "rightValue": "INSERT",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "cond-table",
+              "leftValue": "={{ $json.body.table }}",
+              "rightValue": "leads",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "2b3c4d5e-guard-insert",
+      "name": "Guard: INSERT on leads",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [480, 340]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "duplicateItem": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a-submitted-at",
+              "name": "submitted_at",
+              "value": "={{ $json.body.record.created_at }}",
+              "type": "string"
+            },
+            {
+              "id": "a-full-name",
+              "name": "full_name",
+              "value": "={{ $json.body.record.full_name }}",
+              "type": "string"
+            },
+            {
+              "id": "a-email",
+              "name": "email",
+              "value": "={{ $json.body.record.email }}",
+              "type": "string"
+            },
+            {
+              "id": "a-phone",
+              "name": "phone",
+              "value": "={{ $json.body.record.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "a-country",
+              "name": "country",
+              "value": "={{ $json.body.record.country }}",
+              "type": "string"
+            },
+            {
+              "id": "a-qualification",
+              "name": "highest_qualification",
+              "value": "={{ $json.body.record.highest_qualification }}",
+              "type": "string"
+            },
+            {
+              "id": "a-gpa",
+              "name": "gpa",
+              "value": "={{ $json.body.record.gpa }}",
+              "type": "string"
+            },
+            {
+              "id": "a-ielts",
+              "name": "ielts_overall",
+              "value": "={{ $json.body.record.ielts_overall }}",
+              "type": "string"
+            },
+            {
+              "id": "a-fields",
+              "name": "preferred_fields",
+              "value": "={{ ($json.body.record.preferred_fields || []).join(', ') }}",
+              "type": "string"
+            },
+            {
+              "id": "a-levels",
+              "name": "preferred_levels",
+              "value": "={{ ($json.body.record.preferred_levels || []).join(', ') }}",
+              "type": "string"
+            },
+            {
+              "id": "a-intake",
+              "name": "preferred_intake_month",
+              "value": "={{ $json.body.record.preferred_intake_month }}",
+              "type": "string"
+            },
+            {
+              "id": "a-tuition",
+              "name": "tuition_budget_aud",
+              "value": "={{ $json.body.record.tuition_budget_aud }}",
+              "type": "string"
+            },
+            {
+              "id": "a-living",
+              "name": "living_budget_aud",
+              "value": "={{ $json.body.record.living_budget_aud }}",
+              "type": "string"
+            },
+            {
+              "id": "a-channel",
+              "name": "preferred_contact_channel",
+              "value": "={{ $json.body.record.preferred_contact_channel }}",
+              "type": "string"
+            },
+            {
+              "id": "a-notes",
+              "name": "notes",
+              "value": "={{ $json.body.record.notes }}",
+              "type": "string"
+            },
+            {
+              "id": "a-score",
+              "name": "lead_score",
+              "value": "={{ $json.body.record.lead_score }}",
+              "type": "string"
+            },
+            {
+              "id": "a-tier",
+              "name": "lead_tier",
+              "value": "={{ (() => { const s = Number($json.body.record.lead_score); if (isNaN(s)) return ''; if (s >= 80) return 'A'; if (s >= 60) return 'B'; if (s >= 40) return 'C'; return 'D'; })() }}",
+              "type": "string"
+            },
+            {
+              "id": "a-consent-service",
+              "name": "consent_service",
+              "value": "={{ $json.body.record.consent_service ? 'yes' : 'no' }}",
+              "type": "string"
+            },
+            {
+              "id": "a-consent-marketing",
+              "name": "consent_marketing",
+              "value": "={{ $json.body.record.consent_marketing ? 'yes' : 'no' }}",
+              "type": "string"
+            },
+            {
+              "id": "a-consent-version",
+              "name": "consent_wording_version",
+              "value": "={{ $json.body.record.consent_wording_version }}",
+              "type": "string"
+            },
+            {
+              "id": "a-consent-at",
+              "name": "consent_given_at",
+              "value": "={{ $json.body.record.consent_given_at }}",
+              "type": "string"
+            },
+            {
+              "id": "a-ua",
+              "name": "user_agent",
+              "value": "={{ $json.body.record.user_agent }}",
+              "type": "string"
+            },
+            {
+              "id": "a-locale",
+              "name": "locale",
+              "value": "={{ $json.body.record.locale }}",
+              "type": "string"
+            },
+            {
+              "id": "a-source",
+              "name": "source",
+              "value": "atlas-ai.vercel.app",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3c4d5e6f-normalise",
+      "name": "Normalise Fields + Tier",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [720, 220]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_UNIMATE_SHEET_ID_AT_ACTIVATION",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "useAppend": true
+        }
+      },
+      "id": "4d5e6f7g-sheets-append",
+      "name": "Append to UniMate Leads Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [960, 220],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "REPLACE_WITH_UNIMATE_GSHEETS_CRED_ID",
+          "name": "UniMate Google Sheets OAuth2"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "fromEmail": "atlas-ai-alerts@unimate.com.au",
+        "toEmail": "sam@claudeking.org",
+        "subject": "[Atlas AI] Lead sync failed — manual Sheet backfill needed",
+        "emailFormat": "text",
+        "text": "=Atlas AI lead-sync to Google Sheet failed for a lead that DID land in Supabase.\n\nLead snapshot:\n  Name: {{ $('Normalise Fields + Tier').item.json.full_name }}\n  Email: {{ $('Normalise Fields + Tier').item.json.email }}\n  Score: {{ $('Normalise Fields + Tier').item.json.lead_score }} (tier {{ $('Normalise Fields + Tier').item.json.lead_tier }})\n  Submitted: {{ $('Normalise Fields + Tier').item.json.submitted_at }}\n\nError: {{ $json.error }}\n\nAction: open Supabase → leads table, copy this row to the UniMate leads Sheet manually, then check the N8N execution log.",
+        "options": {}
+      },
+      "id": "5e6f7g8h-deadletter-email",
+      "name": "Dead-letter Email to Sam",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [1200, 360],
+      "credentials": {
+        "smtp": {
+          "id": "REPLACE_WITH_UNIMATE_SMTP_CRED_ID",
+          "name": "UniMate SMTP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, forwarded: $('Guard: INSERT on leads').item !== undefined } }}",
+        "options": {}
+      },
+      "id": "6f7g8h9i-respond",
+      "name": "Respond 200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1440, 340]
+    }
+  ],
+  "connections": {
+    "Supabase DB Webhook": {
+      "main": [
+        [
+          {
+            "node": "Guard: INSERT on leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guard: INSERT on leads": {
+      "main": [
+        [
+          {
+            "node": "Normalise Fields + Tier",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond 200 OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalise Fields + Tier": {
+      "main": [
+        [
+          {
+            "node": "Append to UniMate Leads Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to UniMate Leads Sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Dead-letter Email to Sam",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dead-letter Email to Sam": {
+      "main": [
+        [
+          {
+            "node": "Respond 200 OK",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "active": false,
+  "versionId": "atlas-ai-lead-sync-v1.0.0",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "description": "Dormant add-on (PRD §3 X.1.1). Ships in atlas-ai v1 repo; activated by UniMate signing the +$200 add-on PO. Mirrors every new lead row from Supabase (via DB Webhook) into UniMate's Google Sheet. Dead-letters to Sam on Sheet API failure so zero leads are ever lost.",
+    "deploymentTarget": "UniMate Hostinger N8N (client-owned VPS)",
+    "sourceRepo": "github.com/koda-labs/atlas-ai",
+    "activationPO": "X.1.1 (+$200 Sam labour)"
+  },
+  "pinData": {},
+  "tags": [
+    { "name": "atlas-ai" },
+    { "name": "unimate" },
+    { "name": "dormant-add-on" }
+  ]
+}

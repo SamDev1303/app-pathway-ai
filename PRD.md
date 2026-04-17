@@ -1,9 +1,20 @@
 # PRD — Atlas AI v1 (HARD-CUT)
 
-**Version:** 1.0 · **Locked:** 2026-04-16 · **Owner:** Sam (Koda Labs) · **Client:** UniMate Pty Ltd
-**Budget:** $3,000 AUD fixed · **Timeline:** 3 weeks from 50% deposit · **Target market:** Australia only
+**Version:** 1.1 · **Locked:** 2026-04-16 (v1.0) → revised 2026-04-17 (v1.1) · **Owner:** Sam (Koda Labs) · **Client:** UniMate Pty Ltd
+**Budget:** $3,000 AUD fixed (HARD-CUT) · **Optional add-ons:** §3 X.1.1 N8N lead-sync activation (+$200) · **Timeline:** 3 weeks from 50% deposit · **Target market:** Australia only
 
 > This PRD supersedes the client's original 22-page "Atlas AI" PRD (archived at `_reference/archive/OLD-PRD-2026-04-11.md`). Scope here is reduced to ship on budget. The 6 cut modules are quoted separately in v2 (§9).
+
+### Changelog — v1.1 (2026-04-17)
+
+| Change | v1.0 | v1.1 | Reason |
+|---|---|---|---|
+| §5 Lead CRM row | "Google Sheet via Make.com" | "Email (Resend) to Sam + UniMate; DB = source of truth. Ready-to-deploy N8N → Sheet pipeline shipped dormant (see §3 X.1.1); activation is client-hosted on UniMate's Hostinger N8N instance." | Make.com added a third-party dependency with zero data-integrity gain (DB + email already give 100% capture + notification). N8N on UniMate-owned Hostinger replaces the vendor chain — UniMate pays their own ~$5–20/mo hosting, Atlas ships the workflow as a portable JSON, and Sam charges only for activation labour. |
+| §3 cut-module table | — | **New row X.1.1:** "N8N lead-sync activation (+$200)" — workflow pre-built at `ops/n8n/lead-sync-workflow.json`; UniMate provisions a Hostinger N8N VPS, Sam imports + configures on a PO sign-off. | Preserves client optionality without inflating the $3k fixed budget. Hosting cost + Google Workspace cred are UniMate-owned; the $200 covers Sam's import + cred setup + Supabase webhook registration + smoke test. |
+| §2 V1.2 success metric | Unchanged wording; Sheet was never acceptance-blocking. | Clarified to "leads land in DB + email post-consent" (no Sheet dependency). | Matches actual shipped v1 behaviour; stops "live Sheet" being an implicit launch gate. |
+| `.env.example` | `MAKE_LEAD_WEBHOOK_URL` + `LEAD_NOTIFY_EMAILS` | `MAKE_LEAD_WEBHOOK_URL` removed; `N8N_WEBHOOK_URL` present but commented-out with activation instructions. | Config tracks code reality. |
+
+**Budget impact:** $0 on v1 price. ~2 hrs reclaimed for lead-capture UI polish. UniMate has a priced escape hatch ($200) if they later want the Sheet mirror live.
 
 ---
 
@@ -36,8 +47,9 @@ These six modules are removed from v1. The v1 client-facing framing is **"v1 shi
 | X.4 | Analytics Dashboard | Vercel Analytics + Supabase logs suffice for v1 | $1–2k |
 | X.5 | Better Auth (magic link + multi-session) | Supabase Auth magic link has identical UX at zero integration cost | $1k |
 | X.6 | `internal_user_id` abstraction layer | Redundant when we're Supabase end-to-end; re-adds value only if client migrates off | $1k |
+| **X.1.1** | **N8N lead-sync activation** (optional v1 add-on, not a cut module) | Workflow ships dormant in the v1 repo at `ops/n8n/lead-sync-workflow.json`. Activation steps: (1) UniMate provisions N8N on Hostinger VPS (~$5–20/mo UniMate pays directly), (2) Sam imports the workflow JSON, (3) Sam configures Google Sheets credential against UniMate's Google Workspace, (4) Sam registers Supabase DB webhook → N8N webhook URL, (5) end-to-end smoke test with a seeded lead. Pipeline appends every new lead to UniMate's Google Sheet in real time. Not wired in v1 core because the Hostinger VPS + Google Workspace creds are UniMate-owned and provisioned post-launch. | **+$200** (Sam's labour only; hosting + creds are UniMate's cost) |
 
-Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversation.
+Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversation. X.1.1 is a standalone +$200 add-on, not part of the v2 envelope.
 
 ---
 
@@ -78,7 +90,7 @@ Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversat
 | PDF | react-pdf (client-side) | No server work; SOP exports in-browser |
 | Email | Resend | Already wired; works well with Next.js |
 | Hosting | Vercel (existing project) | Free hobby tier covers v1 traffic |
-| Lead CRM (v1) | Google Sheet via Make.com | Replaces admin dashboard; zero code |
+| Lead CRM (v1) | **Resend email to Sam + UniMate.** DB (`leads` table) is source of truth; email is the live notification channel. **Optional add-on:** N8N → Google Sheet pipeline ships dormant at `ops/n8n/lead-sync-workflow.json` — UniMate hosts N8N on their own Hostinger VPS and activates via §3 X.1.1 (+$200 Sam labour; hosting + Google creds UniMate-owned) post-launch if desired. | Avoids third-party Make.com dependency for zero data-integrity gain (DB + email already cover capture + notification). UniMate-hosted N8N removes the Mac-uptime risk of a developer-hosted orchestrator while keeping Sheet-mirror optionality behind a clean priced activation. |
 
 ---
 

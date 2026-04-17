@@ -18,10 +18,10 @@ export const seedUniversities: University[] = [
     logo_letter: "U",
     hero_color: "#FDB515",
     courses: [
-      { course_name: "Bachelor of Computer Science", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 53760, ielts_min: 6.5, gpa_min: 7.0, pr_eligible: true },
-      { course_name: "Master of Information Technology", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 56160, ielts_min: 6.5, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Bachelor of Engineering (Honours)", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 56880, ielts_min: 6.5, gpa_min: 7.5, pr_eligible: true },
-      { course_name: "Master of Commerce", level: "postgraduate", field: "Business", duration_months: 24, annual_fee_aud: 54720, ielts_min: 7.0, gpa_min: 6.5, pr_eligible: false },
+      { course_name: "Bachelor of Computer Science", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 53760, ielts_min: 6.5, gpa_min: 7.0, industry_placement: true },
+      { course_name: "Master of Information Technology", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 56160, ielts_min: 6.5, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Bachelor of Engineering (Honours)", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 56880, ielts_min: 6.5, gpa_min: 7.5, industry_placement: true },
+      { course_name: "Master of Commerce", level: "postgraduate", field: "Business", duration_months: 24, annual_fee_aud: 54720, ielts_min: 7.0, gpa_min: 6.5, industry_placement: false },
     ],
   },
   {
@@ -37,10 +37,10 @@ export const seedUniversities: University[] = [
     logo_letter: "S",
     hero_color: "#E64626",
     courses: [
-      { course_name: "Bachelor of Advanced Computing", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 55500, ielts_min: 6.5, gpa_min: 7.0, pr_eligible: true },
-      { course_name: "Master of Data Science", level: "postgraduate", field: "IT", duration_months: 18, annual_fee_aud: 58000, ielts_min: 6.5, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Bachelor of Engineering Honours (Civil)", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 56500, ielts_min: 6.5, gpa_min: 7.5, pr_eligible: true },
-      { course_name: "Master of Public Health", level: "postgraduate", field: "Health", duration_months: 18, annual_fee_aud: 54000, ielts_min: 7.0, gpa_min: 6.5, pr_eligible: true },
+      { course_name: "Bachelor of Advanced Computing", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 55500, ielts_min: 6.5, gpa_min: 7.0, industry_placement: true },
+      { course_name: "Master of Data Science", level: "postgraduate", field: "IT", duration_months: 18, annual_fee_aud: 58000, ielts_min: 6.5, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Bachelor of Engineering Honours (Civil)", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 56500, ielts_min: 6.5, gpa_min: 7.5, industry_placement: true },
+      { course_name: "Master of Public Health", level: "postgraduate", field: "Health", duration_months: 18, annual_fee_aud: 54000, ielts_min: 7.0, gpa_min: 6.5, industry_placement: true },
     ],
   },
   {
@@ -56,10 +56,10 @@ export const seedUniversities: University[] = [
     logo_letter: "M",
     hero_color: "#094183",
     courses: [
-      { course_name: "Bachelor of Science (Computing)", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 51008, ielts_min: 6.5, gpa_min: 7.5, pr_eligible: true },
-      { course_name: "Master of Information Technology", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 56960, ielts_min: 6.5, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Master of Engineering (Software)", level: "postgraduate", field: "Engineering", duration_months: 36, annual_fee_aud: 56544, ielts_min: 6.5, gpa_min: 7.0, pr_eligible: true },
-      { course_name: "Master of Business Administration", level: "postgraduate", field: "Business", duration_months: 24, annual_fee_aud: 99840, ielts_min: 7.0, gpa_min: 7.0, pr_eligible: false },
+      { course_name: "Bachelor of Science (Computing)", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 51008, ielts_min: 6.5, gpa_min: 7.5, industry_placement: true },
+      { course_name: "Master of Information Technology", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 56960, ielts_min: 6.5, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Master of Engineering (Software)", level: "postgraduate", field: "Engineering", duration_months: 36, annual_fee_aud: 56544, ielts_min: 6.5, gpa_min: 7.0, industry_placement: true },
+      { course_name: "Master of Business Administration", level: "postgraduate", field: "Business", duration_months: 24, annual_fee_aud: 99840, ielts_min: 7.0, gpa_min: 7.0, industry_placement: false },
     ],
   },
   {
@@ -75,10 +75,10 @@ export const seedUniversities: University[] = [
     logo_letter: "M",
     hero_color: "#006DAE",
     courses: [
-      { course_name: "Bachelor of Computer Science (Advanced)", level: "undergraduate", field: "IT", duration_months: 48, annual_fee_aud: 50300, ielts_min: 6.5, gpa_min: 7.0, pr_eligible: true },
-      { course_name: "Master of Data Science", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 50500, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: true },
-      { course_name: "Bachelor of Nursing", level: "undergraduate", field: "Health", duration_months: 36, annual_fee_aud: 47800, ielts_min: 7.0, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Bachelor of Business", level: "undergraduate", field: "Business", duration_months: 36, annual_fee_aud: 49500, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: false },
+      { course_name: "Bachelor of Computer Science (Advanced)", level: "undergraduate", field: "IT", duration_months: 48, annual_fee_aud: 50300, ielts_min: 6.5, gpa_min: 7.0, industry_placement: true },
+      { course_name: "Master of Data Science", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 50500, ielts_min: 6.5, gpa_min: 6.0, industry_placement: true },
+      { course_name: "Bachelor of Nursing", level: "undergraduate", field: "Health", duration_months: 36, annual_fee_aud: 47800, ielts_min: 7.0, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Bachelor of Business", level: "undergraduate", field: "Business", duration_months: 36, annual_fee_aud: 49500, ielts_min: 6.5, gpa_min: 6.0, industry_placement: false },
     ],
   },
   {
@@ -94,10 +94,10 @@ export const seedUniversities: University[] = [
     logo_letter: "Q",
     hero_color: "#51247A",
     courses: [
-      { course_name: "Bachelor of Computer Science", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 50880, ielts_min: 6.5, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Master of Computer Science", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 52320, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: true },
-      { course_name: "Bachelor of Engineering Honours", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 51840, ielts_min: 6.5, gpa_min: 7.0, pr_eligible: true },
-      { course_name: "Master of Pharmaceutical Industry Practice", level: "postgraduate", field: "Health", duration_months: 18, annual_fee_aud: 47520, ielts_min: 7.0, gpa_min: 6.5, pr_eligible: true },
+      { course_name: "Bachelor of Computer Science", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 50880, ielts_min: 6.5, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Master of Computer Science", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 52320, ielts_min: 6.5, gpa_min: 6.0, industry_placement: true },
+      { course_name: "Bachelor of Engineering Honours", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 51840, ielts_min: 6.5, gpa_min: 7.0, industry_placement: true },
+      { course_name: "Master of Pharmaceutical Industry Practice", level: "postgraduate", field: "Health", duration_months: 18, annual_fee_aud: 47520, ielts_min: 7.0, gpa_min: 6.5, industry_placement: true },
     ],
   },
   {
@@ -113,10 +113,10 @@ export const seedUniversities: University[] = [
     logo_letter: "A",
     hero_color: "#9C168F",
     courses: [
-      { course_name: "Bachelor of Advanced Computing (Honours)", level: "undergraduate", field: "IT", duration_months: 48, annual_fee_aud: 52410, ielts_min: 6.5, gpa_min: 7.5, pr_eligible: true },
-      { course_name: "Master of Computing", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 53310, ielts_min: 6.5, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Master of Engineering", level: "postgraduate", field: "Engineering", duration_months: 24, annual_fee_aud: 54000, ielts_min: 6.5, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Bachelor of Politics, Philosophy & Economics", level: "undergraduate", field: "Arts", duration_months: 36, annual_fee_aud: 49170, ielts_min: 6.5, gpa_min: 7.0, pr_eligible: false },
+      { course_name: "Bachelor of Advanced Computing (Honours)", level: "undergraduate", field: "IT", duration_months: 48, annual_fee_aud: 52410, ielts_min: 6.5, gpa_min: 7.5, industry_placement: true },
+      { course_name: "Master of Computing", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 53310, ielts_min: 6.5, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Master of Engineering", level: "postgraduate", field: "Engineering", duration_months: 24, annual_fee_aud: 54000, ielts_min: 6.5, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Bachelor of Politics, Philosophy & Economics", level: "undergraduate", field: "Arts", duration_months: 36, annual_fee_aud: 49170, ielts_min: 6.5, gpa_min: 7.0, industry_placement: false },
     ],
   },
   {
@@ -132,10 +132,10 @@ export const seedUniversities: University[] = [
     logo_letter: "W",
     hero_color: "#27348B",
     courses: [
-      { course_name: "Bachelor of Computer Science", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 44400, ielts_min: 6.5, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Master of IT", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 45200, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: true },
-      { course_name: "Bachelor of Engineering Science", level: "undergraduate", field: "Engineering", duration_months: 36, annual_fee_aud: 46800, ielts_min: 6.5, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Master of Business Analytics", level: "postgraduate", field: "Business", duration_months: 18, annual_fee_aud: 46900, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: false },
+      { course_name: "Bachelor of Computer Science", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 44400, ielts_min: 6.5, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Master of IT", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 45200, ielts_min: 6.5, gpa_min: 6.0, industry_placement: true },
+      { course_name: "Bachelor of Engineering Science", level: "undergraduate", field: "Engineering", duration_months: 36, annual_fee_aud: 46800, ielts_min: 6.5, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Master of Business Analytics", level: "postgraduate", field: "Business", duration_months: 18, annual_fee_aud: 46900, ielts_min: 6.5, gpa_min: 6.0, industry_placement: false },
     ],
   },
   {
@@ -152,10 +152,10 @@ export const seedUniversities: University[] = [
     hero_color: "#102030",
     regional: true,
     courses: [
-      { course_name: "Bachelor of Computer Science", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 47000, ielts_min: 6.0, gpa_min: 6.0, pr_eligible: true },
-      { course_name: "Master of Computing & Innovation", level: "postgraduate", field: "IT", duration_months: 18, annual_fee_aud: 48500, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: true },
-      { course_name: "Bachelor of Nursing", level: "undergraduate", field: "Health", duration_months: 36, annual_fee_aud: 44500, ielts_min: 7.0, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Master of Wine Business", level: "postgraduate", field: "Business", duration_months: 18, annual_fee_aud: 44000, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: false },
+      { course_name: "Bachelor of Computer Science", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 47000, ielts_min: 6.0, gpa_min: 6.0, industry_placement: true },
+      { course_name: "Master of Computing & Innovation", level: "postgraduate", field: "IT", duration_months: 18, annual_fee_aud: 48500, ielts_min: 6.5, gpa_min: 6.0, industry_placement: true },
+      { course_name: "Bachelor of Nursing", level: "undergraduate", field: "Health", duration_months: 36, annual_fee_aud: 44500, ielts_min: 7.0, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Master of Wine Business", level: "postgraduate", field: "Business", duration_months: 18, annual_fee_aud: 44000, ielts_min: 6.5, gpa_min: 6.0, industry_placement: false },
     ],
   },
   {
@@ -171,10 +171,10 @@ export const seedUniversities: University[] = [
     logo_letter: "T",
     hero_color: "#000000",
     courses: [
-      { course_name: "Bachelor of Computing Science (Honours)", level: "undergraduate", field: "IT", duration_months: 48, annual_fee_aud: 47490, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: true },
-      { course_name: "Master of Information Technology", level: "postgraduate", field: "IT", duration_months: 18, annual_fee_aud: 48360, ielts_min: 6.5, gpa_min: 5.5, pr_eligible: true },
-      { course_name: "Bachelor of Engineering (Honours)", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 49560, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: true },
-      { course_name: "Master of Business Administration", level: "postgraduate", field: "Business", duration_months: 24, annual_fee_aud: 60500, ielts_min: 6.5, gpa_min: 6.5, pr_eligible: false },
+      { course_name: "Bachelor of Computing Science (Honours)", level: "undergraduate", field: "IT", duration_months: 48, annual_fee_aud: 47490, ielts_min: 6.5, gpa_min: 6.0, industry_placement: true },
+      { course_name: "Master of Information Technology", level: "postgraduate", field: "IT", duration_months: 18, annual_fee_aud: 48360, ielts_min: 6.5, gpa_min: 5.5, industry_placement: true },
+      { course_name: "Bachelor of Engineering (Honours)", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 49560, ielts_min: 6.5, gpa_min: 6.0, industry_placement: true },
+      { course_name: "Master of Business Administration", level: "postgraduate", field: "Business", duration_months: 24, annual_fee_aud: 60500, ielts_min: 6.5, gpa_min: 6.5, industry_placement: false },
     ],
   },
   {
@@ -191,10 +191,10 @@ export const seedUniversities: University[] = [
     hero_color: "#E32726",
     regional: true,
     courses: [
-      { course_name: "Bachelor of Information & Communications Technology", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 32440, ielts_min: 6.0, gpa_min: 5.0, pr_eligible: true },
-      { course_name: "Master of Information & Communications Technology", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 34920, ielts_min: 6.5, gpa_min: 5.5, pr_eligible: true },
-      { course_name: "Bachelor of Nursing", level: "undergraduate", field: "Health", duration_months: 36, annual_fee_aud: 35920, ielts_min: 7.0, gpa_min: 6.0, pr_eligible: true },
-      { course_name: "Bachelor of Business", level: "undergraduate", field: "Business", duration_months: 36, annual_fee_aud: 32840, ielts_min: 6.0, gpa_min: 5.0, pr_eligible: false },
+      { course_name: "Bachelor of Information & Communications Technology", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 32440, ielts_min: 6.0, gpa_min: 5.0, industry_placement: true },
+      { course_name: "Master of Information & Communications Technology", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 34920, ielts_min: 6.5, gpa_min: 5.5, industry_placement: true },
+      { course_name: "Bachelor of Nursing", level: "undergraduate", field: "Health", duration_months: 36, annual_fee_aud: 35920, ielts_min: 7.0, gpa_min: 6.0, industry_placement: true },
+      { course_name: "Bachelor of Business", level: "undergraduate", field: "Business", duration_months: 36, annual_fee_aud: 32840, ielts_min: 6.0, gpa_min: 5.0, industry_placement: false },
     ],
   },
   {
@@ -210,10 +210,10 @@ export const seedUniversities: University[] = [
     logo_letter: "R",
     hero_color: "#E61E2A",
     courses: [
-      { course_name: "Bachelor of Information Technology", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 41280, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: true },
-      { course_name: "Master of Data Science", level: "postgraduate", field: "IT", duration_months: 18, annual_fee_aud: 44160, ielts_min: 6.5, gpa_min: 5.5, pr_eligible: true },
-      { course_name: "Bachelor of Engineering (Aerospace)", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 44160, ielts_min: 6.5, gpa_min: 6.5, pr_eligible: true },
-      { course_name: "Master of Architecture", level: "postgraduate", field: "Architecture", duration_months: 24, annual_fee_aud: 42240, ielts_min: 6.5, gpa_min: 6.0, pr_eligible: true },
+      { course_name: "Bachelor of Information Technology", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 41280, ielts_min: 6.5, gpa_min: 6.0, industry_placement: true },
+      { course_name: "Master of Data Science", level: "postgraduate", field: "IT", duration_months: 18, annual_fee_aud: 44160, ielts_min: 6.5, gpa_min: 5.5, industry_placement: true },
+      { course_name: "Bachelor of Engineering (Aerospace)", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 44160, ielts_min: 6.5, gpa_min: 6.5, industry_placement: true },
+      { course_name: "Master of Architecture", level: "postgraduate", field: "Architecture", duration_months: 24, annual_fee_aud: 42240, ielts_min: 6.5, gpa_min: 6.0, industry_placement: true },
     ],
   },
   {
@@ -230,10 +230,10 @@ export const seedUniversities: University[] = [
     hero_color: "#E61E2A",
     regional: true,
     courses: [
-      { course_name: "Bachelor of Computer Science", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 36720, ielts_min: 6.0, gpa_min: 5.5, pr_eligible: true },
-      { course_name: "Master of Computer Science (AI)", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 38760, ielts_min: 6.5, gpa_min: 5.5, pr_eligible: true },
-      { course_name: "Bachelor of Engineering (Mechatronic)", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 39240, ielts_min: 6.0, gpa_min: 6.0, pr_eligible: true },
-      { course_name: "Bachelor of Nursing", level: "undergraduate", field: "Health", duration_months: 36, annual_fee_aud: 37920, ielts_min: 7.0, gpa_min: 6.0, pr_eligible: true },
+      { course_name: "Bachelor of Computer Science", level: "undergraduate", field: "IT", duration_months: 36, annual_fee_aud: 36720, ielts_min: 6.0, gpa_min: 5.5, industry_placement: true },
+      { course_name: "Master of Computer Science (AI)", level: "postgraduate", field: "IT", duration_months: 24, annual_fee_aud: 38760, ielts_min: 6.5, gpa_min: 5.5, industry_placement: true },
+      { course_name: "Bachelor of Engineering (Mechatronic)", level: "undergraduate", field: "Engineering", duration_months: 48, annual_fee_aud: 39240, ielts_min: 6.0, gpa_min: 6.0, industry_placement: true },
+      { course_name: "Bachelor of Nursing", level: "undergraduate", field: "Health", duration_months: 36, annual_fee_aud: 37920, ielts_min: 7.0, gpa_min: 6.0, industry_placement: true },
     ],
   },
 ];

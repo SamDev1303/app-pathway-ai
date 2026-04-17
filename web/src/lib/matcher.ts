@@ -12,7 +12,7 @@ const WEIGHTS = {
   ielts: 0.25,
   gpa: 0.25,
   budget: 0.2,
-  pr: 0.15,
+  outcomes: 0.15,
   location: 0.1,
   rank: 0.05,
 } as const;
@@ -38,7 +38,12 @@ function scoreCourse(student: Student, uni: University, course: Course) {
     0,
     Math.min(100, (1 - course.annual_fee_aud / student.budget_aud) * 100 + 50),
   );
-  const prScore = student.wants_pr && course.pr_eligible ? 100 : student.wants_pr ? 30 : 70;
+  const outcomesScore =
+    student.prioritize_outcomes && course.industry_placement
+      ? 100
+      : student.prioritize_outcomes
+      ? 50
+      : 70;
   const locationScore =
     student.state_pref && uni.state === student.state_pref ? 100 : 60;
   const rankScore =
@@ -50,7 +55,7 @@ function scoreCourse(student: Student, uni: University, course: Course) {
     ieltsScore * WEIGHTS.ielts +
     gpaScore * WEIGHTS.gpa +
     budgetScore * WEIGHTS.budget +
-    prScore * WEIGHTS.pr +
+    outcomesScore * WEIGHTS.outcomes +
     locationScore * WEIGHTS.location +
     rankScore * WEIGHTS.rank;
 
@@ -84,13 +89,15 @@ function scoreCourse(student: Student, uni: University, course: Course) {
     });
   }
 
-  if (student.wants_pr && course.pr_eligible) {
+  if (student.prioritize_outcomes && course.industry_placement) {
     reasons.push({
-      label: uni.regional ? "PR-eligible + regional (+5 points)" : "PR-eligible course",
+      label: uni.regional
+        ? "Industry placement + regional campus"
+        : "Industry placement built in",
       status: "good",
     });
-  } else if (student.wants_pr && !course.pr_eligible) {
-    reasons.push({ label: "Not on MLTSSL", status: "warn" });
+  } else if (student.prioritize_outcomes && !course.industry_placement) {
+    reasons.push({ label: "Limited industry placement", status: "warn" });
   }
 
   if (gpaOk && gpaScore > 80) {

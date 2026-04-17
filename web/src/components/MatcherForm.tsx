@@ -21,7 +21,7 @@ export function MatcherForm() {
   const [field, setField] = useState<CourseField>("IT");
   const [ielts, setIelts] = useState(6.5);
   const [budget, setBudget] = useState(40000);
-  const [wantsPR, setWantsPR] = useState(true);
+  const [prioritizeOutcomes, setPrioritizeOutcomes] = useState(true);
   const [results, setResults] = useState<MatchResponse | null>(null);
   const [pending, startTransition] = useTransition();
   const [modalOpen, setModalOpen] = useState(false);
@@ -32,7 +32,7 @@ export function MatcherForm() {
       ielts,
       gpa: 6.0,
       budget_aud: budget,
-      wants_pr: wantsPR,
+      prioritize_outcomes: prioritizeOutcomes,
     };
     startTransition(() => {
       const r = matchStudent(student, universities);
@@ -116,13 +116,14 @@ export function MatcherForm() {
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox"
-              checked={wantsPR}
-              onChange={(e) => setWantsPR(e.target.checked)}
+              checked={prioritizeOutcomes}
+              onChange={(e) => setPrioritizeOutcomes(e.target.checked)}
               className="w-4 h-4 accent-[var(--color-gold-500)]"
             />
             <span className="text-sm text-[var(--color-navy-950)]">
-              I want a course that leads to{" "}
-              <span className="font-semibold">Permanent Residency</span>
+              Prioritise courses with{" "}
+              <span className="font-semibold">strong graduate outcomes</span>{" "}
+              <span className="text-[var(--color-navy-700)]">(industry placement + regional)</span>
             </span>
           </label>
           <button
@@ -231,7 +232,7 @@ function ResultsView({ results, onBook }: { results: MatchResponse; onBook: () =
             Walk into Liverpool with your shortlist.
           </h3>
           <p className="mt-4 text-base text-[var(--color-navy-950)]/75 max-w-2xl leading-relaxed">
-            Bring these matches to a free consultation with a MARA-registered counsellor. We&apos;ll audit fees, scholarships, IELTS gaps, and your visa pathway in 30 minutes.
+            Bring these matches to a free consultation with a MARA-registered counsellor. We&apos;ll audit fees, scholarships, IELTS gaps, and next steps in a 30-minute session.
           </p>
           <button
             type="button"
@@ -259,9 +260,10 @@ function ResultsView({ results, onBook }: { results: MatchResponse; onBook: () =
         <p className="text-xs text-[var(--color-navy-700)] leading-relaxed max-w-3xl mx-auto text-center italic">
           <span className="font-semibold">Indicative only.</span> Match scores
           are based on published 2025 IELTS, GPA, and tuition data and do not
-          guarantee admission or student visa outcome. UniMate Australia is a
-          MARA-registered migration consultancy (MARN 1798425). For binding
-          eligibility advice, book a free consultation at our Liverpool office.
+          guarantee admission. Atlas AI is an information and matching service;
+          it is not migration advice. UniMate Australia is a MARA-registered
+          migration consultancy (MARN 1798425). For binding eligibility or
+          migration advice, book a free consultation at our Liverpool office.
         </p>
       </div>
     </div>

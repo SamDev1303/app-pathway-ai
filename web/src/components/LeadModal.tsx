@@ -18,7 +18,8 @@ export function LeadModal({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [message, setMessage] = useState("");
-  const [consent, setConsent] = useState(false);
+  const [consentService, setConsentService] = useState(false);
+  const [consentMarketing, setConsentMarketing] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
@@ -40,7 +41,8 @@ export function LeadModal({
     setEmail("");
     setPhone("");
     setMessage("");
-    setConsent(false);
+    setConsentService(false);
+    setConsentMarketing(false);
     setStatus("idle");
     setErrorMsg("");
   };
@@ -52,8 +54,8 @@ export function LeadModal({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!consent) {
-      setErrorMsg("Please accept the privacy notice to continue.");
+    if (!consentService) {
+      setErrorMsg("Please accept the service consent to continue.");
       return;
     }
     setErrorMsg("");
@@ -67,7 +69,9 @@ export function LeadModal({
           email,
           phone,
           message,
-          consent: true,
+          consent_service: true,
+          consent_marketing: consentMarketing,
+          consent_wording_version: "2026-04-17.v1",
           source
         })
       });
@@ -185,17 +189,32 @@ export function LeadModal({
                     />
                   </Field>
 
-                  <label className="flex items-start gap-3 cursor-pointer pt-2">
+                  <p className="text-[11px] text-[var(--color-navy-950)]/70 pt-2 leading-relaxed">
+                    Atlas AI collects this information so UniMate&apos;s MARA-registered agents can respond to your enquiry. Your details are stored only after you tick the required consent below. We handle your data under the <em>Privacy Act 1988 (Cth)</em> and will never share it with third parties without your written consent.
+                  </p>
+
+                  <label className="flex items-start gap-3 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={consent}
-                      onChange={(e) => setConsent(e.target.checked)}
+                      checked={consentService}
+                      onChange={(e) => setConsentService(e.target.checked)}
                       className="mt-1 accent-[var(--color-gold-500)] w-4 h-4"
                       required
                     />
-                    <span className="text-xs text-[var(--color-navy-950)]/75 leading-relaxed">
-                      I consent to UniMate Australia contacting me about my study and migration enquiry. We handle your data under the
-                      <em> Privacy Act 1988 (Cth)</em>. We will never share your details with third parties without your written consent.
+                    <span className="text-xs text-[var(--color-navy-950)]/80 leading-relaxed">
+                      <span className="font-semibold">Required:</span> I consent to UniMate Australia contacting me about my course enquiry so a MARA-registered counsellor can follow up.
+                    </span>
+                  </label>
+
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={consentMarketing}
+                      onChange={(e) => setConsentMarketing(e.target.checked)}
+                      className="mt-1 accent-[var(--color-gold-500)] w-4 h-4"
+                    />
+                    <span className="text-xs text-[var(--color-navy-950)]/70 leading-relaxed">
+                      <span className="font-semibold">Optional:</span> Send me occasional updates about scholarships, intake deadlines, and open days.
                     </span>
                   </label>
 

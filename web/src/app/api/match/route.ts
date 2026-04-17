@@ -22,7 +22,7 @@ const StudentSchema = z.object({
   state_pref: z
     .enum(["NSW", "VIC", "QLD", "WA", "SA", "TAS", "ACT", "NT"])
     .optional(),
-  wants_pr: z.boolean(),
+  prioritize_outcomes: z.boolean(),
   level: z.enum(["undergraduate", "postgraduate", "vet"]).optional(),
 });
 

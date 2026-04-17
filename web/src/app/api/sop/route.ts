@@ -26,11 +26,12 @@ Writing style:
 - Include ONE concrete specific detail per paragraph (a project, a turning point, a mentor, a regional connection)
 - No clichés ("since childhood I have been passionate about…", "I firmly believe…")
 - No hyperbole
-- End on long-term contribution to Australia's skills pipeline (PR-aware without being PR-obvious)
+- End on long-term professional contribution — focus on career trajectory, industry impact, and skills development (NOT visa outcomes, residency intentions, or migration pathways)
 
 Hard rules:
 - NEVER invent university rankings, program codes, or specific faculty names unless the user provided them.
 - NEVER claim student has met specific people or attended events they didn't mention.
+- NEVER include visa advice, migration pathway guidance, residency claims, or post-study work stratagems. This is an academic SOP, not a migration document.
 - Use the user's inputs as seed facts — elaborate naturally, don't fabricate.
 - Output plain prose only — no headers, no bullet points, no markdown.`;
 

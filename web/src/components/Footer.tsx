@@ -13,7 +13,7 @@ const howItWorks = [
   {
     step: "02",
     title: "Match",
-    body: "Three real Group of Eight or regional matches with fees, IELTS, and PR fit."
+    body: "Three real Group of Eight or regional matches with fees, IELTS, and outcomes fit."
   },
   {
     step: "03",

@@ -8,7 +8,7 @@ const course = (
   annual_fee_aud: number,
   ielts_min: number,
   gpa_min: number,
-  pr_eligible: boolean,
+  industry_placement: boolean,
 ): Course => ({
   course_name,
   level,
@@ -17,7 +17,7 @@ const course = (
   annual_fee_aud,
   ielts_min,
   gpa_min,
-  pr_eligible,
+  industry_placement,
 });
 
 // Source basis:

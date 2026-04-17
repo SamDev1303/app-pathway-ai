@@ -6,9 +6,9 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const SUGGESTED = [
   "What IELTS score do I need for UNSW?",
-  "Which courses lead to PR in Australia?",
+  "Which Australian universities have the strongest IT programs?",
   "How much does a Master of IT cost?",
-  "Difference between subclass 500 and 485?",
+  "How do I compare Group of Eight vs regional universities?",
 ];
 
 export function ChatDrawer() {
@@ -137,7 +137,7 @@ export function ChatDrawer() {
                 <input
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  placeholder="Ask about visas, courses, IELTS…"
+                  placeholder="Ask about courses, IELTS, fees…"
                   className="flex-1 bg-transparent border border-[var(--color-navy-100)] focus:border-[var(--color-gold-500)] outline-none px-4 py-3 text-sm"
                 />
                 <button

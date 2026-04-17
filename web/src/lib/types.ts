@@ -29,7 +29,7 @@ export interface Course {
   annual_fee_aud: number;
   ielts_min: number;
   gpa_min: number;
-  pr_eligible: boolean;
+  industry_placement: boolean;
 }
 
 export interface University {
@@ -54,7 +54,7 @@ export interface Student {
   gpa: number;
   budget_aud: number;
   state_pref?: AustralianState;
-  wants_pr: boolean;
+  prioritize_outcomes: boolean;
   level?: StudyLevel;
 }
 

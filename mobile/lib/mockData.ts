@@ -29,7 +29,7 @@ export type ProfileData = {
   gpa: string;
   field: string;
   budget: string;
-  prIntent: string;
+  outcomesFocus: string;
 };
 
 export const universities: UniversityMatch[] = [
@@ -45,7 +45,7 @@ export const universities: UniversityMatch[] = [
     tuition: "Premium metro",
     intake: "Term 1 / 3",
     image: auImages.unsw,
-    reasons: ["Strong English", "Career-led", "PR-aware"],
+    reasons: ["Strong English", "Career-led", "Industry-linked"],
     summary: "Best aligned for software outcomes, Sydney internships, and a clean English threshold."
   },
   {
@@ -120,7 +120,7 @@ export const universities: UniversityMatch[] = [
     tuition: "Regional value",
     intake: "Mar / Jul / Nov",
     image: auImages.melbourneTram,
-    reasons: ["PR-eligible", "In budget", "Lower IELTS"],
+    reasons: ["Industry placement", "In budget", "Lower IELTS"],
     summary: "Value-led regional option with a practical entry threshold."
   },
   {
@@ -162,14 +162,14 @@ export const advisorPrompts: ChatPrompt[] = [
     response: "For the UNSW Computer Science pathway, a safe benchmark is IELTS 6.5 overall with no band below 6.0. If your current score is lower, UniMate would usually shortlist pathway-friendly alternatives while planning a retake."
   },
   {
-    id: "pr-courses",
-    label: "PR pathway courses",
-    response: "For PR-aware planning, UniMate tends to favour regional study options, nursing, software, cyber, and select business analytics pathways where study location, occupation alignment, and post-study work rights stack more cleanly."
+    id: "outcomes-courses",
+    label: "Strong graduate outcomes",
+    response: "For graduate-outcomes-focused planning, UniMate tends to favour regional study options, nursing, software, cyber, and select business analytics pathways where industry placement, employer networks, and campus employability services stack more cleanly. A MARA-registered counsellor handles any migration-related questions in consultation."
   },
   {
     id: "budget-options",
     label: "Best under A$40k",
-    response: "Below A$40k yearly tuition, the shortlist usually moves toward Tasmania, Deakin, Griffith, and other regional-friendly campuses where affordability and migration outcomes can align better than prestige-first metro picks."
+    response: "Below A$40k yearly tuition, the shortlist usually moves toward Tasmania, Deakin, Griffith, and other regional-friendly campuses where affordability and academic fit align well with strong graduate employability."
   }
 ];
 
@@ -186,12 +186,12 @@ export const defaultProfile: ProfileData = {
   gpa: "3.4 / 4.0",
   field: "Computer Science",
   budget: "A$45k / year",
-  prIntent: "Yes, open to PR-eligible pathways"
+  outcomesFocus: "Prioritise courses with strong industry placement"
 };
 
-export const visaUpdate = {
-  title: "Visa update",
-  body: "Australia remains focused on genuine-student evidence, English preparedness, and clear post-study intent. Strong financial explanation and course logic matter more than ever in 2026."
+export const admissionsUpdate = {
+  title: "Admissions update",
+  body: "Australian universities in 2026 emphasise genuine-student evidence, English preparedness, and clear academic intent. Strong financial documentation and a clear course logic matter more than ever. A MARA-registered counsellor can help you assemble an admissions-ready file."
 };
 
 export const advisorTip =

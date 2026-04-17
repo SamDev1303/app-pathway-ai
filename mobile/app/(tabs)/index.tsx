@@ -5,7 +5,7 @@ import { ArrowUpRight, CircleAlert, Sparkles } from "lucide-react-native";
 import { EditorialCard } from "@/components/EditorialCard";
 import { ScoreRing } from "@/components/ScoreRing";
 import { SectionHeader } from "@/components/SectionHeader";
-import { advisorTip, universities, visaUpdate } from "@/lib/mockData";
+import { advisorTip, universities, admissionsUpdate } from "@/lib/mockData";
 import { colors, typography } from "@/lib/theme";
 
 const topMatch = universities[0];
@@ -47,7 +47,7 @@ export default function HomeScreen() {
                     { marginTop: 16, maxWidth: "82%", fontSize: 40, lineHeight: 44, color: "#ffffff" }
                   ]}
                 >
-                  Study migration, treated like a life editorial.
+                  Study abroad, treated like a life editorial.
                 </Text>
               </View>
 
@@ -152,7 +152,7 @@ export default function HomeScreen() {
                         { fontSize: 12, textTransform: "uppercase", color: colors.gold }
                       ]}
                     >
-                      Visa update
+                      Admissions update
                     </Text>
                     <CircleAlert color={colors.navy} size={18} />
                   </View>
@@ -160,7 +160,7 @@ export default function HomeScreen() {
                     Clearer story, stronger file.
                   </Text>
                   <Text style={[typography.body, { marginTop: 12, fontSize: 14, lineHeight: 28, color: colors.textPrimary }]}>
-                    {visaUpdate.body}
+                    {admissionsUpdate.body}
                   </Text>
                   <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center", gap: 8 }}>
                     <Text style={[typography.bodySemiBold, { fontSize: 14, color: "#30498f" }]}>

@@ -39,13 +39,13 @@ const fieldOptions: {
   {
     id: "it",
     title: "Information Technology",
-    blurb: "Software, data, cyber, AI — the most PR-active pathway in 2026.",
+    blurb: "Software, data, cyber, AI — the most in-demand academic track in 2026.",
     image: auImages.unsw
   },
   {
     id: "engineering",
     title: "Engineering",
-    blurb: "Civil, mechanical, electrical — long-standing skilled migration occupations.",
+    blurb: "Civil, mechanical, electrical — strong industry placement programs.",
     image: auImages.uqGreatCourt
   },
   {
@@ -57,13 +57,13 @@ const fieldOptions: {
   {
     id: "health",
     title: "Health & Nursing",
-    blurb: "Nursing, allied health — fastest current PR pathway via MLTSSL.",
+    blurb: "Nursing, allied health — strong clinical placement + career demand.",
     image: auImages.bondi
   },
   {
     id: "education",
     title: "Education & Teaching",
-    blurb: "Early childhood, secondary teaching — regional incentives apply.",
+    blurb: "Early childhood, secondary teaching — regional campuses available.",
     image: auImages.anuLibrary
   }
 ];
@@ -107,7 +107,7 @@ function ieltsCaption(score: number): { tone: "low" | "ok" | "great"; line: stri
   if (score < 7.5) {
     return { tone: "great", line: "Nursing, teaching, and Group of Eight postgrad all open. Strong file." };
   }
-  return { tone: "great", line: "Top-tier ready. Every Australian university and PR-eligible pathway is open." };
+  return { tone: "great", line: "Top-tier ready. Every Australian university — metro and regional — is within reach." };
 }
 
 export default function ProfileScreen() {

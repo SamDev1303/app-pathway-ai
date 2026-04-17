@@ -1,6 +1,6 @@
 # Atlas AI — Client Intake
 
-**Prepared for:** UniMate Pty Ltd — Bilal & Rocco
+**Prepared for:** UniMate Pty Ltd — Karna Banti
 **Prepared by:** Koda Labs — sam@claudeking.org
 **Date:** 2026-04-18
 **Related docs:** `ATLAS-AI-SOW.md` (v1.1), `PRD-CLIENT.md`
@@ -87,7 +87,7 @@ These are **joint decisions** — Sam and UniMate must both agree. Defaults are 
 
 | # | Item | Owner | Deadline | Blocks | Status |
 |---|---|---|---|---|---|
-| E1 | UniMate ops inbox for lead notifications (can be `leads@unimate.com.au` or a Bilal/Rocco personal address) | UniMate | Day 3 | P3 lead-capture email flow | ☐ |
+| E1 | UniMate ops inbox for lead notifications (can be `leads@unimate.com.au` or a Karna's personal address (bhantikaran@gmail.com)) | UniMate | Day 3 | P3 lead-capture email flow | ☐ |
 | E2 | Resend sender domain — default `noreply@resend.dev` or UniMate provides `noreply@unimate.com.au` + DNS TXT for DKIM | UniMate (optional) | Day 5 | P3 email deliverability | ☐ |
 | E3 | Named compliance sign-off contact (MARA-registered agent on UniMate side) | UniMate | Day 5 | P4.5 compliance gate | ☐ |
 | E4 | Named technical contact for SSH/DNS if UniMate owns the domain | UniMate | Day 3 (only if D1 = custom) | P9 deploy | ☐ |

@@ -1,6 +1,6 @@
 # Atlas AI v1 — Product Requirements (Client Edition)
 
-**For:** UniMate Pty Ltd — Bilal & Rocco
+**For:** UniMate Pty Ltd — Karna Banti (bhantikaran@gmail.com)
 **From:** Koda Labs — sam@claudeking.org
 **Version:** 1.1 (supersedes original 22-page PRD dated 2026-04-11)
 **Date:** 2026-04-18
@@ -131,7 +131,7 @@ Full detail in SOW §3.
 Not blockers, but Sam will ask these before build start:
 
 1. **Do you already have a privacy policy URL?** If no, Koda drafts a template based on APP 5 requirements.
-2. **Do you want lead emails to CC both Bilal and Rocco, or one ops inbox?** Affects the Resend config.
+2. **Do you want lead emails to go to bhantikaran@gmail.com only, or to a shared UniMate ops inbox?** Affects the Resend config.
 3. **Is `noreply@resend.dev` OK as the sender, or do you want `noreply@unimate.com.au`?** The latter needs DNS changes on your side.
 4. **Do you have a preferred mobile app icon?** If no, Koda uses the web logo at 1024×1024.
 

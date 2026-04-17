@@ -1,9 +1,9 @@
 # Statement of Work — Atlas AI v1
 
-**Between:** Koda Labs (supplier) and **UniMate Pty Ltd** (client)
-**Date prepared:** 2026-04-16 · **Revised:** 2026-04-18 (v1.2 after peer review)
-**SOW version:** 1.2 draft
-**Prepared by:** Sam (Koda Labs) — sam@claudeking.org
+**Between:** Sam Krishna, sole trader, ABN **[TO BE INSERTED — Sam's Clean Up Bros ABN; optionally adding "Koda Labs" as a registered trading name via ASIC before signing]** (supplier) and **UniMate Pty Ltd** (client)
+**Date prepared:** 2026-04-16 · **Revised:** 2026-04-18 (v1.3 after tax-status confirm)
+**SOW version:** 1.3 draft
+**Prepared by:** Sam Krishna — sam@claudeking.org
 
 ### Changelog
 
@@ -108,7 +108,7 @@ Fifty-fifty, two-gate.
 | **Deposit — 50%** | $1,500 AUD | $1,700 AUD | **Must clear before Phase 4 build starts.** Koda does not touch client-funded code until the deposit clears. |
 | **Final — 50%** | $1,500 AUD | $1,500 AUD | **Due day-7 of the UAT window OR on written acceptance, whichever first.** |
 
-Invoices from **Koda Labs** (sam@claudeking.org). Payment terms NET 7 from invoice date on each milestone.
+Invoices issued by the Supplier (sam@claudeking.org) under Supplier's ABN. Payment terms NET 7 from invoice date on each milestone.
 
 **If n8n activation is elected:** the $200 line is rolled into the deposit (so deposit = $1,700). n8n install happens during UAT (day 8–10). Final payment stays $1,500.
 
@@ -116,7 +116,7 @@ Invoices from **Koda Labs** (sam@claudeking.org). Payment terms NET 7 from invoi
 
 **Late payment:** Payment terms are NET 7. No interest applied on first overdue cycle; persistent non-payment >30 days past due pauses the 30-day post-launch support window until the invoice clears.
 
-**IP transfer:** All code, Supabase project ownership, Vercel project ownership, and n8n workflow ownership transfer to UniMate on clearance of final payment. Before that, IP remains with Koda Labs — UniMate has a build-phase licence to operate the staging/production URL but no transferability rights.
+**IP transfer:** All code, Supabase project ownership, Vercel project ownership, and n8n workflow ownership transfer to UniMate on clearance of final payment. Before that, IP remains with the Supplier — UniMate has a build-phase licence to operate the staging/production URL but no transferability rights.
 
 **Deposit non-refundable after work commences:** Once Phase 4 build starts (i.e., the deposit clears and Koda writes the first P4 commit), the deposit is non-refundable. Standard industry practice for fixed-price delivery. If UniMate cancels between SOW signing and deposit clearance, no money has changed hands and there's nothing to refund.
 
@@ -124,7 +124,9 @@ Invoices from **Koda Labs** (sam@claudeking.org). Payment terms NET 7 from invoi
 
 ## 5a. GST treatment
 
-Fees are **exclusive of GST** unless expressly stated otherwise. If GST applies, UniMate must pay GST in addition to the Fees on receipt of a valid tax invoice. Koda Labs will issue tax invoices compliant with the A New Tax System (Goods and Services Tax) Act 1999 (Cth) where GST applies.
+The Supplier is **not currently registered for GST** under the A New Tax System (Goods and Services Tax) Act 1999 (Cth). Accordingly, **no GST is chargeable** on the Fees in this SOW, and invoices issued under this SOW will not include a GST component. The Fees above are the final amount payable.
+
+If the Supplier's GST registration status changes during the life of this SOW (for example, by crossing the $75,000 annual-turnover threshold and registering), GST will apply prospectively to Fees not yet invoiced; GST will not be applied retrospectively to Fees already invoiced or paid under this SOW. Supplier will provide written notice to UniMate at least 7 days before issuing any GST-inclusive invoice under this SOW.
 
 ---
 
@@ -140,7 +142,7 @@ UniMate sign-off requires all seven rows to PASS in a live walk-through. Each ro
 | 4 | SOP generator outputs valid PDF | Draft → edit → regenerate → download. PDF opens in Chrome + Safari + Acrobat. |
 | 5 | Mobile app opens with Atlas AI branding | Expo build installs on test Android/iOS, launches, shows Atlas AI name + logo |
 | 6 | Production URL live | `atlas-ai.vercel.app` (or custom domain) returns 200 on `/`, `/api/match`, `/api/chat` |
-| 7 | Compliance attestation signed | Attestation document signed by Koda Labs' two independent reviewers delivered at handover |
+| 7 | Compliance attestation signed | Attestation document signed by the Supplier's two independent reviewers delivered at handover |
 
 ---
 
@@ -154,7 +156,7 @@ Built to Australian standards:
 - **APP 8 cross-border disclosure** — Supabase is hosted in Singapore (`ap-southeast-1`). The lead-capture UI explicitly discloses Singapore hosting in the Phase 3 collection notice. UniMate's written acknowledgement of this cross-border disclosure is a precondition of the Phase 4.5 compliance gate (see `CLIENT-INTAKE.md` §A8 + §D3).
 - **No unauthorised scraping** — 43 AU universities seeded manually from CRICOS open data + public university pages
 
-Compliance attestation doc provided at handover, signed by Koda Labs' two independent reviewers (code review + AU compliance review).
+Compliance attestation doc provided at handover, signed by the Supplier's two independent reviewers (code review + AU compliance review).
 
 ---
 
@@ -197,7 +199,7 @@ These are on UniMate's side of the line. Missing any of them delays the timeline
 
 ## 11. Governance (how the work is audited)
 
-Koda Labs' internal governance is transparent and auditable:
+the Supplier's internal governance is transparent and auditable:
 - Every code change is committed with a phase reference and files touched
 - Every phase requires dual-agent sign-off (code review + compliance review) before closing
 - All plan-check + phase-verify artifacts are archived and available on request
@@ -222,20 +224,20 @@ To the maximum extent permitted by law, each party's aggregate liability arising
 Any change to scope, integrations, acceptance criteria, timeline, or deliverables must be **agreed in writing** and may require a Change Order or a new Purchase Order before work begins. Process:
 
 1. Either party raises a written change request (email to sam@claudeking.org is sufficient).
-2. Koda Labs returns an impact assessment within 2 business days — price delta, timeline delta, affected phases, compliance review required (Y/N).
+2. The Supplier returns an impact assessment within 2 business days — price delta, timeline delta, affected phases, compliance review required (Y/N).
 3. UniMate accepts in writing OR rejects in writing. No change is binding until written acceptance.
 4. Accepted changes are appended to this SOW as numbered Change Orders and do not amend §4 (Price) or §3 (Timeline) retroactively — each Change Order has its own line item.
 
-Requests that fall within the v2 backlog (§9) may be quoted as separate SOWs rather than Change Orders, at Koda Labs' election.
+Requests that fall within the v2 backlog (§9) may be quoted as separate SOWs rather than Change Orders, at the Supplier's election.
 
 ---
 
 ## 15. Warranty
 
-Koda Labs warrants that the Deliverables will materially conform to the Acceptance Criteria (§6) for **30 days after final acceptance**. The Client's exclusive remedy for breach of this warranty is repair, replacement, or re-performance of the affected Deliverable at Koda Labs' election. This warranty does not apply to:
+The Supplier warrants that the Deliverables will materially conform to the Acceptance Criteria (§6) for **30 days after final acceptance**. The Client's exclusive remedy for breach of this warranty is repair, replacement, or re-performance of the affected Deliverable at the Supplier's election. This warranty does not apply to:
 
 - Defects caused by UniMate's modifications to the code, infrastructure, or configuration
-- Defects caused by third-party services outside Koda Labs' control (Supabase, Vercel, OpenAI, Resend, Hostinger, Google Workspace)
+- Defects caused by third-party services outside the Supplier's control (Supabase, Vercel, OpenAI, Resend, Hostinger, Google Workspace)
 - Changes to Australian law, MARA Code of Conduct, or Privacy Act that take effect after handover
 - Usage outside the documented acceptance criteria
 

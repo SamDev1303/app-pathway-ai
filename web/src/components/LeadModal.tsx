@@ -1,32 +1,186 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import type { LeadInput } from "@/lib/lead-schema";
+import {
+  CONSENT_WORDING_VERSION,
+  LEAD_DRAFT_SCHEMA_VERSION,
+  LEAD_DRAFT_STORAGE_KEY,
+  LEAD_DRAFT_TTL_DAYS,
+} from "@/lib/lead-schema";
+import { Step1Personal } from "./lead/Step1Personal";
+import { Step2Academic } from "./lead/Step2Academic";
+import { Step3Preferences } from "./lead/Step3Preferences";
+import { Step4Budget } from "./lead/Step4Budget";
+import { Step5Contact } from "./lead/Step5Contact";
 
 type Status = "idle" | "submitting" | "success" | "error";
+type StepNumber = 1 | 2 | 3 | 4 | 5;
+
+interface DraftEnvelope {
+  values: Partial<LeadInput>;
+  currentStep: StepNumber;
+  saved_at: string;
+  schema_version: typeof LEAD_DRAFT_SCHEMA_VERSION;
+}
+
+const STEP_LABELS: Record<StepNumber, string> = {
+  1: "Personal",
+  2: "Academic",
+  3: "Preferences",
+  4: "Budget",
+  5: "Contact",
+};
+
+function isStepValid(step: StepNumber, values: Partial<LeadInput>): boolean {
+  if (step === 1) {
+    return (
+      (values.full_name?.length ?? 0) >= 2 &&
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email ?? "") &&
+      (values.phone?.length ?? 0) >= 6 &&
+      (values.country?.length ?? 0) >= 2
+    );
+  }
+  if (step === 5) {
+    return values.consent_service === true;
+  }
+  return true;
+}
+
+/**
+ * TODO(human) — implement draft persistence + hydration.
+ *
+ * Goal: manage the localStorage draft lifecycle for the 5-step wizard.
+ * This function is called by the LeadModal effect chain. Return the
+ * hydrated { values, currentStep } if a valid draft exists, or `null`
+ * if no usable draft is found.
+ *
+ * Rules (from 3-CONTEXT.md D7):
+ * - Key: LEAD_DRAFT_STORAGE_KEY (already imported)
+ * - Shape must parse to DraftEnvelope
+ * - Ignore (and clear) drafts where `schema_version !== LEAD_DRAFT_SCHEMA_VERSION`
+ *   — silently, no user-facing message
+ * - Ignore (and clear) drafts where `saved_at` is older than
+ *   LEAD_DRAFT_TTL_DAYS (default 30) — silently
+ * - If draft is valid, return { values, currentStep } so the caller can
+ *   rehydrate the form + show the "Picking up where you left off" banner
+ * - On any JSON parse error: clear the key and return null (never throw
+ *   into the UI — stale drafts shouldn't break the form on mount)
+ * - SSR safety: this runs client-side only (called from useEffect) so
+ *   `window.localStorage` is safe, but add a `typeof window === "undefined"`
+ *   guard anyway as a belt-and-braces check
+ *
+ * Why you: this encodes the consent + privacy tradeoff you've been wrestling
+ * with — 30 days is long enough to feel recovered-from-elsewhere and short
+ * enough that stale PII doesn't linger on borrowed devices. The silent
+ * cross-version invalidation means future schema bumps don't need a user-
+ * facing migration UI. Those are YOUR calls and worth owning in code.
+ *
+ * Signature: (ttlDays: number) => { values: Partial<LeadInput>; currentStep: StepNumber } | null
+ */
+function loadDraft(ttlDays: number): {
+  values: Partial<LeadInput>;
+  currentStep: StepNumber;
+} | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = window.localStorage.getItem(LEAD_DRAFT_STORAGE_KEY);
+  if (!raw) return null;
+
+  let parsed: Partial<DraftEnvelope>;
+  try {
+    parsed = JSON.parse(raw) as Partial<DraftEnvelope>;
+  } catch {
+    clearDraft();
+    return null;
+  }
+
+  if (parsed.schema_version !== LEAD_DRAFT_SCHEMA_VERSION) {
+    clearDraft();
+    return null;
+  }
+
+  const savedAt = Date.parse(parsed.saved_at ?? "");
+  if (!Number.isFinite(savedAt)) {
+    clearDraft();
+    return null;
+  }
+  const ageMs = Date.now() - savedAt;
+  if (ageMs > ttlDays * 24 * 60 * 60 * 1000) {
+    clearDraft();
+    return null;
+  }
+
+  if (!parsed.values || typeof parsed.values !== "object") {
+    clearDraft();
+    return null;
+  }
+
+  const step = parsed.currentStep;
+  const currentStep: StepNumber =
+    step === 1 || step === 2 || step === 3 || step === 4 || step === 5 ? step : 1;
+
+  return { values: parsed.values, currentStep };
+}
+
+function saveDraft(values: Partial<LeadInput>, currentStep: StepNumber): void {
+  if (typeof window === "undefined") return;
+  const envelope: DraftEnvelope = {
+    values,
+    currentStep,
+    saved_at: new Date().toISOString(),
+    schema_version: LEAD_DRAFT_SCHEMA_VERSION,
+  };
+  try {
+    window.localStorage.setItem(LEAD_DRAFT_STORAGE_KEY, JSON.stringify(envelope));
+  } catch {
+    /* ignore quota / privacy-mode errors — draft persistence is best-effort */
+  }
+}
+
+function clearDraft(): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(LEAD_DRAFT_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
 
 export function LeadModal({
   open,
   onClose,
-  source = "footer"
+  source = "footer",
 }: {
   open: boolean;
   onClose: () => void;
   source?: string;
 }) {
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
-  const [consentService, setConsentService] = useState(false);
-  const [consentMarketing, setConsentMarketing] = useState(false);
+  const [step, setStep] = useState<StepNumber>(1);
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const [values, setValues] = useState<Partial<LeadInput>>({
+    consent_marketing: false,
+  });
   const [status, setStatus] = useState<Status>("idle");
   const [errorMsg, setErrorMsg] = useState("");
+  const [draftBannerShown, setDraftBannerShown] = useState(false);
+  const [draftBannerDismissed, setDraftBannerDismissed] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const hydrated = loadDraft(LEAD_DRAFT_TTL_DAYS);
+    if (hydrated) {
+      setValues((prev) => ({ ...prev, ...hydrated.values }));
+      setStep(hydrated.currentStep);
+      setDraftBannerShown(true);
+    }
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") handleClose();
     };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
@@ -34,27 +188,53 @@ export function LeadModal({
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [open, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || status === "success") return;
+    const t = setTimeout(() => saveDraft(values, step), 300);
+    return () => clearTimeout(t);
+  }, [values, step, open, status]);
 
   const reset = () => {
-    setFullName("");
-    setEmail("");
-    setPhone("");
-    setMessage("");
-    setConsentService(false);
-    setConsentMarketing(false);
+    setValues({ consent_marketing: false });
+    setStep(1);
     setStatus("idle");
     setErrorMsg("");
+    setDraftBannerShown(false);
+    setDraftBannerDismissed(false);
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     onClose();
-    setTimeout(reset, 300);
+    setTimeout(() => {
+      if (status === "success") reset();
+    }, 300);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose, status]);
+
+  const patchValues = useCallback((patch: Partial<LeadInput>) => {
+    setValues((prev) => ({ ...prev, ...patch }));
+  }, []);
+
+  const goNext = () => {
+    if (step < 5) {
+      setDirection(1);
+      setStep((step + 1) as StepNumber);
+    }
+  };
+
+  const goBack = () => {
+    if (step > 1) {
+      setDirection(-1);
+      setStep((step - 1) as StepNumber);
+    }
   };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!consentService) {
+    if (!isStepValid(5, values)) {
       setErrorMsg("Please accept the service consent to continue.");
       return;
     }
@@ -65,15 +245,14 @@ export function LeadModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          full_name: fullName,
-          email,
-          phone,
-          message,
+          ...values,
           consent_service: true,
-          consent_marketing: consentMarketing,
-          consent_wording_version: "2026-04-17.v1",
-          source
-        })
+          consent_marketing: values.consent_marketing ?? false,
+          consent_wording_version: CONSENT_WORDING_VERSION,
+          source,
+          user_agent: typeof navigator !== "undefined" ? navigator.userAgent : undefined,
+          locale: typeof navigator !== "undefined" ? navigator.language : undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
@@ -82,11 +261,14 @@ export function LeadModal({
         return;
       }
       setStatus("success");
+      clearDraft();
     } catch {
       setStatus("error");
       setErrorMsg("Network issue. Please try again or call our Liverpool office.");
     }
   };
+
+  const stepValid = useMemo(() => isStepValid(step, values), [step, values]);
 
   return (
     <AnimatePresence>
@@ -105,7 +287,7 @@ export function LeadModal({
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 20, opacity: 0, scale: 0.97 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-lg bg-[var(--color-cream)] paper-grain max-h-[92vh] overflow-y-auto"
+            className="relative w-full max-w-2xl bg-[var(--color-cream)] paper-grain max-h-[92vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="rail-gold w-24 mt-8 ml-8 md:ml-10" />
@@ -116,7 +298,7 @@ export function LeadModal({
                     Free consultation
                   </p>
                   <h2 className="mt-2 font-display text-3xl md:text-4xl text-[var(--color-navy-950)] leading-[1.1]">
-                    Bring your match to Liverpool.
+                    {status === "success" ? "Got it." : "Bring your match to Liverpool."}
                   </h2>
                 </div>
                 <button
@@ -131,9 +313,9 @@ export function LeadModal({
 
               {status === "success" ? (
                 <div className="mt-6 rounded-lg border border-[var(--color-gold-500)]/40 bg-[var(--color-gold-500)]/10 p-5">
-                  <p className="font-display text-2xl text-[var(--color-navy-950)]">Got it.</p>
                   <p className="mt-2 text-sm text-[var(--color-navy-950)]/80 leading-relaxed">
-                    Your enquiry is on its way to our Liverpool office. A MARA-registered counsellor will call you within one business day.
+                    Your enquiry is on its way to our Liverpool office. A MARA-registered counsellor
+                    will call you within one business day.
                   </p>
                   <button
                     type="button"
@@ -144,110 +326,94 @@ export function LeadModal({
                   </button>
                 </div>
               ) : (
-                <form onSubmit={submit} className="mt-6 space-y-4">
-                  <Field label="Full name" required>
-                    <input
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      required
-                      minLength={2}
-                      maxLength={120}
-                      className="w-full bg-white border border-[var(--color-navy-950)]/15 px-4 py-3 text-[var(--color-navy-950)] focus:border-[var(--color-gold-500)] outline-none transition-colors"
-                    />
-                  </Field>
+                <>
+                  <ProgressIndicator step={step} />
 
-                  <Field label="Email" required>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="w-full bg-white border border-[var(--color-navy-950)]/15 px-4 py-3 text-[var(--color-navy-950)] focus:border-[var(--color-gold-500)] outline-none transition-colors"
-                    />
-                  </Field>
-
-                  <Field label="Phone (with country code)" required>
-                    <input
-                      type="tel"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      required
-                      placeholder="+61 4XX XXX XXX"
-                      className="w-full bg-white border border-[var(--color-navy-950)]/15 px-4 py-3 text-[var(--color-navy-950)] focus:border-[var(--color-gold-500)] outline-none transition-colors"
-                    />
-                  </Field>
-
-                  <Field label="What's your situation?">
-                    <textarea
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      maxLength={2000}
-                      rows={4}
-                      placeholder="Country, study level, IELTS, target intake — whatever helps us prepare."
-                      className="w-full bg-white border border-[var(--color-navy-950)]/15 px-4 py-3 text-[var(--color-navy-950)] focus:border-[var(--color-gold-500)] outline-none transition-colors resize-none"
-                    />
-                  </Field>
-
-                  <div className="text-[11px] text-[var(--color-navy-950)]/70 pt-2 leading-relaxed space-y-2">
-                    <p>
-                      <span className="font-semibold">Collection notice (APP 5).</span> UniMate Australia (MARN 1798425, QEAC P538, Liverpool NSW) collects the information on this form so our MARA-registered counsellors can contact you about your enquiry.
-                    </p>
-                    <p>
-                      <span className="font-semibold">Why we need it.</span> Your name, email, and phone are required to respond to you. Declining means we cannot follow up on your enquiry.
-                    </p>
-                    <p>
-                      <span className="font-semibold">Who we share it with.</span> Your details stay with UniMate&apos;s counsellors and the service providers who help us operate this platform (email + database hosting). We do not sell or disclose your information to third-party marketers. Disclosure may occur where required by Australian law.
-                    </p>
-                    <p>
-                      <span className="font-semibold">Your rights.</span> You can request access or correction, or ask us to delete your record, by emailing <a className="underline" href="mailto:privacy@unimate.com.au">privacy@unimate.com.au</a>. Our full APP Privacy Policy is available on request.
-                    </p>
-                    <p>
-                      We handle your data under the <em>Privacy Act 1988 (Cth)</em>.
-                    </p>
-                  </div>
-
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={consentService}
-                      onChange={(e) => setConsentService(e.target.checked)}
-                      className="mt-1 accent-[var(--color-gold-500)] w-4 h-4"
-                      required
-                    />
-                    <span className="text-xs text-[var(--color-navy-950)]/80 leading-relaxed">
-                      <span className="font-semibold">Required:</span> I consent to UniMate Australia contacting me about my course enquiry so a MARA-registered counsellor can follow up.
-                    </span>
-                  </label>
-
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={consentMarketing}
-                      onChange={(e) => setConsentMarketing(e.target.checked)}
-                      className="mt-1 accent-[var(--color-gold-500)] w-4 h-4"
-                    />
-                    <span className="text-xs text-[var(--color-navy-950)]/70 leading-relaxed">
-                      <span className="font-semibold">Optional:</span> Send me occasional updates about scholarships, intake deadlines, and open days.
-                    </span>
-                  </label>
-
-                  {errorMsg ? (
-                    <p className="text-sm text-red-700">{errorMsg}</p>
+                  {draftBannerShown && !draftBannerDismissed ? (
+                    <div className="mt-4 flex items-start justify-between gap-3 rounded-md border border-[var(--color-navy-950)]/15 bg-[var(--color-navy-950)]/[0.03] px-3 py-2.5">
+                      <p className="text-xs text-[var(--color-navy-950)]/80 leading-snug">
+                        Picking up where you left off — saved on this device only.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setDraftBannerDismissed(true)}
+                        className="text-[var(--color-navy-950)]/50 hover:text-[var(--color-navy-950)] text-sm"
+                      >
+                        ✕
+                      </button>
+                    </div>
                   ) : null}
 
-                  <button
-                    type="submit"
-                    disabled={status === "submitting"}
-                    className="w-full bg-[var(--color-gold-500)] hover:bg-[var(--color-gold-400)] disabled:opacity-60 text-[var(--color-navy-950)] px-6 py-4 font-display text-xl transition-colors duration-300 mt-2"
-                  >
-                    {status === "submitting" ? "Sending…" : "Request my free consultation →"}
-                  </button>
+                  <form onSubmit={submit} className="mt-5">
+                    <AnimatePresence mode="wait" initial={false} custom={direction}>
+                      <motion.div
+                        key={step}
+                        custom={direction}
+                        initial={{ x: direction > 0 ? 30 : -30, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        exit={{ x: direction > 0 ? -30 : 30, opacity: 0 }}
+                        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                      >
+                        {step === 1 ? <Step1Personal values={values} onChange={patchValues} /> : null}
+                        {step === 2 ? <Step2Academic values={values} onChange={patchValues} /> : null}
+                        {step === 3 ? <Step3Preferences values={values} onChange={patchValues} /> : null}
+                        {step === 4 ? <Step4Budget values={values} onChange={patchValues} /> : null}
+                        {step === 5 ? <Step5Contact values={values} onChange={patchValues} /> : null}
+                      </motion.div>
+                    </AnimatePresence>
 
-                  <p className="text-[10px] text-[var(--color-navy-950)]/55 text-center pt-1">
-                    MARN 1798425 · QEAC P538 · ABN 12 345 678 901
-                  </p>
-                </form>
+                    {errorMsg ? (
+                      <p className="mt-4 text-sm text-red-700">{errorMsg}</p>
+                    ) : null}
+
+                    <div className="mt-6 flex items-center justify-between gap-3">
+                      {step > 1 ? (
+                        <button
+                          type="button"
+                          onClick={goBack}
+                          className="text-sm text-[var(--color-navy-950)]/70 hover:text-[var(--color-navy-950)] transition-colors"
+                        >
+                          ← Back
+                        </button>
+                      ) : <span />}
+
+                      <div className="flex items-center gap-4">
+                        {step > 1 && step < 5 ? (
+                          <button
+                            type="button"
+                            onClick={goNext}
+                            className="text-sm text-[var(--color-navy-950)]/60 hover:text-[var(--color-navy-950)] underline-offset-4 hover:underline transition-colors"
+                          >
+                            Skip this step
+                          </button>
+                        ) : null}
+
+                        {step < 5 ? (
+                          <button
+                            type="button"
+                            onClick={goNext}
+                            disabled={!stepValid}
+                            className="bg-[var(--color-gold-500)] hover:bg-[var(--color-gold-400)] disabled:opacity-50 disabled:cursor-not-allowed text-[var(--color-navy-950)] px-6 py-3 font-display text-base transition-colors"
+                          >
+                            Next →
+                          </button>
+                        ) : (
+                          <button
+                            type="submit"
+                            disabled={status === "submitting" || !stepValid}
+                            className="bg-[var(--color-gold-500)] hover:bg-[var(--color-gold-400)] disabled:opacity-60 disabled:cursor-not-allowed text-[var(--color-navy-950)] px-6 py-4 font-display text-lg transition-colors"
+                          >
+                            {status === "submitting" ? "Sending…" : "Submit enquiry"}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-[var(--color-navy-950)]/55 text-center pt-4">
+                      MARN 1798425 · QEAC P538 · ABN 12 345 678 901
+                    </p>
+                  </form>
+                </>
               )}
             </div>
           </motion.div>
@@ -257,22 +423,45 @@ export function LeadModal({
   );
 }
 
-function Field({
-  label,
-  required,
-  children
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
+function ProgressIndicator({ step }: { step: StepNumber }) {
   return (
-    <label className="block">
-      <span className="block text-xs uppercase tracking-[0.15em] text-[var(--color-navy-950)]/70 mb-2 font-medium">
-        {label}
-        {required ? <span className="text-[var(--color-gold-500)]"> *</span> : null}
-      </span>
-      {children}
-    </label>
+    <div className="mt-5">
+      <div className="flex items-center gap-1.5 md:hidden">
+        {([1, 2, 3, 4, 5] as const).map((n) => (
+          <span
+            key={n}
+            className={`inline-block h-1.5 flex-1 rounded-full transition-colors ${
+              n <= step
+                ? "bg-[var(--color-gold-500)]"
+                : "bg-[var(--color-navy-950)]/15"
+            }`}
+          />
+        ))}
+        <span className="ml-2 text-[11px] uppercase tracking-[0.15em] text-[var(--color-navy-950)]/60 whitespace-nowrap">
+          {step} / 5
+        </span>
+      </div>
+
+      <div className="hidden md:flex items-center gap-3 text-[11px] uppercase tracking-[0.15em]">
+        {([1, 2, 3, 4, 5] as const).map((n, idx, arr) => (
+          <span key={n} className="flex items-center gap-3">
+            <span
+              className={
+                n === step
+                  ? "text-[var(--color-gold-500)] font-semibold"
+                  : n < step
+                    ? "text-[var(--color-navy-950)]/70"
+                    : "text-[var(--color-navy-950)]/35"
+              }
+            >
+              {STEP_LABELS[n]}
+            </span>
+            {idx < arr.length - 1 ? (
+              <span className="text-[var(--color-navy-950)]/20">·</span>
+            ) : null}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }

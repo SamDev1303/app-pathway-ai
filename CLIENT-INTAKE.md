@@ -3,7 +3,7 @@
 **Prepared for:** UniMate Pty Ltd — Karna Banti
 **Prepared by:** Koda Labs — sam@claudeking.org
 **Date:** 2026-04-18
-**Related docs:** `ATLAS-AI-SOW.md` (v1.1), `PRD-CLIENT.md`
+**Related docs:** `ATLAS-AI-SOW.md` (v1.3), `PRD-CLIENT.md` (v1.2)
 
 ---
 
@@ -96,11 +96,11 @@ These are **joint decisions** — Sam and UniMate must both agree. Defaults are 
 
 ## F. Payment & acceptance
 
-Fixed-price contract. See `ATLAS-AI-SOW.md` v1.1 §5 for full terms.
+Fixed-price contract. See `ATLAS-AI-SOW.md` v1.3 §5 for full terms.
 
 | # | Item | Owner | Deadline | Blocks | Status |
 |---|---|---|---|---|---|
-| F1 | PO confirmation (signed SOW v1.1 via Square contract) | UniMate | Day 0 | Build start (P4 onwards) | ☐ |
+| F1 | PO confirmation (signed SOW v1.3 via Square contract) | UniMate | Day 0 | Build start (P4 onwards) | ☐ |
 | F2 | Deposit 50% ($1,600 AUD) clears in Koda Labs bank account | UniMate | Day 0 | P4 build start | ☐ |
 | F3 | UAT acceptance — 7-day window after build complete | UniMate | Day 14 (7 + 7) | Final payment | ☐ |
 | F4 | Final payment 50% ($1,600 AUD) | UniMate | Day 14 (or written acceptance, first) | Ownership transfer | ☐ |
@@ -127,7 +127,7 @@ Koda proposes the below; UniMate can amend any row before signing the SOW. Each 
 
 ## H. Out of scope (explicit — for UniMate reference)
 
-Per SOW v1.1 §2. These are priced separately in v2 and **will not** appear in v1 even if requested during UAT. Re-opening any of these requires a new PO.
+Per SOW v1.3 §2. These are priced separately in v2 and **will not** appear in v1 even if requested during UAT. Re-opening any of these requires a new PO.
 
 1. Admin Dashboard (roles-based CRM) — v2 quote $2–3k
 2. Provider Dashboard (university partner view) — v2 quote $3–4k

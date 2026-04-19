@@ -74,3 +74,65 @@ Sam's instruction: "yes" — in response to Koda's Telegram approval-gate summar
 - Single-seat rule applies (supersedes dual-seat for P3 onwards per Sam 2026-04-17)
 - No self-signoff by Koda — this approval is Sam's timestamped "yes" to Koda's summary
 - If Gideon phase-verify (Wave G) returns FAIL → iterate code before commit to main; escalate to Sam after 3 rounds
+
+---
+
+## proceed 2026-04-20 01:45 AEST — Sam — approve P4.5 compliance-gate plan-then-ship + mid-session Wave 0 emergency scrub
+
+**Verbal approval chain captured in CLI session 50:**
+
+1. **01:45 AEST — plan-then-ship authorization:** Sam's instruction "continue plan both and ship before going to the next phase" — interpreted as timestamped approval to collapse `/gsd-discuss-phase 4.5 → /gsd-plan-phase 4.5 → /gsd-execute-phase 4.5` into a single-session flow.
+2. **01:50 AEST — decision gate:** Sam chose defer-region (D2), TBC MARA # (D1 original), staging-only chat prompt (D3) via AskUserQuestion.
+3. **02:02 AEST — emergency discovery:** Koda found `MARN 1798425` + `QEAC P538` hardcoded in 5 production render paths. Sam chose "verify via MARA register myself" option.
+4. **02:03 AEST — verified fake:** Playwright check confirmed MARN 1798425 + business name UniMate both return "no records to display" on portal.mara.gov.au. Evidence in `.planning/research/p4.5-mara-registry-verify/`.
+5. **02:05 AEST — Wave 0 authorization:** Sam's "Wave 0 scrub NOW + keep demo live (Recommended)" — approved scope expansion to scrub all 5 files + Footer + content.ts before continuing with original Waves 1-6.
+
+### Scope of this approval
+
+**✅ Plan-phase close (immediate commit):**
+- `planning/atlas-ai/4.5-CONTEXT.md` — 10 locked decisions (D1-D10), revised D1 post-MARN discovery
+- `planning/atlas-ai/4.5-PLAN.md` — 7 waves (0-6) + rollback + HITL gates
+- `.planning/research/p4.5-mara-registry-verify/findings.md` + 2 screenshots (evidence of fake MARN)
+
+**✅ P4.5 Wave 0 execution (emergency scrub, landed this session):**
+- Scrub `MARN 1798425` → `MARN [PENDING_FROM_UNIMATE]` (5 files)
+- Scrub `QEAC P538` → `QEAC [PENDING_FROM_UNIMATE]` (3 files)
+- Scrub `ABN 12 345 678 901` → `ABN [PENDING_FROM_UNIMATE]` (3 files)
+- Normalize `MARN {PENDING}` (content.ts:79) → `MARN [PENDING_FROM_UNIMATE]`
+- Square-bracket convention: JSX-safe (curly `{}` fails typecheck as undefined expression)
+
+**✅ P4.5 Waves 1-6 authorization (to execute this session):**
+- Wave 1 — `chat-system-prompt.ts` staging + `mara-disclaimer.ts` v2 (registration-authority URL)
+- Wave 2 — `006_rls_policies.sql` authored (not applied)
+- Wave 3 — 006 applied to live Supabase `szuqcptsmmgycvagteza` [HITL pause before `supabase db push`]
+- Wave 4 — Footer wired site-wide in `app/layout.tsx`
+- Wave 5 — `.github/workflows/mara-grep-gate.yml` + `docs/compliance-attestation-v1.md`
+- Wave 6 — Gideon phase-verify single-seat gpt-5.4 + PHASE.md/STATE.md sign-off + push to main
+
+### Scope boundaries
+
+- ⛔ Not touching `mobile/**` (P7)
+- ⛔ Not touching `/api/chat/route.ts` (P5)
+- ⛔ Not touching SOP / react-pdf (P6)
+- ⛔ Not migrating region to ap-southeast-2 (D2 deferred to P8)
+- ⛔ Not backfilling 43 unis or cricos_code (D5 defers to P8)
+
+### Open items carried to P8 final audit
+
+1. MARA registration number replacement (CI gate deadline 2026-04-27 23:59 AEST)
+2. Supabase region decision (ap-southeast-1 vs ap-southeast-2)
+3. QS WUR licensing agreement
+4. Service-role key rotation runbook
+
+### Review protocol (P4.5)
+
+- **Single-seat:** Gideon `codex exec -m gpt-5.4-mini --full-auto` for plan-check + phase-verify (per `feedback_agent-model-calibration.md`)
+- **Neo / Specter / Atlas:** not involved (per D10)
+- **Iteration cap:** 3 rounds; escalate to Sam after
+
+### Governance
+
+- CLAUDE.md §11 approval gate satisfied
+- No self-signoff by Koda — Sam's multi-step approvals across 4 AskUserQuestion gates this session
+- Wave 0 scope expansion ratified AT the decision point, not retroactively
+- Push-back discipline honoured: surface the risk, options, and recommendation BEFORE executing

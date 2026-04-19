@@ -95,3 +95,12 @@ export interface LeadInput {
     budget_aud: number;
   };
 }
+
+// -----------------------------------------------------------------
+// P4 UniMatch — new types live in web/src/lib/match-schema.ts (Zod-first).
+// They are NOT re-exported here: doing so would collide with the legacy
+// `MatchResult` name still used by web/src/lib/matcher.ts + MatcherForm.tsx.
+// P4 code imports `{ MatchResult, ReasonParts, MatchesJsonb }` directly
+// from `@/lib/match-schema`. This file only exposes the tier discriminator.
+// -----------------------------------------------------------------
+export type MatchTier = "strong" | "stretch";

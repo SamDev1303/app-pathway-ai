@@ -1,9 +1,9 @@
 # STATE.md — Atlas AI planning state
 
-**Last updated:** 2026-04-19 17:55 AEST (Koda session 50 — P4 discuss-phase complete)
-**Current phase:** P4 — UniMatch engine (context captured, ready for plan-phase)
+**Last updated:** 2026-04-19 19:23 AEST (Koda session 50 — P4 plans ready, Gideon R4 APPROVE)
+**Current phase:** P4 — UniMatch engine (plans ready, awaiting Sam's approval-gate "proceed" to execute)
 **Last completed phase:** P3 (done 2026-04-18 02:56 AEST — Gideon plan-check APPROVE r2 + Gideon phase-verify PASS r2; 6 atomic commits shipped)
-**Next phase:** P4 — UniMatch engine (`4-CONTEXT.md` captured 2026-04-19 via `/gsd-discuss-phase 4`; 19 decisions locked; ready for `/gsd-plan-phase 4`)
+**Next phase:** P4 — UniMatch engine (`4-PLAN.md` locked 2026-04-19 via `/gsd-plan-phase 4`; Gideon plan-check 4 rounds: R1/R2/R3 BLOCK with 9 absorbed issues, R4 APPROVE — "Proceed to Wave 1"; awaiting Sam's Telegram "proceed" before `/gsd-execute-phase 4`)
 **Next blocker:** none — P4 context clean. P4.5 compliance gate still carries 4 items from P1 + 1 improvement note from P2 (getClaims migration) + 1 new note from P3 (MARA-forbidden-string CI grep gate) + 1 new note from P4 discussion (QS WUR licensing lawyer-review — low risk, flag-only).
 
 **P4 discovery (2026-04-19):** Schema gaps surfaced during discuss-phase. Migration 003_match_prep.sql must ship as part of P4 (not P4.5): (a) `courses.industry_placement boolean` — was in TS type, missing in DB (seed script header lines 17-24 explicitly flag this as P4's job); (b) `leads.matches jsonb`, `leads.matches_computed_at timestamptz`, `leads.match_token uuid` for match result storage; (c) drop unused `leads.matched_university_ids`. `preferred_state` column NOT added — location tiebreaker dropped from P4 scope.
@@ -21,7 +21,7 @@
 | P1 | ✅ done | Gideon APPROVE-WITH-NOTES + Specter APPROVE-WITH-NOTES | Gideon PASS + Specter PASS (12/12) |
 | P2 | ✅ done (infrastructure only) | Gideon APPROVE-WITH-NOTES + Specter APPROVE-WITH-NOTES | Gideon PASS + Specter PASS (10/10) |
 | P3 | ✅ done | Gideon APPROVE round 2 (single-seat, 2026-04-17 23:40 AEST) | Gideon PASS round 2 (2026-04-18 02:56 AEST) |
-| P4 | context captured 2026-04-19 (19 decisions, `.planning/4-CONTEXT.md`) | — | — |
+| P4 | plans ready 2026-04-19 19:23 AEST (`.planning/4-PLAN.md` 2,198 lines, 6 waves, 16 tasks) | Gideon APPROVE r4 (single-seat gpt-5.4, 2026-04-19 19:22 AEST; 4 rounds: R1/R2/R3 BLOCK → absorbed 9 issues → R4 APPROVE) | — |
 | P4.5 | not_started | — | — |
 | P5 | not_started | — | — |
 | P6 | not_started | — | — |
@@ -63,6 +63,7 @@ Canonical roadmap: [`../PHASE.md`](../PHASE.md).
 
 ## Commits on main (newest → oldest)
 
+- `751ac33` docs(phase-4): research — weights + SQL + MARA banner + 11 landmines
 - `{pending}` chore(phase-2): close P2 — PHASE.md + STATE.md sign-offs recorded
 - `809d7dc` feat(phase-2): Supabase Auth magic link infrastructure
 - `911379b` chore(phase-1): close P1 — dual-seat PASS sign-offs recorded + P2 unblocked

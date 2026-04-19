@@ -22,7 +22,7 @@ function CollectionNotice() {
     <div className="text-[11px] text-[var(--color-navy-950)]/75 pt-2 leading-relaxed space-y-2">
       <p>
         <span className="font-semibold">Collection notice (APP 5).</span> UniMate Australia
-        (MARN 1798425, QEAC P538, Liverpool NSW) collects the information on this form so our
+        (MARN [PENDING_FROM_UNIMATE], QEAC [PENDING_FROM_UNIMATE], Liverpool NSW) collects the information on this form so our
         MARA-registered counsellors can contact you about your enquiry.
       </p>
       <p>

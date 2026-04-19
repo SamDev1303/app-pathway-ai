@@ -262,7 +262,7 @@ function ResultsView({ results, onBook }: { results: MatchResponse; onBook: () =
           are based on published 2025 IELTS, GPA, and tuition data and do not
           guarantee admission. Atlas AI is an information and matching service;
           it is not migration advice. UniMate Australia is a MARA-registered
-          migration consultancy (MARN 1798425). For binding eligibility or
+          migration consultancy (MARN [PENDING_FROM_UNIMATE]). For binding eligibility or
           migration advice, book a free consultation at our Liverpool office.
         </p>
       </div>

@@ -16,7 +16,7 @@ export function Step1Personal({ values, onChange }: StepProps) {
           Collection notice (APP 5)
         </p>
         <p className="mt-1.5 text-xs text-[var(--color-navy-950)]/80 leading-relaxed">
-          UniMate Australia (MARN 1798425, QEAC P538, Liverpool NSW) collects this information so our
+          UniMate Australia (MARN [PENDING_FROM_UNIMATE], QEAC [PENDING_FROM_UNIMATE], Liverpool NSW) collects this information so our
           MARA-registered counsellors can respond. <strong>Nothing is stored on our servers until you
           tick consent on the final step.</strong>
         </p>

@@ -96,7 +96,7 @@ export function Footer() {
             <p className="mt-3 text-sm text-[var(--color-cream)]/85 leading-relaxed">
               {brand.qeac_number}
               <br />
-              ABN 12 345 678 901
+              ABN [PENDING_FROM_UNIMATE]
             </p>
           </div>
           <div>

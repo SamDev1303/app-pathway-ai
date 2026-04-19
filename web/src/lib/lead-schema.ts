@@ -2,16 +2,19 @@ import { z } from "zod";
 import type { CourseField, StudyLevel } from "./types";
 
 /**
- * CANONICAL CONSENT WORDING VERSION — atlas-ai v1.
+ * CANONICAL CONSENT WORDING VERSION — atlas-ai.
  *
- * Bump this hash whenever the APP 5 + APP 8 notice text in Step5Contact.tsx
+ * Bump this hash whenever the APP 5 notice text in Step5Contact.tsx
  * changes. Both client (LeadModal submit) and server (/api/leads INSERT) MUST
  * import this constant — no string literal duplication.
  *
  * v2 (2026-04-17): adds APP 8 Singapore cross-border disclosure paragraph
  * per DEVIATIONS.md §DEV-001.
+ * v3 (2026-04-20): DEV-001 RESOLVED via region migration to ap-southeast-2.
+ * "Where we store it" paragraph rewritten as onshore-storage notice — no
+ * APP 8 cross-border disclosure applies to new Sydney project fprqcugrmjvgrtbtohbf.
  */
-export const CONSENT_WORDING_VERSION = "2026-04-17.v2" as const;
+export const CONSENT_WORDING_VERSION = "2026-04-20.v3" as const;
 
 const CourseFieldEnum = z.enum([
   "IT",

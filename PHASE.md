@@ -202,7 +202,7 @@
 - [ ] Per-turn chat-message footer disclaimer rendered in DOM (audit via screenshot diff)
 - [ ] Privacy consent wording (service + marketing split) live on lead form step 5
 - [ ] RLS policies verified: anon role has INSERT-only on `leads`; service role owns all reads
-- [ ] Data residency verified: Supabase project region is `ap-southeast-2` (not the us-east default)
+- [x] Data residency verified: Supabase project region is `ap-southeast-2` (Sydney) — DEV-001 RESOLVED 2026-04-20 via project migration (`fprqcugrmjvgrtbtohbf`)
 - [ ] **APP encryption verification** (Vector mini round-2 finding 2026-04-17): verify Supabase Postgres encryption at rest (AES-256 by default) + TLS 1.2+ in transit; document in compliance attestation
 - [ ] Commit `feat(phase-4.5): compliance gate — MARA + Privacy Act + RLS + APP encryption verification`
 

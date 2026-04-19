@@ -9,13 +9,16 @@ export interface StepProps {
 }
 
 /**
- * APP 5 + APP 8 Collection Notice for the UniMate atlas-ai lead form.
+ * APP 5 Collection Notice for the UniMate atlas-ai lead form.
  *
- * The middle "Where we store it" paragraph is the verbatim APP 8 sentence
- * from DEVIATIONS.md §"Downstream obligations #1" — DO NOT EDIT without
- * bumping `CONSENT_WORDING_VERSION` in lead-schema.ts. Any text change
- * requires a new version hash so compliance audit can map every lead row
- * to the exact text the student saw.
+ * v3 (2026-04-20): data residency migrated to ap-southeast-2 (Sydney) —
+ * APP 8 cross-border disclosure paragraph rewritten as onshore-storage
+ * notice. DEV-001 RESOLVED in this commit. See DEVIATIONS.md.
+ *
+ * DO NOT EDIT the "Where we store it" paragraph without bumping
+ * `CONSENT_WORDING_VERSION` in lead-schema.ts. Any text change requires
+ * a new version hash so compliance audit can map every lead row to the
+ * exact text the student saw.
  */
 function CollectionNotice() {
   return (
@@ -37,10 +40,9 @@ function CollectionNotice() {
       </p>
       <p>
         <span className="font-semibold">Where we store it.</span> Your information is stored on
-        Supabase servers hosted in Singapore (<code>ap-southeast-1</code>). This is a cross-border
-        disclosure under APP 8 of the <em>Privacy Act 1988 (Cth)</em>. Supabase is contractually
-        bound to Australian privacy standards, and UniMate ensures reasonable steps are taken to
-        comply with APPs in relation to overseas disclosures.
+        Supabase servers hosted in Sydney (<code>ap-southeast-2</code>), within Australia. This
+        is onshore data storage — no APP 8 cross-border disclosure applies. Your data is handled
+        under the <em>Privacy Act 1988 (Cth)</em> within Australian jurisdiction.
       </p>
       <p>
         <span className="font-semibold">Your rights.</span> You can request access or correction,

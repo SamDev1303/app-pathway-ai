@@ -6,10 +6,24 @@ Audit trail of explicit deviations from PRD/PHASE plans, captured at decision ti
 
 ## DEV-001: Supabase region deviation from PRD §6
 
-**Date:** 2026-04-17 12:45 AEDT
-**Phase:** P1 (Supabase project + seed)
+**Date:** 2026-04-17 12:45 AEDT → RESOLVED 2026-04-20 02:15 AEST
+**Phase:** P1 (Supabase project + seed) → resolved in P4.5 (compliance gate)
 **Decided by:** Sam (override) · **Flagged by:** Koda (security hat)
-**Status:** ACCEPTED with downstream obligations
+**Status:** ✅ **RESOLVED via region migration** — old Singapore project deleted, new Sydney project `fprqcugrmjvgrtbtohbf` (ap-southeast-2) provisioned 2026-04-20. PRD §6 is now SATISFIED, not deviated. Consent wording bumped to v3 (no APP 8 cross-border paragraph needed). Compliance attestation `docs/compliance-attestation-v1.md` removes the data-residency open item.
+
+### Resolution (P4.5)
+
+1. Sam provisioned new Supabase project `fprqcugrmjvgrtbtohbf` in ap-southeast-2 (Sydney) at 2026-04-20 ~02:10 AEST.
+2. Koda migrated migrations 001-006 + seed data to new project.
+3. `.env.local` + Vercel production + preview env vars updated.
+4. `Step5Contact.tsx` "Where we store it" paragraph rewritten as onshore-storage notice; `CONSENT_WORDING_VERSION` bumped to `2026-04-20.v3`.
+5. Old Singapore project `szuqcptsmmgycvagteza` → Sam is deleting post-migration verification.
+
+All downstream obligations below are now **N/A** (no cross-border disclosure occurs). Historical record preserved for audit trail.
+
+---
+
+### (Historical — pre-resolution record below)
 
 ### What was planned
 

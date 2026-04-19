@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import { Footer } from "@/components/Footer";
 
 const instrumentSerif = Instrument_Serif({
   variable: "--font-display",
@@ -38,7 +39,10 @@ export default function RootLayout({
       lang="en"
       className={`${instrumentSerif.variable} ${plusJakarta.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <div className="flex-1">{children}</div>
+        <Footer />
+      </body>
     </html>
   );
 }

@@ -5,6 +5,7 @@ import {
   type LeadInput,
 } from "@/lib/lead-schema";
 import { computeScore } from "@/lib/lead-score";
+import { MATCH_WEIGHTS_JSON } from "@/lib/match-weights";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
 export const runtime = "nodejs";
@@ -61,7 +62,11 @@ export async function POST(req: Request) {
   });
 
   const supabase = createServiceRoleClient();
-  const { error: insertError } = await supabase.from("leads").insert(row);
+  const { data: inserted, error: insertError } = await supabase
+    .from("leads")
+    .insert(row)
+    .select("id, match_token")
+    .single();
 
   if (insertError) {
     console.error("[atlas-ai.leads] INSERT failed", insertError);
@@ -75,11 +80,38 @@ export async function POST(req: Request) {
     );
   }
 
+  // P4 UniMatch: compute matches via Postgres RPC. Failure path is lazy:
+  // lead INSERT is preserved, matches remain null, /matches/{token} shows the
+  // PendingMatches fallback. Sam gets notified via email body so he can
+  // manually recompute via Supabase Studio if the RPC ever fails in prod.
+  let matchesReady = false;
+  try {
+    const { error: rpcError } = await supabase.rpc("match_unis_for_lead", {
+      p_lead_id: inserted!.id,
+      p_weights: MATCH_WEIGHTS_JSON,
+    });
+    if (rpcError) {
+      console.error(
+        "[atlas-ai.leads] match_unis_for_lead RPC failed — lead saved, matches null",
+        { lead_id: inserted!.id, err: rpcError },
+      );
+    } else {
+      matchesReady = true;
+    }
+  } catch (err) {
+    console.error(
+      "[atlas-ai.leads] match_unis_for_lead RPC threw — lead saved, matches null",
+      { lead_id: inserted!.id, err },
+    );
+  }
+
   const emailOk = await sendNotificationEmails({
     lead,
     score,
     tier,
     consentGivenAt,
+    matchToken: inserted!.match_token,
+    matchesReady,
   });
 
   if (!emailOk) {
@@ -90,7 +122,11 @@ export async function POST(req: Request) {
     );
   }
 
-  return Response.json({ ok: true });
+  return Response.json({
+    ok: true,
+    match_token: inserted!.match_token,
+    matches_ready: matchesReady,
+  });
 }
 
 interface RowDerived {
@@ -139,11 +175,15 @@ async function sendNotificationEmails({
   score,
   tier,
   consentGivenAt,
+  matchToken,
+  matchesReady,
 }: {
   lead: LeadInput;
   score: number;
   tier: "A" | "B" | "C" | "D";
   consentGivenAt: string;
+  matchToken: string;
+  matchesReady: boolean;
 }): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -206,6 +246,10 @@ async function sendNotificationEmails({
         `Marketing consent: ${lead.consent_marketing ? "yes" : "no"} (optional)`,
         `Consent wording version: ${CONSENT_WORDING_VERSION}`,
         `Consent given at: ${consentGivenAt}`,
+        ``,
+        `Match token: ${matchToken}`,
+        `Results page: https://atlas-ai.vercel.app/matches/${matchToken}`,
+        `Matches computed: ${matchesReady ? "yes" : "NO — RPC failed, manual recompute needed"}`,
       ].join("\n"),
     });
     return true;

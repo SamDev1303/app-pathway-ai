@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- web/ supabase/migrations/",
+  "git": {
+    "deploymentEnabled": {
+      "main": true
+    }
+  }
+}

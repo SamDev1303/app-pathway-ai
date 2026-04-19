@@ -10,6 +10,7 @@
  *   npx tsx scripts/seed-universities.ts              # dry-run (prints plan)
  *   npx tsx scripts/seed-universities.ts --apply      # actually insert
  *   npx tsx scripts/seed-universities.ts --wipe       # delete existing rows first (CAREFUL)
+ *   npx tsx scripts/seed-universities.ts --upsert --apply  # non-destructive refresh (P4+)
  *
  * Prerequisites:
  *   1. supabase/migrations/001_initial_schema.sql applied (via `supabase db push` or dashboard)
@@ -33,6 +34,7 @@ import { resolve } from "node:path";
 
 const APPLY = process.argv.includes("--apply");
 const WIPE = process.argv.includes("--wipe");
+const UPSERT = process.argv.includes("--upsert");
 
 // --- Load env from web/.env.local ---
 function loadEnvLocal() {
@@ -76,8 +78,103 @@ async function main() {
   console.log(
     `Courses to seed: ${seedUniversities.reduce((sum, u) => sum + u.courses.length, 0)}`
   );
-  console.log(`Mode: ${APPLY ? "APPLY" : "DRY-RUN"}${WIPE ? " (with WIPE)" : ""}`);
+  if (UPSERT) {
+    console.log(`Mode: UPSERT (non-destructive refresh)${APPLY ? " [APPLY]" : " [DRY-RUN]"}`);
+  } else {
+    console.log(`Mode: ${APPLY ? "APPLY" : "DRY-RUN"}${WIPE ? " (with WIPE)" : ""}`);
+  }
   console.log(``);
+
+  // --- UPSERT branch: non-destructive refresh for P4+ ---
+  // Merges universities by slug (UNIQUE), courses by (university_id, name).
+  // Populates `industry_placement` per course (column added in migration 003).
+  if (UPSERT && !APPLY) {
+    console.log(`[dry-run] Would UPSERT ${seedUniversities.length} universities and their courses (merge on slug / (university_id, name)).`);
+    console.log(`DRY-RUN complete. Run with --upsert --apply to actually upsert.`);
+    return;
+  }
+
+  if (UPSERT && APPLY) {
+    let uniUpserted = 0;
+    let courseUpserted = 0;
+    let courseInserted2 = 0;
+
+    for (const uni of seedUniversities) {
+      // University: upsert by slug
+      const { data: upsertedUni, error: uniErr } = await supabase
+        .from("universities")
+        .upsert({
+          slug: uni.id, // existing id field doubles as slug in the P1 schema
+          name: uni.name,
+          short_name: uni.short_name,
+          city: uni.city,
+          state: uni.state,
+          cricos_provider_code: uni.cricos_code ?? null,
+          qs_ranking_2025: uni.qs_ranking_2025 ?? null,
+          is_group_of_eight: uni.is_group_of_eight,
+          is_regional: uni.regional ?? false,
+          website: uni.website ?? null,
+          logo_letter: uni.logo_letter ?? null,
+          hero_color: uni.hero_color ?? null,
+        }, { onConflict: 'slug' })
+        .select("id")
+        .single();
+
+      if (uniErr) {
+        console.error(`[seed] upsert failed for ${uni.id}:`, uniErr);
+        continue;
+      }
+      uniUpserted += 1;
+
+      // Courses: match on (university_id, name) — UPDATE if exists, INSERT if not.
+      for (const course of uni.courses) {
+        const { data: existing } = await supabase
+          .from("courses")
+          .select("id")
+          .eq("university_id", upsertedUni!.id)
+          .eq("name", course.course_name)
+          .maybeSingle();
+
+        const coursePayload = {
+          university_id: upsertedUni!.id,
+          cricos_code: (course as any).cricos_code ?? null,
+          name: course.course_name,
+          level: course.level,
+          field: course.field,
+          duration_months: course.duration_months,
+          indicative_fee: course.annual_fee_aud,
+          ielts_overall: course.ielts_min,
+          industry_placement: course.industry_placement, // P4 migration 003 adds this column
+          intake_months: [2, 7], // seed default; per-course backfill deferred to P4.5
+        };
+
+        if (existing?.id) {
+          const { error: updErr } = await supabase.from("courses").update(coursePayload).eq("id", existing.id);
+          if (updErr) {
+            console.error(`[seed] course update failed for ${uni.id} / ${course.course_name}:`, updErr);
+            continue;
+          }
+          courseUpserted += 1;
+        } else {
+          const { error: insErr } = await supabase.from("courses").insert(coursePayload);
+          if (insErr) {
+            console.error(`[seed] course insert failed for ${uni.id} / ${course.course_name}:`, insErr);
+            continue;
+          }
+          courseInserted2 += 1;
+        }
+      }
+      console.log(`[OK] upsert ${uni.short_name} (${uni.courses.length} courses processed)`);
+    }
+
+    console.log(``);
+    console.log(`--- Summary (UPSERT) ---`);
+    console.log(`Universities upserted: ${uniUpserted}`);
+    console.log(`Courses updated: ${courseUpserted}`);
+    console.log(`Courses inserted: ${courseInserted2}`);
+    console.log(`Upsert complete. Verify via Supabase Studio → courses → filter industry_placement=true.`);
+    return;
+  }
 
   if (WIPE) {
     if (!APPLY) {

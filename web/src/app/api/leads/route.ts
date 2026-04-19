@@ -8,8 +8,6 @@ import { computeScore } from "@/lib/lead-score";
 import { MATCH_WEIGHTS_JSON } from "@/lib/match-weights";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
-export const runtime = "nodejs";
-
 /**
  * Atomic lead capture:
  *   1. Parse + Zod-validate the client payload

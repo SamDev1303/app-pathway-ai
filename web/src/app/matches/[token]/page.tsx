@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { MatchesJsonbSchema } from "@/lib/match-schema";
 import { TOKEN_TTL_MINUTES } from "@/lib/match-weights";
@@ -10,24 +11,51 @@ import { PendingMatches } from "@/components/matches/PendingMatches";
 import { ExpiredTokenFallback } from "@/components/matches/ExpiredTokenFallback";
 import { NotFoundFallback } from "@/components/matches/NotFoundFallback";
 
-// Never cache — matches data is per-token per-request and the TTL logic
-// depends on fresh `now()` comparison.
-//
-// Under Next 16 `cacheComponents: true` (see next.config.ts:4), the legacy
+// Under Next 16 `cacheComponents: true` (see next.config.ts:4), routes are
+// dynamic by default — pages without a `"use cache"` directive are uncached
+// and MUST wrap any uncached data access in `<Suspense>`. The legacy
 // route-segment configs `export const dynamic = "force-dynamic"` and
-// `export const runtime = "nodejs"` throw a build-time incompatibility error.
-// With cacheComponents enabled, routes are dynamic by default (pages without
-// a `"use cache"` directive are uncached) — so removing these exports gives
-// us identical "always fresh" behaviour. Node runtime is inferred from the
-// service-role-client import, which pulls in Node-only Supabase internals.
+// `export const runtime = "nodejs"` throw a build-time incompatibility error
+// under this mode. Node runtime is inferred from the service-role-client
+// import, which pulls in Node-only Supabase internals.
+//
+// The async Supabase lookup lives in `MatchesContent` so cacheComponents
+// can stream it through the Suspense boundary instead of blocking the shell.
 
 interface PageProps {
   params: Promise<{ token: string }>; // Next 15+ async params
 }
 
-export default async function MatchesPage({ params }: PageProps) {
-  const { token } = await params;
+export default function MatchesPage({ params }: PageProps) {
+  // Do NOT await params at the page root — under cacheComponents, dynamic
+  // params ARE runtime data. Push the await inside the Suspense boundary.
+  return (
+    <Suspense fallback={<MatchesSkeleton />}>
+      <MatchesContent params={params} />
+    </Suspense>
+  );
+}
 
+function MatchesSkeleton() {
+  return (
+    <main
+      className="container mx-auto max-w-3xl px-4 pb-16"
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <div className="mt-8 h-20 animate-pulse rounded-md bg-neutral-100" />
+      <div className="mt-6 h-10 w-2/3 animate-pulse rounded-md bg-neutral-100" />
+      <div className="mt-8 space-y-4">
+        <div className="h-32 animate-pulse rounded-md bg-neutral-100" />
+        <div className="h-32 animate-pulse rounded-md bg-neutral-100" />
+        <div className="h-32 animate-pulse rounded-md bg-neutral-100" />
+      </div>
+    </main>
+  );
+}
+
+async function MatchesContent({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = await params;
   const supabase = createServiceRoleClient();
   const { data: lead, error } = await supabase
     .from("leads")

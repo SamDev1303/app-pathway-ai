@@ -3,9 +3,9 @@
 -- Apply via: supabase db push (or Supabase Management API /v1/projects/{ref}/database/query)
 -- Prerequisites: 001_initial_schema.sql + 002_leads_status.sql applied.
 --
--- Why this exists: P4 UniMatch engine needs three schema additions the P1 migration
+-- Why this exists: P4 UniMatch engine needs three schema additions the P1 schema file
 -- deferred (industry_placement was in TS type only) or never built (matches/token
--- storage). Shipped as a discrete migration so the plpgsql function in 004 has a
+-- storage). Shipped as a discrete schema file so the plpgsql function in 004 has a
 -- stable schema to reference.
 
 -- ================================================================
@@ -26,7 +26,7 @@ ALTER TABLE public.leads
 -- ================================================================
 -- Drop the array column (was scaffolded in P1, never populated, superseded by matches jsonb)
 -- Pre-flight: per Research Landmine #7, verify no RLS policy references matched_university_ids.
--- P1 migration added only leads_anon_insert (WITH CHECK (true)) — no column refs. Safe.
+-- P1 schema file added only leads_anon_insert (WITH CHECK (true)) — no column refs. Safe.
 -- ================================================================
 ALTER TABLE public.leads
   DROP COLUMN IF EXISTS matched_university_ids;
@@ -54,7 +54,7 @@ ALTER TABLE public.leads
 CREATE INDEX IF NOT EXISTS idx_leads_match_token ON public.leads(match_token);
 
 -- ================================================================
--- No RLS policy changes. anon still has INSERT-only (001 migration).
+-- No RLS policy changes. anon still has INSERT-only (001 schema file).
 -- match_token is returned in the 200 response from /api/leads; server-role reads
 -- leads from /matches/[token] Server Component. No new anon SELECT path added.
 -- ================================================================

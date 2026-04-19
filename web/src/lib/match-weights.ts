@@ -18,7 +18,7 @@ export const MATCH_WEIGHTS = {
   qs_rank: 15,             // Scaled: max(0, 15 * (1 - rank/200))  (+5 from regional=0)
   g8: 5,                   // Capped — QS already captures most G8s
   industry_placement: 0,   // Gated behind a lead signal (prioritize_outcomes) that P3 never captured.
-                            // Column still ships in migration 003 for a v2 signal-capture phase.
+                            // Column still ships in SQL file 003_match_prep.sql for a v2 signal-capture phase.
   regional: 0,             // Heuristic rejected by Gideon plan-check round 1 — no preferred_state column.
   intake: 3,               // Low-signal within 12-uni seed (all have Feb+Jul)
 } as const;

@@ -174,16 +174,17 @@
 ---
 
 ### Phase 4: UniMatch engine (backend API)
-**Status:** not_started
-**Owner:** Gideon (port matcher to API) + Neo (weighting validation)
+**Status:** done (2026-04-20 00:55 AEST — 6-wave execution; Round-5 4-persona contract PASS; migration 005 stretch_flag fix live on szuqcptsmmgycvagteza; must_have #3 REVOKE/GRANT failure-injection PASS; MARA grep gate clean; `npm run build` PASS)
+**Owner:** Gideon (port matcher to API) + Neo (weighting validation) — single-seat Gideon per 2026-04-17 protocol
 **Research topic:** Weighting strategy; QS WUR public data; CRICOS metadata
-**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
-**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
+**Plan check sign-off:** Gideon APPROVE r4 (single-seat gpt-5.4, 2026-04-19 19:22 AEST; 4 rounds: R1/R2/R3 BLOCK absorbed 9 issues → R4 APPROVE)
+**Phase verify sign-off:** Gideon pending (dispatch next — orchestrator fills after PASS) | Neo n/a (single-seat protocol)
+**Commits:** `807c452` W1 + `448045b` W2 + `72200ec` W3 + `f0b0a70` W4 + `cf82e9a` W5 + `{pending}` W6
 **Tasks:**
-- [ ] Port existing JS matcher to `/api/match` reading from Supabase
-- [ ] Returns ranked list with match % + reason text
-- [ ] Caches per-user match result for 24h
-- [ ] Commit `feat(phase-4): /api/match ranked against 43 AU unis`
+- [x] Port existing JS matcher to `/api/match` reading from Supabase *(superseded — `match_unis_for_lead(uuid, jsonb)` RPC in `supabase/migrations/004_match_function.sql` + stretch_flag fix in `005_match_function_stretch_fix.sql`; orphan `/api/match/route.ts` deleted in `f0b0a70`; ranking now invoked inline from `/api/leads`)*
+- [x] Returns ranked list with match % + reason text *(`web/src/lib/match-schema.ts` MatchResultSchema + `web/src/lib/match-reason.ts` reason template + `web/src/app/matches/[token]/page.tsx` Server Component render; MARA banner via `web/src/lib/mara-disclaimer.ts` canonical constant)*
+- [x] Caches per-user match result for 24h *(side-effect UPDATE in RPC persists to `leads.matches` + `leads.matches_computed_at`; `/matches/[token]` reads via `match_token` uuid with magic-link fallback)*
+- [x] Commit `feat(phase-4): /api/match ranked against 43 AU unis` *(superseded by 6 atomic Wave commits above — one per wave, Round-5 contract locked post-005 after Sam accepted Path A for Gideon R1 Blocker #4 unachievable-arrays discovery; debug transcript at `.planning/debug/wave-6-persona-smoke-failures.md`)*
 
 ---
 

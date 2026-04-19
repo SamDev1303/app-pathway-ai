@@ -1,6 +1,6 @@
 # SOURCECODE.md — Atlas AI Living Architecture
 
-**Last updated:** 2026-04-17 00:15 AEDT · P0 done + P0.5 partial (3 of 8 files scrubbed) + P1 prep (schema + seed + env staged)
+**Last updated:** 2026-04-20 00:55 AEST · P4 done (6-wave match engine shipped: migrations 003+004+005, `/matches/[token]` Server Component, Round-5 4-persona contract PASS, MARA grep clean)
 **Update rule:** Every commit that adds/removes/renames files OR bumps a stack version MUST refresh this file in the same commit. See `CLAUDE.md` §3.
 
 ---
@@ -106,12 +106,12 @@ Per-file purpose is kept in sync by CLAUDE.md rule §3 — if a file's role chan
 |---|---|---|---|---|
 | POST | `/api/chat` | Streaming advisor chat | public (rate-limited P5) | demo — needs MARA-safe rewrite in P0.5 + P5 |
 | POST | `/api/chat-simple` | Non-streaming chat fallback | public | demo — needs MARA-safe rewrite in P0.5 + P5 |
-| POST | `/api/leads` | 5-step lead capture | public + captcha P3 | demo — needs consent-then-write rewrite in P3 |
-| POST | `/api/match` | UniMatch ranking (demo JS matcher) | public | demo — ports to Supabase in P4 |
+| POST | `/api/leads` | 5-step lead capture + inline match RPC invocation (returns `match_token`) | public + captcha P3 | P3 done + P4 done (invokes `match_unis_for_lead` RPC inline, returns `match_token`) |
 | POST | `/api/sop` | Generate SOP draft | public | demo — rebuilds + react-pdf export in P6 (net-new, not a "lift") |
+| GET  | `/matches/[token]` | Server Component — renders ranked strong + stretch matches for the lead identified by `match_token` (magic-link fallback when lead is stale) | public (token-scoped) | P4 done (Wave 5) |
 
 "demo" = exists from pre-rename demo; each row notes which phase rebuilds it.
-**Accuracy rule (CLAUDE.md §3a):** the set of rows above must equal the set of `route.ts` files under `web/src/app/api/`. If `ls web/src/app/api/*/route.ts | wc -l` != row count, the commit fails.
+**Accuracy rule (CLAUDE.md §3a):** the set of POST rows above must equal the set of `route.ts` files under `web/src/app/api/`. If `ls web/src/app/api/*/route.ts | wc -l` != POST row count, the commit fails. GET row for `/matches/[token]` is a page route, not an API route. Current count: 4 API routes (`chat`, `chat-simple`, `leads`, `sop`) + 1 page route (`/matches/[token]`).
 
 ---
 

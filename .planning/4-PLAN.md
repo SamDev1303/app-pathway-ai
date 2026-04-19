@@ -2056,27 +2056,34 @@ DELETE FROM public.leads WHERE email IN (
 );
 ```
 
-Parse each persona's `strong` array and confirm it matches the exact expected ordering below. Gideon plan-check round 1 Blocker #4 required tolerance-based checks be replaced with locked top-3 arrays against the revised weight vector (field 30 / budget 23 / ielts 12 / level 12 / qs 15 / g8 5 / placement 0 / regional 0 / intake 3).
+Parse each persona's `strong` + `stretch` arrays and confirm exact match against the Round-5 contract below. Original Gideon round-1 Blocker #4 locked strong-only arrays against the revised weight vector (field 30 / budget 23 / ielts 12 / level 12 / qs 15 / g8 5 / placement 0 / regional 0 / intake 3). During Wave 6 (2026-04-19 20:55 AEST) the debug agent confirmed those arrays were unachievable — RESEARCH.md was internally inconsistent (SQL predicate vs persona-math table). Sam approved Path A: ship `migration 005_match_function_stretch_fix.sql` (stretch_flag now fires on `budget_score = 0` far-stretch band per RESEARCH.md line 248 intent), then re-derive arrays from the post-005 RPC output as the new contract.
 
-Expected strong arrays (locked against the 12-uni seed):
-- **Persona A (G8 Business $55k IELTS 7.5):** `['UNSW', 'UWA', 'Adelaide']`
-- **Persona B (IT $28k IELTS 6.0):** `['WSU', 'UTS', 'RMIT']`
-- **Persona C (Masters Engineering $42k IELTS 6.5):** `['UWA', 'UTS', 'RMIT']`
-- **Persona D (Regional Nurse Health $32k IELTS 6.5):** `['Adelaide', 'UOW', 'WSU']`
+**Round-5 locked arrays (post-migration 005, 2026-04-19 20:55 AEST — Sam accepted):**
 
-If any persona fails exact match on the full top-3 array, STOP, root-cause via the course_totals CTE (add a temporary `SELECT * FROM course_totals` diagnostic), and surface diff to Sam before proceeding. Do NOT silently re-tune weights to make the test pass — re-open RESEARCH.md §Persona Simulation instead and document the drift.
+| Persona | Strong (exact, in order) | Stretch (exact, in order) |
+|---|---|---|
+| **A** G8 Business $55k IELTS 7.5 Feb PG | `['UNSW', 'UWA', 'Adelaide']` | `['UTS']` |
+| **B** IT $28k IELTS 6.0 Feb UG | `[]` | `['WSU', 'UOW']` |
+| **C** Engineering $35k IELTS 6.5 Jul UG | `[]` | `['UQ', 'UWA']` |
+| **D** Health $32k IELTS 6.5 Feb UG | `[]` | `['Monash', 'UOW']` |
 
-Record the EXPLAIN ANALYZE total runtime in the commit message; target <500ms.
+**Why B/C/D have empty strong:** each persona's budget is below the cheapest in-field course in the 12-uni seed (B IT at 116% of cheapest, C Eng at 112%, D Health at 112%). Empty-strong + 2 honest stretch options with budget warnings is the intended UX — beats inflating `match_pct` by letting far-stretch items pass as strong (pre-005 behavior). Production seed with regional/TAFE-adjacent options should produce non-empty strong for similar personas.
+
+Record the EXPLAIN ANALYZE total runtime in the commit message; target <500ms. (Path A measured 7.87ms — 63× under budget.)
+
+Do NOT silently re-tune weights to make the test pass — `match-weights.ts` vector is locked.
 </action>
 
 <acceptance_criteria>
-- Persona A `strong[0..2].short_name = ['UNSW', 'UWA', 'Adelaide']` (exact, in order).
-- Persona B `strong[0..2].short_name = ['WSU', 'UTS', 'RMIT']` (exact, in order).
-- Persona C `strong[0..2].short_name = ['UWA', 'UTS', 'RMIT']` (exact, in order).
-- Persona D `strong[0..2].short_name = ['Adelaide', 'UOW', 'WSU']` (exact, in order).
+- Persona A `strong[0..2].short_name = ['UNSW', 'UWA', 'Adelaide']` (exact, in order) + `stretch[0].short_name = 'UTS'`.
+- Persona B `strong = []` + `stretch[0..1].short_name = ['WSU', 'UOW']` (exact, in order).
+- Persona C `strong = []` + `stretch[0..1].short_name = ['UQ', 'UWA']` (exact, in order).
+- Persona D `strong = []` + `stretch[0..1].short_name = ['Monash', 'UOW']` (exact, in order).
+- Must_have #3 failure-injection: REVOKE EXECUTE → RPC returns 403 → /api/leads catches, returns 200 + `matches_ready:false`. GRANT restore.
 - EXPLAIN ANALYZE reports total query time under 500ms.
 - No test rows remain after cleanup (`SELECT count(*) FROM public.leads WHERE email LIKE 'persona-%-test@example.com'` returns 0).
 - Persona outcomes captured in commit body for audit.
+- Migration `005_match_function_stretch_fix.sql` applied to live Supabase.
 </acceptance_criteria>
 
 <done>RPC validated against 4 research personas with exact ordered top-3 arrays (no tolerance per round-1 Blocker #4); perf under 500ms budget; test rows cleaned up.</done>

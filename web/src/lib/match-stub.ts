@@ -11,9 +11,10 @@ export interface MatchStubResult {
  * Deterministic client-side top-3 match preview for Step 3 of the lead
  * wizard. Returns shape consumed by the preview card in Step3Preferences.tsx.
  *
- * This is a STUB — Phase 4 replaces it with `/api/match`, which uses real
- * pgvector similarity + Supabase-side scoring. The stub's output is never
- * persisted; it's shown only as a teaser while the student fills the form.
+ * This is a STUB — Phase 4 integrates matching into `/api/leads` (via the
+ * Postgres RPC `match_unis_for_lead`) and renders persisted results at
+ * `/matches/[token]`. The stub's output is never persisted; it's shown only
+ * as a teaser while the student fills the form.
  *
  * UI must display the disclaimer `"Preview match — final ranking appears
  * after you complete your enquiry."` next to the stub results (PLAN.md

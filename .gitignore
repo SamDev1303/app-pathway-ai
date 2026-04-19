@@ -13,6 +13,9 @@
 .env*.local
 .env
 
+# supabase cli temp (project config cache)
+supabase/.temp/
+
 # expo
 **/.expo/
 **/tunnel.log

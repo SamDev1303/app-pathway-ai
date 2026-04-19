@@ -1,6 +1,6 @@
 -- Atlas AI — Phase 4.5 RLS policies
--- Region: ap-southeast-1 (Singapore) per DEVIATIONS.md DEV-001
--- (Region decision re-evaluated at P8 per planning/atlas-ai/4.5-CONTEXT.md D2)
+-- Region: ap-southeast-2 (Sydney) — DEV-001 RESOLVED 2026-04-20 via project migration
+-- Applied on: project fprqcugrmjvgrtbtohbf (Sydney)
 -- Apply via: supabase db push OR Supabase dashboard SQL editor
 -- Prerequisites: 001-005 already applied.
 --

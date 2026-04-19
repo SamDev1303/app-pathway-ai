@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-04-20 00:55 AEST (Koda session 50 — P4 Wave 6 finalizer complete, Gideon phase-verify pending)
 **Current phase:** P4.5 — compliance gate (P4 execute complete; Gideon phase-verify dispatch next)
-**Last completed phase:** P4 (done 2026-04-20 00:55 AEST — 6-wave execution; 4-persona Round-5 contract PASS; migration 005 stretch_flag fix live; must_have #3 REVOKE/GRANT injection PASS; MARA grep clean; `npm run build` PASS. Phase verify: Gideon pending (dispatch next))
+**Last completed phase:** P4 (done 2026-04-20 00:55 AEST — 6-wave execution; 4-persona Round-5 contract PASS; migration 005 stretch_flag fix live; must_have #3 REVOKE/GRANT injection PASS; MARA grep clean; `npm run build` PASS. Phase verify: Gideon PASS-WITH-NOTES (single-seat gpt-5.4, 2026-04-20 01:13 AEST; 4 PASS + 4 PASS-WITH-NOTES; zero push blockers — see `.planning/research/p4-phase-verify/gideon-v1.md`))
 **Next phase:** P4.5 — compliance gate (HARD BLOCK on P5; 4 items from P1 + 1 note P2 getClaims migration + 1 P3 MARA-CI grep gate + 1 P4 QS WUR licensing flag)
 **Next blocker:** none — P4 context clean. P4.5 compliance gate still carries 4 items from P1 + 1 improvement note from P2 (getClaims migration) + 1 new note from P3 (MARA-forbidden-string CI grep gate) + 1 new note from P4 discussion (QS WUR licensing lawyer-review — low risk, flag-only).
 
@@ -21,7 +21,7 @@
 | P1 | ✅ done | Gideon APPROVE-WITH-NOTES + Specter APPROVE-WITH-NOTES | Gideon PASS + Specter PASS (12/12) |
 | P2 | ✅ done (infrastructure only) | Gideon APPROVE-WITH-NOTES + Specter APPROVE-WITH-NOTES | Gideon PASS + Specter PASS (10/10) |
 | P3 | ✅ done | Gideon APPROVE round 2 (single-seat, 2026-04-17 23:40 AEST) | Gideon PASS round 2 (2026-04-18 02:56 AEST) |
-| P4 | ✅ done (2026-04-20 00:55 AEST — 6 waves shipped; Round-5 4-persona contract PASS; 005 stretch_flag fix live; REVOKE/GRANT injection PASS; MARA grep clean; build PASS) | Gideon APPROVE r4 (single-seat gpt-5.4, 2026-04-19 19:22 AEST; 4 rounds: R1/R2/R3 BLOCK → absorbed 9 issues → R4 APPROVE) | Gideon pending (dispatch next) |
+| P4 | ✅ done (2026-04-20 00:55 AEST — 6 waves shipped; Round-5 4-persona contract PASS; 005 stretch_flag fix live; REVOKE/GRANT injection PASS; MARA grep clean; build PASS) | Gideon APPROVE r4 (single-seat gpt-5.4, 2026-04-19 19:22 AEST; 4 rounds: R1/R2/R3 BLOCK → absorbed 9 issues → R4 APPROVE) | Gideon PASS-WITH-NOTES (single-seat gpt-5.4, 2026-04-20 01:13 AEST; 4 PASS + 4 PASS-WITH-NOTES; zero push blockers — see `.planning/research/p4-phase-verify/gideon-v1.md`) |
 | P4.5 | not_started | — | — |
 | P5 | not_started | — | — |
 | P6 | not_started | — | — |

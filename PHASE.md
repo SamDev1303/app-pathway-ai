@@ -178,8 +178,8 @@
 **Owner:** Gideon (port matcher to API) + Neo (weighting validation) — single-seat Gideon per 2026-04-17 protocol
 **Research topic:** Weighting strategy; QS WUR public data; CRICOS metadata
 **Plan check sign-off:** Gideon APPROVE r4 (single-seat gpt-5.4, 2026-04-19 19:22 AEST; 4 rounds: R1/R2/R3 BLOCK absorbed 9 issues → R4 APPROVE)
-**Phase verify sign-off:** Gideon pending (dispatch next — orchestrator fills after PASS) | Neo n/a (single-seat protocol)
-**Commits:** `807c452` W1 + `448045b` W2 + `72200ec` W3 + `f0b0a70` W4 + `cf82e9a` W5 + `{pending}` W6
+**Phase verify sign-off:** Gideon PASS-WITH-NOTES (single-seat gpt-5.4, 2026-04-20 01:13 AEST, `.planning/research/p4-phase-verify/gideon-v1.md` — 4 PASS + 4 PASS-WITH-NOTES, zero push blockers; notes are verification-surface only: must_have #3 REVOKE/GRANT live-run + must_have #4 browser 31-min expiry UAT deferred to P4.5 harness) | Neo n/a (single-seat protocol)
+**Commits:** `807c452` W1 + `448045b` W2 + `72200ec` W3 + `f0b0a70` W4 + `cf82e9a` W5 + `e2a6163` W6
 **Tasks:**
 - [x] Port existing JS matcher to `/api/match` reading from Supabase *(superseded — `match_unis_for_lead(uuid, jsonb)` RPC in `supabase/migrations/004_match_function.sql` + stretch_flag fix in `005_match_function_stretch_fix.sql`; orphan `/api/match/route.ts` deleted in `f0b0a70`; ranking now invoked inline from `/api/leads`)*
 - [x] Returns ranked list with match % + reason text *(`web/src/lib/match-schema.ts` MatchResultSchema + `web/src/lib/match-reason.ts` reason template + `web/src/app/matches/[token]/page.tsx` Server Component render; MARA banner via `web/src/lib/mara-disclaimer.ts` canonical constant)*

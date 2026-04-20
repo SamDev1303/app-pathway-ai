@@ -4,12 +4,20 @@ import {
   type UIMessage,
 } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
+import { createClient } from "@supabase/supabase-js";
+import {
+  CHAT_SYSTEM_PROMPT_V1,
+  CHAT_PER_TURN_FOOTER,
+  CHAT_MARA_DEFLECTION_RESPONSE,
+} from "@/lib/chat-system-prompt";
 
 export const maxDuration = 30;
 
-// NOTE: OpenRouter is the v1-demo provider. P5 migrates to OpenAI gpt-4o-mini
-// (PRD §5 + PHASE.md P5). Do not add visa / PR / migration advice here —
-// P0.5 scrub removed all such content to comply with MARA Code of Conduct.
+// Provider selector: `openrouter-free` (default, free Qwen3) →
+// `anthropic-gateway` / `openai-gateway` post-meeting swap is a 1-line flip
+// via CHAT_PROVIDER env. All three share the AI SDK v6 streamText shape.
+const CHAT_PROVIDER = process.env.CHAT_PROVIDER ?? "openrouter-free";
+
 const openrouter = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
@@ -19,45 +27,138 @@ const openrouter = createOpenAI({
   },
 });
 
-const SYSTEM_PROMPT = `You are Atlas AI's course advisor, built for UniMate Pty Ltd — a MARA-registered education consultancy based in Liverpool, NSW.
+function pickModel() {
+  switch (CHAT_PROVIDER) {
+    case "anthropic-gateway":
+      // Wired post-meeting — Vercel AI Gateway "anthropic/claude-sonnet-4-6"
+      return openrouter("anthropic/claude-sonnet-4-6");
+    case "openai-gateway":
+      return openrouter("openai/gpt-4o-mini");
+    case "openrouter-free":
+    default:
+      return openrouter("qwen/qwen3-next-80b-a3b-instruct:free");
+  }
+}
 
-Your role: help prospective international students explore CRICOS-registered Australian university courses. You help with course selection, IELTS/PTE requirements, and university comparisons. You DO NOT give migration advice under any circumstances.
+// Gemini embedding for RAG query vector. Same model/dim as wave-1 backfill.
+const GEMINI_EMBED_MODEL = "gemini-embedding-001";
+const GEMINI_EMBED_DIMS = 3072;
 
-Voice: warm, knowledgeable, direct, never salesy. Australian English. Short paragraphs.
+async function embedQuery(text: string): Promise<number[] | null> {
+  const key =
+    process.env.GOOGLE_AI_KEY ??
+    process.env.GEMINI_API_KEY ??
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY;
+  if (!key) return null;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_EMBED_MODEL}:embedContent?key=${key}`;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        content: { parts: [{ text }] },
+        outputDimensionality: GEMINI_EMBED_DIMS,
+      }),
+    });
+    if (!res.ok) {
+      console.warn("[atlas-ai.chat] embed failed", res.status);
+      return null;
+    }
+    const json = (await res.json()) as { embedding?: { values: number[] } };
+    return json.embedding?.values ?? null;
+  } catch (err) {
+    console.warn("[atlas-ai.chat] embed error", err);
+    return null;
+  }
+}
 
-Hard rules (MARA Code of Conduct — non-negotiable):
-- You are NOT a migration agent. NEVER give visa advice, subclass guidance, PR pathway advice, points-test information, MLTSSL/STSOL advice, post-study work visa advice, or any other migration-related guidance.
-- If the user asks ANY visa / PR / migration / immigration / occupation-list / points question, deflect immediately: "That's a migration question and I'm not licensed to answer it. UniMate has MARA-registered agents who can — book a free consultation and they'll walk you through it. https://atlas-ai.vercel.app/consult"
-- NEVER quote visa success rates, approval percentages, or migration outcome statistics.
-- NEVER fabricate university names, course codes, CRICOS numbers, IELTS scores, or fees. If you don't know, say "I'd need to verify that — your UniMate counsellor can confirm."
-- For specific course matching, point users to the matcher above the chat: "Try our 30-second match — it's below this chat."
-- If asked about other consultancies (ApplyBoard, IDP, etc), stay neutral and pivot to the matcher.
+type RetrievedCourse = {
+  course_id: string;
+  university_id: string;
+  course_name: string;
+  university_name: string;
+  level: string;
+  field: string;
+  cricos_code: string | null;
+  similarity: number;
+  content: string;
+};
 
-What you DO know cold:
-- Group of Eight universities: ANU, Melbourne, Sydney, UNSW, Monash, UQ, Adelaide, UWA
-- IELTS minimums: most undergrad 6.0-6.5, postgrad 6.5-7.0, nursing/teaching 7.0
-- Tuition: undergrad A$30-60k/yr, postgrad A$35-60k/yr, MBA A$60-100k/yr
-- 4 intakes per year: February, May, July, October (February is biggest)
-- Regional Australian universities include: Wollongong, Newcastle, Tasmania, and others — these are CRICOS-registered and many offer lower tuition than Group of Eight metro schools.
+async function retrieveCourses(queryEmbedding: number[]): Promise<RetrievedCourse[]> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return [];
+  const supabase = createClient(url, key, { auth: { persistSession: false } });
+  const { data, error } = await supabase.rpc("match_courses_for_chat", {
+    query_embedding: queryEmbedding,
+    top_k: 5,
+    threshold: 0.65,
+  });
+  if (error) {
+    console.warn("[atlas-ai.chat] rpc failed", error.message);
+    return [];
+  }
+  return (data as RetrievedCourse[]) ?? [];
+}
 
-Every response MUST end with this footer on its own line:
-"—
-This is not migration advice. Consult a UniMate MARA-registered agent for binding guidance."
+function buildSystemPrompt(retrieved: RetrievedCourse[]): string {
+  const base = CHAT_SYSTEM_PROMPT_V1;
+  if (retrieved.length === 0) {
+    return `${base}\n\n<no_hits/>\nThe user's question has no matching courses in the Atlas dataset. Honestly say the dataset doesn't cover it and offer a /consult booking. Do NOT fabricate universities or courses.`;
+  }
+  const rows = retrieved
+    .map(
+      (r, i) =>
+        `${i + 1}. ${r.course_name} @ ${r.university_name} (level=${r.level}, field=${r.field}, CRICOS=${r.cricos_code ?? "n/a"})`
+    )
+    .join("\n");
+  return `${base}\n\n<retrieved_courses>\n${rows}\n</retrieved_courses>\nGround the answer in the retrieved courses above. Cite by course name + university. If none fit the question, say so and offer /consult.`;
+}
 
-Always end longer responses with one clear next step (usually: try the matcher, or book a consult).`;
+function getLastUserText(messages: UIMessage[]): string {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    const m = messages[i];
+    if (m.role !== "user") continue;
+    const parts = (m as unknown as { parts?: Array<Record<string, unknown>> }).parts;
+    if (parts) {
+      const txt = parts
+        .filter((p) => p.type === "text" && typeof p.text === "string")
+        .map((p) => p.text as string)
+        .join(" ")
+        .trim();
+      if (txt) return txt;
+    }
+    const content = (m as unknown as { content?: string }).content;
+    if (typeof content === "string" && content.trim()) return content.trim();
+  }
+  return "";
+}
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
   try {
     const { messages }: { messages: UIMessage[] } = await req.json();
+    const lastUser = getLastUserText(messages);
+
+    // RAG: embed last user message, retrieve top-k grounded courses.
+    let retrieved: RetrievedCourse[] = [];
+    if (lastUser) {
+      const vec = await embedQuery(lastUser);
+      if (vec) retrieved = await retrieveCourses(vec);
+    }
+
+    const system = buildSystemPrompt(retrieved);
 
     const result = streamText({
-      model: openrouter("openai/gpt-oss-120b:free"),
-      system: SYSTEM_PROMPT,
+      model: pickModel(),
+      system,
       messages: await convertToModelMessages(messages),
       temperature: 0.5,
       onFinish: ({ usage }) => {
         console.log("[atlas-ai.chat]", {
+          provider: CHAT_PROVIDER,
+          retrieved: retrieved.length,
           ms: Date.now() - startedAt,
           inputTokens: usage?.inputTokens,
           outputTokens: usage?.outputTokens,
@@ -65,13 +166,26 @@ export async function POST(req: Request) {
       },
     });
 
-    return result.toUIMessageStreamResponse();
+    return result.toUIMessageStreamResponse({
+      messageMetadata: () => ({
+        retrievedCourses: retrieved.map((r) => ({
+          course_id: r.course_id,
+          course_name: r.course_name,
+          university_name: r.university_name,
+          level: r.level,
+          field: r.field,
+          cricos_code: r.cricos_code,
+        })),
+      }),
+    });
   } catch (err) {
     console.error("[atlas-ai.chat] error", err);
     return new Response(
       JSON.stringify({
         error:
-          "Atlas AI is briefly unavailable. Please book a free consultation with a UniMate MARA-registered agent at our Liverpool office.",
+          CHAT_MARA_DEFLECTION_RESPONSE +
+          "\n\n" +
+          CHAT_PER_TURN_FOOTER,
       }),
       { status: 503, headers: { "Content-Type": "application/json" } },
     );

@@ -101,6 +101,22 @@ async function MatchesContent({ params }: { params: Promise<{ token: string }> }
         <MatchesHero firstName={firstName} />
         <MatchList matches={matches.strong} />
         <StretchSection matches={matches.stretch} />
+        <section className="mt-10 rounded-lg border border-navy-950/10 bg-white p-5">
+          <h2 className="font-display text-xl text-navy-950">
+            Turn your shortlist into an SOP
+          </h2>
+          <p className="mt-2 text-sm text-navy-950/70">
+            Draft an academic Statement of Purpose against your top match.
+            Your UniMate MARA agent reviews the final version before
+            submission.
+          </p>
+          <a
+            href={`/sop/${token}`}
+            className="mt-4 inline-flex items-center gap-2 rounded-md border border-navy-950/20 bg-cream px-4 py-2 text-sm font-semibold text-navy-950 hover:bg-gold-500/10"
+          >
+            Draft your SOP →
+          </a>
+        </section>
         <ConsultCTA />
         <MaraBanner variant="footer" />
       </main>

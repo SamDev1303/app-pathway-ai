@@ -219,10 +219,6 @@ export function SopEditor({ lead, initialDraft, initialHistory }: Props) {
       // If the server didn't return a real draftId/versionNumber, treat as
       // save failure: surface a banner and do NOT append a fake history entry.
       if (!finalDraftId || finalVersionNumber == null || persistError) {
-        console.error(
-          "[SopEditor] missing persistence metadata",
-          { finalDraftId, finalVersionNumber, persistError },
-        );
         setBanner({
           kind: "error",
           message: "Draft saved failed — please retry.",

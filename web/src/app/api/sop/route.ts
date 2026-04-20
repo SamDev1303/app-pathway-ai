@@ -526,7 +526,12 @@ export async function POST(req: Request) {
               model: SOP_MODEL,
             });
             if ("error" in result) {
-              persistError = result.error;
+              // Log real DB error server-side; client gets generic signal only.
+              console.error(
+                "[atlas-ai.sop] persist_failed",
+                { leadId: lead.id, error: result.error },
+              );
+              persistError = "persist_failed";
             } else {
               persisted = result;
             }

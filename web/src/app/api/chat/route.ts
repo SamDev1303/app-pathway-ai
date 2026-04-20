@@ -12,6 +12,7 @@ import {
 } from "@/lib/chat-system-prompt";
 import { scanForDeflection } from "@/lib/chat-deflection";
 import { getOrCreateChatSession, persistChatMessage } from "@/lib/chat-session";
+import { checkChatRateLimit, RATE_LIMIT_MESSAGE } from "@/lib/ratelimit";
 
 export const maxDuration = 30;
 
@@ -140,8 +141,13 @@ async function logDatasetGap(userMessage: string, sessionId: string | null): Pro
  * when the user input is already a migration question — saves tokens + latency
  * and guarantees no provider-side leak.
  */
-function deflectionStreamResponse(metadata: Record<string, unknown>): Response {
-  const payload = `${CHAT_MARA_DEFLECTION_RESPONSE}\n\n${CHAT_PER_TURN_FOOTER}`;
+function deflectionStreamResponse(
+  metadata: Record<string, unknown>,
+  customBody?: string,
+): Response {
+  const payload = customBody
+    ? `${customBody}\n\n${CHAT_PER_TURN_FOOTER}`
+    : `${CHAT_MARA_DEFLECTION_RESPONSE}\n\n${CHAT_PER_TURN_FOOTER}`;
   const encoder = new TextEncoder();
   const messageId = crypto.randomUUID();
   const lines = [
@@ -202,11 +208,28 @@ function getLastUserText(messages: UIMessage[]): string {
   return "";
 }
 
+function clientIp(req: Request): string {
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+  const real = req.headers.get("x-real-ip");
+  if (real) return real.trim();
+  return "unknown";
+}
+
 export async function POST(req: Request) {
   const startedAt = Date.now();
   const session = await getOrCreateChatSession();
   const sessionId: string | null = session?.id ?? null;
   try {
+    const rl = await checkChatRateLimit({ ip: clientIp(req), sessionId });
+    if (!rl.ok) {
+      console.warn("[atlas-ai.chat] rate-limit hit", rl.reason);
+      return deflectionStreamResponse(
+        { rateLimited: true, reason: rl.reason },
+        RATE_LIMIT_MESSAGE,
+      );
+    }
+
     const { messages }: { messages: UIMessage[] } = await req.json();
     const lastUser = getLastUserText(messages);
 

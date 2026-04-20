@@ -430,6 +430,24 @@ export async function POST(req: Request) {
         ? body.restoreFromDraftId
         : null;
     if (restoreText && restoreFromDraftId) {
+      // Validate that restoreFromDraftId belongs to this lead. Without this,
+      // a client knowing any sop_drafts.id could forge a cross-lead parent
+      // chain via the service-role insert below.
+      const { data: parentDraft, error: parentErr } = await supabase
+        .from("sop_drafts")
+        .select("id, lead_id")
+        .eq("id", restoreFromDraftId)
+        .maybeSingle<{ id: string; lead_id: string }>();
+      if (parentErr || !parentDraft || parentDraft.lead_id !== lead.id) {
+        console.warn(
+          "[atlas-ai.sop] restore_source_invalid",
+          { leadId: lead.id, restoreFromDraftId },
+        );
+        return Response.json(
+          { error: "restore_source_invalid" },
+          { status: 403 },
+        );
+      }
       const result = await insertDraftWithRetry(supabase, {
         leadId: lead.id,
         parentDraftId: restoreFromDraftId,

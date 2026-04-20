@@ -19,10 +19,7 @@
 //      parent_draft_id=restoreFromDraftId, model="restored", and stream the
 //      text back as a single chunk so the client UI treats it like a regen.
 
-import {
-  streamText,
-  type UIMessage as _UIMessage,
-} from "ai";
+import { streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import {
@@ -37,9 +34,6 @@ import { CHAT_MARA_DEFLECTION_RESPONSE } from "@/lib/chat-system-prompt";
 import { checkSopRateLimit, SOP_RATE_LIMIT_MESSAGE } from "@/lib/ratelimit";
 
 export const maxDuration = 60;
-
-// Suppress unused import warning — kept for future UIMessage typing.
-type _Keep = _UIMessage;
 
 // ================================================================
 // Model selection — mirrors /api/chat CHAT_MODEL selector shape.

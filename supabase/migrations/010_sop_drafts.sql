@@ -9,6 +9,10 @@
 --   * version_number is MAX(version_number where lead_id=...) + 1 at insert
 --     time (computed in /api/sop route, not a DB trigger — keeps migration
 --     idempotent + lets route handle race conditions explicitly).
+--   * UNIQUE(lead_id, version_number) is the authoritative concurrency guard:
+--     concurrent regenerations that both compute the same MAX+1 will see one
+--     succeed and the other fail with Postgres error 23505 (unique_violation).
+--     The route retries on 23505 up to 3x — see /api/sop route.ts.
 --   * Service-role-only RLS (mirrors migrations 007/008/009). Anon and authed
 --     users never touch this table directly; all writes go through the
 --     service-role client inside /api/sop.
@@ -24,7 +28,8 @@ CREATE TABLE IF NOT EXISTS sop_drafts (
   sections           jsonb,
   model              text NOT NULL,
   edited_from_section text,
-  created_at         timestamptz NOT NULL DEFAULT now()
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT sop_drafts_lead_version_unique UNIQUE (lead_id, version_number)
 );
 
 CREATE INDEX IF NOT EXISTS idx_sop_drafts_lead

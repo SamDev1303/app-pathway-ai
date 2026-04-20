@@ -78,10 +78,10 @@ export function Hero() {
             <span>↓</span>
           </a>
           <a
-            href="#book"
+            href="/chat"
             className="text-[var(--color-cream)]/90 hover:text-[var(--color-gold-400)] underline underline-offset-4 decoration-[var(--color-gold-500)]/40 hover:decoration-[var(--color-gold-400)] text-sm transition-colors"
           >
-            Or book the Liverpool office →
+            Or ask the AI advisor →
           </a>
         </div>
       </div>

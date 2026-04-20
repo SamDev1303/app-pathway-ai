@@ -9,8 +9,15 @@
 //   5. streamText with SOP_SYSTEM_PROMPT_V1 + structured <lead>/<target> block.
 //   6. Cumulative-buffer post-filter (scanForDeflection) — swap to deflection
 //      on hit + insert mara_deflections row.
-//   7. onFinish → insert sop_drafts row with version_number = MAX+1.
-//   8. Return stream + messageMetadata { draftId, versionNumber, deflected }.
+//   7. onFinish → insert sop_drafts row with version_number = MAX+1, retried
+//      up to 3x on Postgres 23505 (unique_violation) from the
+//      UNIQUE(lead_id, version_number) constraint in migration 010.
+//   8. Return stream + messageMetadata { draftId, versionNumber, deflected,
+//      persistError } emitted on the `finish` part.
+//   9. Restore path: if body has { restoreText, restoreFromDraftId }, skip
+//      streamText entirely. Insert a new row with full_text=restoreText +
+//      parent_draft_id=restoreFromDraftId, model="restored", and stream the
+//      text back as a single chunk so the client UI treats it like a regen.
 
 import {
   streamText,
@@ -117,6 +124,59 @@ async function nextVersionNumber(
   return ((data?.version_number as number | undefined) ?? 0) + 1;
 }
 
+type InsertDraftArgs = {
+  leadId: string;
+  parentDraftId: string | null;
+  fullText: string;
+  model: string;
+};
+
+// Insert sop_drafts row with MAX+1 version. Retries up to 3 times on
+// Postgres 23505 (unique_violation) — the UNIQUE(lead_id, version_number)
+// constraint added in migration 010 turns concurrent MAX+1 races into
+// retry-able errors rather than duplicate version numbers.
+async function insertDraftWithRetry(
+  supabase: SupabaseClient,
+  args: InsertDraftArgs,
+): Promise<{ id: string; versionNumber: number } | { error: string }> {
+  const MAX_ATTEMPTS = 3;
+  let lastErr = "unknown";
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const vNum = await nextVersionNumber(supabase, args.leadId);
+    const insert = await supabase
+      .from("sop_drafts")
+      .insert({
+        lead_id: args.leadId,
+        parent_draft_id: args.parentDraftId,
+        version_number: vNum,
+        full_text: args.fullText,
+        sections: null,
+        model: args.model,
+        edited_from_section: null,
+      })
+      .select("id, version_number")
+      .single();
+    if (!insert.error && insert.data) {
+      return {
+        id: insert.data.id as string,
+        versionNumber: insert.data.version_number as number,
+      };
+    }
+    lastErr = insert.error?.message ?? "unknown";
+    // Postgres 23505 = unique_violation. supabase-js exposes code on error.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const code = (insert.error as any)?.code;
+    if (code !== "23505") {
+      console.warn("[atlas-ai.sop] persist failed (non-retryable)", lastErr);
+      return { error: lastErr };
+    }
+    console.warn(
+      `[atlas-ai.sop] 23505 on attempt ${attempt}/${MAX_ATTEMPTS} — retrying`,
+    );
+  }
+  return { error: `unique_violation_retries_exhausted: ${lastErr}` };
+}
+
 // ================================================================
 // Types + input parsing
 // ================================================================
@@ -125,8 +185,11 @@ type SopRequest = {
   selectedUniId?: string;
   selectedCourseName?: string;
   parentDraftId?: string | null;
-  // Optional client-supplied body when "Restore as v(N+1)" uses prior text.
+  // Restore path — when both set, route skips streamText, inserts a new row
+  // with full_text=restoreText + parent_draft_id=restoreFromDraftId, and
+  // streams the text back as a single chunk.
   restoreText?: string;
+  restoreFromDraftId?: string;
 };
 
 type LeadRow = {
@@ -347,6 +410,46 @@ export async function POST(req: Request) {
       );
     }
 
+    // Holds the persisted row after onFinish — read by messageMetadata
+    // callback so the final SSE frame carries real draftId + versionNumber.
+    let persisted: { id: string; versionNumber: number } | null = null;
+    let persistError: string | null = null;
+
+    // Restore short-circuit — client sent restoreText + restoreFromDraftId.
+    // Skip streamText entirely: insert a new row whose full_text = restoreText
+    // and parent_draft_id = restoreFromDraftId, then stream the text back as
+    // a single chunk so the client's version-history + current-text flows stay
+    // consistent with a normal regenerate.
+    const restoreText =
+      typeof body.restoreText === "string" && body.restoreText.trim().length > 0
+        ? body.restoreText
+        : null;
+    const restoreFromDraftId =
+      typeof body.restoreFromDraftId === "string" &&
+      body.restoreFromDraftId.length > 0
+        ? body.restoreFromDraftId
+        : null;
+    if (restoreText && restoreFromDraftId) {
+      const result = await insertDraftWithRetry(supabase, {
+        leadId: lead.id,
+        parentDraftId: restoreFromDraftId,
+        fullText: restoreText,
+        model: "restored",
+      });
+      if ("error" in result) {
+        console.warn("[atlas-ai.sop] restore persist failed", result.error);
+        return Response.json(
+          { error: "Restore failed — please retry." },
+          { status: 503 },
+        );
+      }
+      return simpleStreamResponse(restoreText, {
+        draftId: result.id,
+        versionNumber: result.versionNumber,
+        deflected: false,
+      });
+    }
+
     // Model call.
     let postDeflection: { phrase: string } | null = null;
     let cumulativeBuffer = "";
@@ -398,25 +501,16 @@ export async function POST(req: Request) {
             ? `${CHAT_MARA_DEFLECTION_RESPONSE}\n\n${SOP_PER_TURN_FOOTER}`
             : (text ?? "");
           if (finalText.trim().length > 0) {
-            const vNum = await nextVersionNumber(supabase, lead.id);
-            const insert = await supabase
-              .from("sop_drafts")
-              .insert({
-                lead_id: lead.id,
-                parent_draft_id: body.parentDraftId ?? null,
-                version_number: vNum,
-                full_text: finalText,
-                sections: null,
-                model: SOP_MODEL,
-                edited_from_section: null,
-              })
-              .select("id, version_number")
-              .single();
-            if (insert.error) {
-              console.warn(
-                "[atlas-ai.sop] persist failed",
-                insert.error.message,
-              );
+            const result = await insertDraftWithRetry(supabase, {
+              leadId: lead.id,
+              parentDraftId: body.parentDraftId ?? null,
+              fullText: finalText,
+              model: SOP_MODEL,
+            });
+            if ("error" in result) {
+              persistError = result.error;
+            } else {
+              persisted = result;
             }
           }
 
@@ -435,10 +529,21 @@ export async function POST(req: Request) {
     });
 
     return result.toUIMessageStreamResponse({
-      messageMetadata: () => ({
-        deflected: postDeflection != null,
-        target,
-      }),
+      messageMetadata: ({ part }) => {
+        // Emit real persistence metadata on the finish frame so the client
+        // can store the authoritative draftId + versionNumber (no more
+        // `client-*` fallbacks). Honours the route header contract:
+        // { draftId, versionNumber, deflected }.
+        if (part.type === "finish") {
+          return {
+            draftId: persisted?.id ?? null,
+            versionNumber: persisted?.versionNumber ?? null,
+            deflected: postDeflection != null,
+            persistError,
+          };
+        }
+        return undefined;
+      },
     });
   } catch (err) {
     console.error("[atlas-ai.sop] error", err);

@@ -12,7 +12,7 @@
 --
 -- Anon: NO access. Service role writes from /api/chat route.
 
-CREATE TABLE mara_deflections (
+CREATE TABLE IF NOT EXISTS mara_deflections (
   id                 uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   session_id         uuid,              -- FK added in 009 after chat_sessions exists
   user_message       text NOT NULL,
@@ -20,18 +20,18 @@ CREATE TABLE mara_deflections (
   created_at         timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_mara_deflections_created_at ON mara_deflections(created_at DESC);
-CREATE INDEX idx_mara_deflections_session    ON mara_deflections(session_id);
+CREATE INDEX IF NOT EXISTS idx_mara_deflections_created_at ON mara_deflections(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_mara_deflections_session    ON mara_deflections(session_id);
 
-CREATE TABLE chat_dataset_gaps (
+CREATE TABLE IF NOT EXISTS chat_dataset_gaps (
   id           uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   session_id   uuid,                     -- FK added in 009 after chat_sessions exists
   user_message text NOT NULL,
   created_at   timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX idx_chat_dataset_gaps_created_at ON chat_dataset_gaps(created_at DESC);
-CREATE INDEX idx_chat_dataset_gaps_session    ON chat_dataset_gaps(session_id);
+CREATE INDEX IF NOT EXISTS idx_chat_dataset_gaps_created_at ON chat_dataset_gaps(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_chat_dataset_gaps_session    ON chat_dataset_gaps(session_id);
 
 -- ================================================================
 -- RLS — service role only

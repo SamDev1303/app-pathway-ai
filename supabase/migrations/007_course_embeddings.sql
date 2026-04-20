@@ -10,7 +10,7 @@
 --
 -- Anon: NO access. Service role populates + reads via /api/chat route.
 
-CREATE TABLE course_embeddings (
+CREATE TABLE IF NOT EXISTS course_embeddings (
   course_id   uuid PRIMARY KEY REFERENCES courses(id) ON DELETE CASCADE,
   embedding   vector(3072) NOT NULL,
   content     text NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE course_embeddings (
 
 -- HNSW cosine index for fast semantic search.
 -- m=16, ef_construction=64 balances build time + recall for ~200-row scale.
-CREATE INDEX idx_course_embeddings_hnsw
+CREATE INDEX IF NOT EXISTS idx_course_embeddings_hnsw
   ON course_embeddings
   USING hnsw (embedding vector_cosine_ops)
   WITH (m = 16, ef_construction = 64);
@@ -64,6 +64,12 @@ AS $$
   ORDER BY ce.embedding <=> query_embedding
   LIMIT top_k;
 $$;
+
+-- Lock RPC execution to the service role explicitly (belt-and-braces with RLS).
+REVOKE EXECUTE ON FUNCTION match_courses_for_chat(vector, int, float)
+  FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION match_courses_for_chat(vector, int, float)
+  TO service_role;
 
 -- ================================================================
 -- RLS — service role only

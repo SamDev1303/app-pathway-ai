@@ -16,10 +16,15 @@ import { checkChatRateLimit, RATE_LIMIT_MESSAGE } from "@/lib/ratelimit";
 
 export const maxDuration = 30;
 
-// Provider selector: `openrouter-free` (default, free Qwen3) →
-// `anthropic-gateway` / `openai-gateway` post-meeting swap is a 1-line flip
-// via CHAT_PROVIDER env. All three share the AI SDK v6 streamText shape.
-const CHAT_PROVIDER = process.env.CHAT_PROVIDER ?? "openrouter-free";
+// Model selector. All paths currently route through OpenRouter (one transport,
+// different model slugs). Post-meeting, wire real provider clients by adding
+// a branch with `createAnthropic(...)` / direct `createOpenAI(baseURL:
+// "https://api.openai.com/v1")` — that's the honest provider swap. Until
+// then, CHAT_MODEL is a model-label selector on OpenRouter.
+const CHAT_MODEL =
+  process.env.CHAT_MODEL ??
+  process.env.CHAT_PROVIDER ?? // backwards-compat with wave-2 name
+  "openrouter/qwen-free";
 
 const openrouter = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
@@ -31,13 +36,15 @@ const openrouter = createOpenAI({
 });
 
 function pickModel() {
-  switch (CHAT_PROVIDER) {
-    case "anthropic-gateway":
-      // Wired post-meeting — Vercel AI Gateway "anthropic/claude-sonnet-4-6"
+  switch (CHAT_MODEL) {
+    case "openrouter/anthropic-sonnet":
+    case "anthropic-gateway": // legacy alias
       return openrouter("anthropic/claude-sonnet-4-6");
-    case "openai-gateway":
+    case "openrouter/openai-mini":
+    case "openai-gateway": // legacy alias
       return openrouter("openai/gpt-4o-mini");
-    case "openrouter-free":
+    case "openrouter/qwen-free":
+    case "openrouter-free": // legacy alias
     default:
       return openrouter("qwen/qwen3-next-80b-a3b-instruct:free");
   }
@@ -277,16 +284,19 @@ export async function POST(req: Request) {
 
     const system = buildSystemPrompt(retrieved);
 
-    // Layer-2 deflection: scan assistant text-delta chunks server-side. If the
-    // model leaks a forbidden term despite the prompt, abort + replace.
+    // Layer-2 deflection: scan the CUMULATIVE assistant buffer, not per-delta.
+    // A forbidden token split across chunks ("vi" + "sa") would evade the
+    // per-delta regex — accumulating the buffer catches cross-chunk splits.
     let postDeflection: { phrase: string } | null = null;
+    let cumulativeBuffer = "";
     const postFilter = ({ stopStream }: { stopStream: () => void }) =>
       new TransformStream<Record<string, unknown>, Record<string, unknown>>({
         transform(chunk, controller) {
           if (postDeflection) return;
           if (chunk && chunk.type === "text-delta") {
             const delta = typeof chunk.delta === "string" ? chunk.delta : "";
-            const scan = scanForDeflection(delta);
+            cumulativeBuffer += delta;
+            const scan = scanForDeflection(cumulativeBuffer);
             if (scan.matched) {
               postDeflection = { phrase: scan.phrase };
               controller.enqueue({
@@ -310,7 +320,7 @@ export async function POST(req: Request) {
       experimental_transform: postFilter as any,
       onFinish: async ({ usage, text }) => {
         console.log("[atlas-ai.chat]", {
-          provider: CHAT_PROVIDER,
+          model: CHAT_MODEL,
           retrieved: retrieved.length,
           deflected: postDeflection != null,
           ms: Date.now() - startedAt,
@@ -345,6 +355,7 @@ export async function POST(req: Request) {
           cricos_code: r.cricos_code,
         })),
         noHits: retrieved.length === 0,
+        deflected: postDeflection != null,
       }),
     });
   } catch (err) {

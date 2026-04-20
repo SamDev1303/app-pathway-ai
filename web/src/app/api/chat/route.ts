@@ -10,6 +10,7 @@ import {
   CHAT_PER_TURN_FOOTER,
   CHAT_MARA_DEFLECTION_RESPONSE,
 } from "@/lib/chat-system-prompt";
+import { scanForDeflection } from "@/lib/chat-deflection";
 
 export const maxDuration = 30;
 
@@ -84,12 +85,17 @@ type RetrievedCourse = {
   content: string;
 };
 
-async function retrieveCourses(queryEmbedding: number[]): Promise<RetrievedCourse[]> {
+function serviceRoleClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key =
     process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY;
-  if (!url || !key) return [];
-  const supabase = createClient(url, key, { auth: { persistSession: false } });
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false } });
+}
+
+async function retrieveCourses(queryEmbedding: number[]): Promise<RetrievedCourse[]> {
+  const supabase = serviceRoleClient();
+  if (!supabase) return [];
   const { data, error } = await supabase.rpc("match_courses_for_chat", {
     query_embedding: queryEmbedding,
     top_k: 5,
@@ -100,6 +106,66 @@ async function retrieveCourses(queryEmbedding: number[]): Promise<RetrievedCours
     return [];
   }
   return (data as RetrievedCourse[]) ?? [];
+}
+
+async function logDeflection(
+  userMessage: string,
+  triggeredPhrase: string,
+  sessionId: string | null,
+): Promise<void> {
+  const supabase = serviceRoleClient();
+  if (!supabase) return;
+  const { error } = await supabase.from("mara_deflections").insert({
+    session_id: sessionId,
+    user_message: userMessage,
+    triggered_phrase: triggeredPhrase,
+  });
+  if (error) console.warn("[atlas-ai.chat] deflection log failed", error.message);
+}
+
+async function logDatasetGap(userMessage: string, sessionId: string | null): Promise<void> {
+  const supabase = serviceRoleClient();
+  if (!supabase) return;
+  const { error } = await supabase.from("chat_dataset_gaps").insert({
+    session_id: sessionId,
+    user_message: userMessage,
+  });
+  if (error) console.warn("[atlas-ai.chat] gap log failed", error.message);
+}
+
+/**
+ * Canned deflection response as a ReadableStream formatted for
+ * `toUIMessageStreamResponse`-compatible consumption. We skip the model entirely
+ * when the user input is already a migration question — saves tokens + latency
+ * and guarantees no provider-side leak.
+ */
+function deflectionStreamResponse(metadata: Record<string, unknown>): Response {
+  const payload = `${CHAT_MARA_DEFLECTION_RESPONSE}\n\n${CHAT_PER_TURN_FOOTER}`;
+  const encoder = new TextEncoder();
+  const messageId = crypto.randomUUID();
+  const lines = [
+    { type: "start", messageId },
+    { type: "start-step" },
+    { type: "text-start", id: messageId },
+    { type: "text-delta", id: messageId, delta: payload },
+    { type: "text-end", id: messageId },
+    { type: "finish-step" },
+    { type: "finish", messageMetadata: metadata },
+  ];
+  const body = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const line of lines) {
+        controller.enqueue(encoder.encode(`data: ${JSON.stringify(line)}\n\n`));
+      }
+      controller.close();
+    },
+  });
+  return new Response(body, {
+    headers: {
+      "Content-Type": "text/event-stream",
+      "x-vercel-ai-ui-message-stream": "v1",
+    },
+  });
 }
 
 function buildSystemPrompt(retrieved: RetrievedCourse[]): string {
@@ -137,9 +203,25 @@ function getLastUserText(messages: UIMessage[]): string {
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
+  // Wave 4 will populate this from the atlas_chat_session cookie.
+  const sessionId: string | null = null;
   try {
     const { messages }: { messages: UIMessage[] } = await req.json();
     const lastUser = getLastUserText(messages);
+
+    // Layer-1 deflection: if the user's own message is a migration question,
+    // short-circuit — don't spend tokens, don't risk provider leak.
+    if (lastUser) {
+      const pre = scanForDeflection(lastUser);
+      if (pre.matched) {
+        await logDeflection(lastUser, pre.phrase, sessionId);
+        return deflectionStreamResponse({
+          deflected: true,
+          triggeredPhrase: pre.phrase,
+          retrievedCourses: [],
+        });
+      }
+    }
 
     // RAG: embed last user message, retrieve top-k grounded courses.
     let retrieved: RetrievedCourse[] = [];
@@ -148,21 +230,56 @@ export async function POST(req: Request) {
       if (vec) retrieved = await retrieveCourses(vec);
     }
 
+    if (lastUser && retrieved.length === 0) {
+      // Fire-and-forget gap log — don't block the stream on it.
+      void logDatasetGap(lastUser, sessionId);
+    }
+
     const system = buildSystemPrompt(retrieved);
+
+    // Layer-2 deflection: scan assistant text-delta chunks server-side. If the
+    // model leaks a forbidden term despite the prompt, abort + replace.
+    let postDeflection: { phrase: string } | null = null;
+    const postFilter = ({ stopStream }: { stopStream: () => void }) =>
+      new TransformStream<Record<string, unknown>, Record<string, unknown>>({
+        transform(chunk, controller) {
+          if (postDeflection) return;
+          if (chunk && chunk.type === "text-delta") {
+            const delta = typeof chunk.delta === "string" ? chunk.delta : "";
+            const scan = scanForDeflection(delta);
+            if (scan.matched) {
+              postDeflection = { phrase: scan.phrase };
+              controller.enqueue({
+                ...chunk,
+                delta: `${CHAT_MARA_DEFLECTION_RESPONSE}\n\n${CHAT_PER_TURN_FOOTER}`,
+              });
+              stopStream();
+              return;
+            }
+          }
+          controller.enqueue(chunk);
+        },
+      });
 
     const result = streamText({
       model: pickModel(),
       system,
       messages: await convertToModelMessages(messages),
       temperature: 0.5,
-      onFinish: ({ usage }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      experimental_transform: postFilter as any,
+      onFinish: async ({ usage }) => {
         console.log("[atlas-ai.chat]", {
           provider: CHAT_PROVIDER,
           retrieved: retrieved.length,
+          deflected: postDeflection != null,
           ms: Date.now() - startedAt,
           inputTokens: usage?.inputTokens,
           outputTokens: usage?.outputTokens,
         });
+        if (postDeflection && lastUser) {
+          await logDeflection(lastUser, postDeflection.phrase, sessionId);
+        }
       },
     });
 
@@ -176,6 +293,7 @@ export async function POST(req: Request) {
           field: r.field,
           cricos_code: r.cricos_code,
         })),
+        noHits: retrieved.length === 0,
       }),
     });
   } catch (err) {

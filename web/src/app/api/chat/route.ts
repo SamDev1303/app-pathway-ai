@@ -11,6 +11,7 @@ import {
   CHAT_MARA_DEFLECTION_RESPONSE,
 } from "@/lib/chat-system-prompt";
 import { scanForDeflection } from "@/lib/chat-deflection";
+import { getOrCreateChatSession, persistChatMessage } from "@/lib/chat-session";
 
 export const maxDuration = 30;
 
@@ -203,11 +204,19 @@ function getLastUserText(messages: UIMessage[]): string {
 
 export async function POST(req: Request) {
   const startedAt = Date.now();
-  // Wave 4 will populate this from the atlas_chat_session cookie.
-  const sessionId: string | null = null;
+  const session = await getOrCreateChatSession();
+  const sessionId: string | null = session?.id ?? null;
   try {
     const { messages }: { messages: UIMessage[] } = await req.json();
     const lastUser = getLastUserText(messages);
+
+    if (sessionId && lastUser) {
+      void persistChatMessage({
+        sessionId,
+        role: "user",
+        content: lastUser,
+      });
+    }
 
     // Layer-1 deflection: if the user's own message is a migration question,
     // short-circuit — don't spend tokens, don't risk provider leak.
@@ -215,6 +224,14 @@ export async function POST(req: Request) {
       const pre = scanForDeflection(lastUser);
       if (pre.matched) {
         await logDeflection(lastUser, pre.phrase, sessionId);
+        if (sessionId) {
+          void persistChatMessage({
+            sessionId,
+            role: "assistant",
+            content: `${CHAT_MARA_DEFLECTION_RESPONSE}\n\n${CHAT_PER_TURN_FOOTER}`,
+            deflected: true,
+          });
+        }
         return deflectionStreamResponse({
           deflected: true,
           triggeredPhrase: pre.phrase,
@@ -268,7 +285,7 @@ export async function POST(req: Request) {
       temperature: 0.5,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       experimental_transform: postFilter as any,
-      onFinish: async ({ usage }) => {
+      onFinish: async ({ usage, text }) => {
         console.log("[atlas-ai.chat]", {
           provider: CHAT_PROVIDER,
           retrieved: retrieved.length,
@@ -279,6 +296,17 @@ export async function POST(req: Request) {
         });
         if (postDeflection && lastUser) {
           await logDeflection(lastUser, postDeflection.phrase, sessionId);
+        }
+        if (sessionId) {
+          void persistChatMessage({
+            sessionId,
+            role: "assistant",
+            content: postDeflection
+              ? `${CHAT_MARA_DEFLECTION_RESPONSE}\n\n${CHAT_PER_TURN_FOOTER}`
+              : (text ?? ""),
+            retrievedCourseIds: retrieved.map((r) => r.course_id),
+            deflected: postDeflection != null,
+          });
         }
       },
     });

@@ -1,97 +1,447 @@
-import { generateText } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+// web/src/app/api/sop/route.ts
+// P6 wave 2: SOP generator — lead-gated, versioned, streaming, MARA-safe.
+//
+// Replaces the demo 4-field form route. New flow:
+//   1. Resolve lead via service-role + leads.match_token (uuid).
+//   2. Pre-filter leads.notes for migration phrases → 422 refusal.
+//   3. Pre-filter lead profile + notes via scanForDeflection belt-and-braces.
+//   4. Rate-limit (per-lead 10/day, per-IP 5/hr, global 100/day).
+//   5. streamText with SOP_SYSTEM_PROMPT_V1 + structured <lead>/<target> block.
+//   6. Cumulative-buffer post-filter (scanForDeflection) — swap to deflection
+//      on hit + insert mara_deflections row.
+//   7. onFinish → insert sop_drafts row with version_number = MAX+1.
+//   8. Return stream + messageMetadata { draftId, versionNumber, deflected }.
 
-export const maxDuration = 45;
+import {
+  streamText,
+  type UIMessage as _UIMessage,
+} from "ai";
+import { createOpenAI } from "@ai-sdk/openai";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import {
+  SOP_SYSTEM_PROMPT_V1,
+  SOP_SYSTEM_PROMPT_VERSION,
+  SOP_PER_TURN_FOOTER,
+  scanNotesForForbidden,
+  SOP_NOTES_FORBIDDEN_MESSAGE,
+} from "@/lib/sop-prompt";
+import { scanForDeflection } from "@/lib/chat-deflection";
+import { CHAT_MARA_DEFLECTION_RESPONSE } from "@/lib/chat-system-prompt";
+import { checkSopRateLimit, SOP_RATE_LIMIT_MESSAGE } from "@/lib/ratelimit";
+
+export const maxDuration = 60;
+
+// Suppress unused import warning — kept for future UIMessage typing.
+type _Keep = _UIMessage;
+
+// ================================================================
+// Model selection — mirrors /api/chat CHAT_MODEL selector shape.
+// ================================================================
+const SOP_MODEL =
+  process.env.SOP_MODEL ??
+  process.env.CHAT_MODEL ??
+  "openrouter/qwen-free";
 
 const openrouter = createOpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey: process.env.OPENROUTER_API_KEY,
   headers: {
-    "HTTP-Referer": "https://unimate-demo.vercel.app",
-    "X-Title": "UniMate Australia (sop)",
+    "HTTP-Referer": "https://atlas-ai.vercel.app",
+    "X-Title": "Atlas AI (sop)",
   },
 });
 
-// Senior-counsellor SOP drafter. Produces ~350-450 word drafts with the MARA/QEAC voice.
-// Temperature higher than chat (0.7) for more narrative variation, since every student's SOP
-// should feel distinct — not template-filled.
-const SYSTEM_PROMPT = `You are a senior MARA-registered education counsellor at UniMate Australia's Liverpool, NSW office drafting a Statement of Purpose for an international student applying to an Australian university.
+function pickSopModel() {
+  switch (SOP_MODEL) {
+    case "openrouter/anthropic-sonnet":
+    case "anthropic-gateway":
+      return openrouter("anthropic/claude-sonnet-4-6");
+    case "openrouter/openai-mini":
+    case "openai-gateway":
+      return openrouter("openai/gpt-4o-mini");
+    case "openrouter/qwen-free":
+    case "openrouter-free":
+    default:
+      return openrouter("qwen/qwen3-next-80b-a3b-instruct:free");
+  }
+}
 
-Writing style:
-- First person, the student's voice
-- Warm, specific, never generic
-- Australian English
-- 4 paragraphs: hook (academic awakening), academic + practical background, why this course at this university, career + long-term contribution
-- 350-450 words total
-- Include ONE concrete specific detail per paragraph (a project, a turning point, a mentor, a regional connection)
-- No clichés ("since childhood I have been passionate about…", "I firmly believe…")
-- No hyperbole
-- End on long-term professional contribution — focus on career trajectory, industry impact, and skills development (NOT visa outcomes, residency intentions, or migration pathways)
+// ================================================================
+// Helpers
+// ================================================================
+function serviceRoleClient(): SupabaseClient | null {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.SUPABASE_SERVICE_KEY;
+  if (!url || !key) return null;
+  return createClient(url, key, { auth: { persistSession: false } });
+}
 
-Hard rules:
-- NEVER invent university rankings, program codes, or specific faculty names unless the user provided them.
-- NEVER claim student has met specific people or attended events they didn't mention.
-- NEVER include visa advice, migration pathway guidance, residency claims, or post-study work stratagems. This is an academic SOP, not a migration document.
-- Use the user's inputs as seed facts — elaborate naturally, don't fabricate.
-- Output plain prose only — no headers, no bullet points, no markdown.`;
+function clientIp(req: Request): string {
+  const xff = req.headers.get("x-forwarded-for");
+  if (xff) return xff.split(",")[0].trim();
+  const real = req.headers.get("x-real-ip");
+  if (real) return real.trim();
+  return "unknown";
+}
 
-type SopInput = {
-  university: string;
-  course: string;
-  background: string;
-  goals: string;
+async function logDeflection(
+  userMessage: string,
+  triggeredPhrase: string,
+  supabase: SupabaseClient,
+): Promise<void> {
+  // session_id = null per P6 design (no chat_sessions tie-in on SOP path).
+  const { error } = await supabase.from("mara_deflections").insert({
+    session_id: null,
+    user_message: userMessage.slice(0, 2000),
+    triggered_phrase: triggeredPhrase,
+  });
+  if (error) console.warn("[atlas-ai.sop] deflection log failed", error.message);
+}
+
+async function nextVersionNumber(
+  supabase: SupabaseClient,
+  leadId: string,
+): Promise<number> {
+  const { data, error } = await supabase
+    .from("sop_drafts")
+    .select("version_number")
+    .eq("lead_id", leadId)
+    .order("version_number", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) {
+    console.warn("[atlas-ai.sop] version lookup failed", error.message);
+    return 1;
+  }
+  return ((data?.version_number as number | undefined) ?? 0) + 1;
+}
+
+// ================================================================
+// Types + input parsing
+// ================================================================
+type SopRequest = {
+  leadToken: string;
+  selectedUniId?: string;
+  selectedCourseName?: string;
+  parentDraftId?: string | null;
+  // Optional client-supplied body when "Restore as v(N+1)" uses prior text.
+  restoreText?: string;
 };
 
-function buildPrompt(input: SopInput): string {
-  return `Draft a Statement of Purpose for a student applying to:
+type LeadRow = {
+  id: string;
+  full_name: string | null;
+  highest_qualification: string | null;
+  gpa: number | null;
+  ielts_overall: number | null;
+  preferred_fields: string[] | null;
+  preferred_levels: string[] | null;
+  preferred_intake_month: number | null;
+  tuition_budget_aud: number | null;
+  notes: string | null;
+  matches: unknown;
+  match_token: string;
+};
 
-University: ${input.university}
-Course: ${input.course}
+type MatchShape = {
+  uni_id: string;
+  uni_name: string;
+  short_name?: string;
+  course_name: string;
+};
 
-Their academic and practical background (in their words):
-${input.background}
+function pickTarget(
+  lead: LeadRow,
+  selectedUniId?: string,
+  selectedCourseName?: string,
+): { uniName: string; courseName: string } | null {
+  const matches = lead.matches as
+    | {
+        strong?: MatchShape[];
+        stretch?: MatchShape[];
+      }
+    | null
+    | undefined;
+  const pool = [...(matches?.strong ?? []), ...(matches?.stretch ?? [])];
+  if (pool.length === 0) return null;
 
-Their stated career goals:
-${input.goals}
+  if (selectedUniId && selectedCourseName) {
+    const hit = pool.find(
+      (m) =>
+        m.uni_id === selectedUniId && m.course_name === selectedCourseName,
+    );
+    if (hit) return { uniName: hit.uni_name, courseName: hit.course_name };
+  }
+
+  const first = matches?.strong?.[0] ?? pool[0];
+  return { uniName: first.uni_name, courseName: first.course_name };
+}
+
+function buildUserPrompt(
+  lead: LeadRow,
+  target: { uniName: string; courseName: string },
+): string {
+  const profileLines = [
+    lead.full_name ? `full_name: ${lead.full_name}` : null,
+    lead.highest_qualification
+      ? `highest_qualification: ${lead.highest_qualification}`
+      : null,
+    lead.gpa != null ? `gpa: ${lead.gpa}` : null,
+    lead.ielts_overall != null ? `ielts_overall: ${lead.ielts_overall}` : null,
+    lead.preferred_fields?.length
+      ? `preferred_fields: ${lead.preferred_fields.join(", ")}`
+      : null,
+    lead.preferred_levels?.length
+      ? `preferred_levels: ${lead.preferred_levels.join(", ")}`
+      : null,
+    lead.preferred_intake_month
+      ? `preferred_intake_month: ${lead.preferred_intake_month}`
+      : null,
+    lead.tuition_budget_aud
+      ? `tuition_budget_aud: ${lead.tuition_budget_aud}`
+      : null,
+    lead.notes ? `notes: ${lead.notes}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return `<lead>
+${profileLines}
+</lead>
+<target>
+uni=${target.uniName} course=${target.courseName}
+</target>
 
 Write the full 4-paragraph SOP now. Plain prose, no formatting.`;
 }
 
+// ================================================================
+// Canned stream (deflection / rate-limit / 422)
+// ================================================================
+function simpleStreamResponse(
+  body: string,
+  metadata: Record<string, unknown>,
+  status = 200,
+): Response {
+  const encoder = new TextEncoder();
+  const messageId = crypto.randomUUID();
+  const lines = [
+    { type: "start", messageId },
+    { type: "start-step" },
+    { type: "text-start", id: messageId },
+    { type: "text-delta", id: messageId, delta: body },
+    { type: "text-end", id: messageId },
+    { type: "finish-step" },
+    { type: "finish", messageMetadata: metadata },
+  ];
+  const stream = new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const line of lines) {
+        controller.enqueue(
+          encoder.encode(`data: ${JSON.stringify(line)}\n\n`),
+        );
+      }
+      controller.close();
+    },
+  });
+  return new Response(stream, {
+    status,
+    headers: {
+      "Content-Type": "text/event-stream",
+      "x-vercel-ai-ui-message-stream": "v1",
+    },
+  });
+}
+
+// ================================================================
+// POST
+// ================================================================
 export async function POST(req: Request) {
   const startedAt = Date.now();
   try {
-    const body = (await req.json()) as Partial<SopInput>;
-
-    if (!body.university || !body.course) {
+    const body = (await req.json()) as Partial<SopRequest>;
+    if (!body.leadToken || typeof body.leadToken !== "string") {
       return Response.json(
-        { error: "Missing university or course" },
+        { error: "Missing leadToken" },
         { status: 400 },
       );
     }
 
-    const input: SopInput = {
-      university: String(body.university).slice(0, 200),
-      course: String(body.course).slice(0, 200),
-      background: String(body.background ?? "").slice(0, 2000),
-      goals: String(body.goals ?? "").slice(0, 1000),
-    };
+    const supabase = serviceRoleClient();
+    if (!supabase) {
+      return Response.json(
+        { error: "Service unavailable" },
+        { status: 503 },
+      );
+    }
 
-    const { text, usage } = await generateText({
-      model: openrouter("openai/gpt-oss-120b:free"),
-      system: SYSTEM_PROMPT,
-      prompt: buildPrompt(input),
+    // Resolve lead by match_token.
+    const { data: lead, error: leadErr } = await supabase
+      .from("leads")
+      .select(
+        "id, full_name, highest_qualification, gpa, ielts_overall, preferred_fields, preferred_levels, preferred_intake_month, tuition_budget_aud, notes, matches, match_token",
+      )
+      .eq("match_token", body.leadToken)
+      .maybeSingle<LeadRow>();
+
+    if (leadErr) {
+      console.error("[atlas-ai.sop] lead lookup failed", leadErr.message);
+      return Response.json({ error: "Lookup failed" }, { status: 500 });
+    }
+    if (!lead) {
+      return Response.json({ error: "Invalid lead token" }, { status: 404 });
+    }
+
+    // Pre-filter 1: explicit forbidden-phrase scan on notes (bake-in rule).
+    if (lead.notes) {
+      const hit = scanNotesForForbidden(lead.notes);
+      if (hit) {
+        return Response.json(
+          { error: SOP_NOTES_FORBIDDEN_MESSAGE, triggered: hit },
+          { status: 422 },
+        );
+      }
+    }
+
+    // Target = picked match or strong[0] default.
+    const target = pickTarget(
+      lead,
+      body.selectedUniId,
+      body.selectedCourseName,
+    );
+    if (!target) {
+      return Response.json(
+        {
+          error:
+            "No matches available yet. Complete the matcher first before drafting an SOP.",
+        },
+        { status: 422 },
+      );
+    }
+
+    // Pre-filter 2: belt-and-braces deflection scan on target + notes combined.
+    // If any migration phrasing leaked into notes past the explicit filter,
+    // this catches it (e.g. "485" is in both lists).
+    const preScanText = `${lead.notes ?? ""} ${target.courseName} ${target.uniName}`;
+    const preScan = scanForDeflection(preScanText);
+    if (preScan.matched) {
+      await logDeflection(preScanText, preScan.phrase, supabase);
+      return simpleStreamResponse(
+        `${CHAT_MARA_DEFLECTION_RESPONSE}\n\n${SOP_PER_TURN_FOOTER}`,
+        { deflected: true, triggeredPhrase: preScan.phrase },
+      );
+    }
+
+    // Rate-limit.
+    const rl = await checkSopRateLimit({
+      ip: clientIp(req),
+      leadId: lead.id,
+    });
+    if (!rl.ok) {
+      console.warn("[atlas-ai.sop] rate-limit hit", rl.reason);
+      return simpleStreamResponse(
+        SOP_RATE_LIMIT_MESSAGE,
+        { rateLimited: true, reason: rl.reason },
+        429,
+      );
+    }
+
+    // Model call.
+    let postDeflection: { phrase: string } | null = null;
+    let cumulativeBuffer = "";
+
+    const postFilter = ({ stopStream }: { stopStream: () => void }) =>
+      new TransformStream<Record<string, unknown>, Record<string, unknown>>({
+        transform(chunk, controller) {
+          if (postDeflection) return;
+          if (chunk && chunk.type === "text-delta") {
+            const delta =
+              typeof chunk.delta === "string" ? chunk.delta : "";
+            cumulativeBuffer += delta;
+            const scan = scanForDeflection(cumulativeBuffer);
+            if (scan.matched) {
+              postDeflection = { phrase: scan.phrase };
+              controller.enqueue({
+                ...chunk,
+                delta: `${CHAT_MARA_DEFLECTION_RESPONSE}\n\n${SOP_PER_TURN_FOOTER}`,
+              });
+              stopStream();
+              return;
+            }
+          }
+          controller.enqueue(chunk);
+        },
+      });
+
+    const userPrompt = buildUserPrompt(lead, target);
+
+    const result = streamText({
+      model: pickSopModel(),
+      system: SOP_SYSTEM_PROMPT_V1,
+      prompt: userPrompt,
       temperature: 0.7,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      experimental_transform: postFilter as any,
+      onFinish: async ({ text, usage }) => {
+        try {
+          if (postDeflection) {
+            await logDeflection(
+              userPrompt,
+              postDeflection.phrase,
+              supabase,
+            );
+          }
+
+          // Persist sop_drafts row (even on deflection — keeps audit trail).
+          const finalText = postDeflection
+            ? `${CHAT_MARA_DEFLECTION_RESPONSE}\n\n${SOP_PER_TURN_FOOTER}`
+            : (text ?? "");
+          if (finalText.trim().length > 0) {
+            const vNum = await nextVersionNumber(supabase, lead.id);
+            const insert = await supabase
+              .from("sop_drafts")
+              .insert({
+                lead_id: lead.id,
+                parent_draft_id: body.parentDraftId ?? null,
+                version_number: vNum,
+                full_text: finalText,
+                sections: null,
+                model: SOP_MODEL,
+                edited_from_section: null,
+              })
+              .select("id, version_number")
+              .single();
+            if (insert.error) {
+              console.warn(
+                "[atlas-ai.sop] persist failed",
+                insert.error.message,
+              );
+            }
+          }
+
+          console.log("[atlas-ai.sop]", {
+            model: SOP_MODEL,
+            promptVersion: SOP_SYSTEM_PROMPT_VERSION,
+            deflected: postDeflection != null,
+            ms: Date.now() - startedAt,
+            inputTokens: usage?.inputTokens,
+            outputTokens: usage?.outputTokens,
+          });
+        } catch (err) {
+          console.error("[atlas-ai.sop] onFinish error", err);
+        }
+      },
     });
 
-    console.log("[unimate.sop]", {
-      ms: Date.now() - startedAt,
-      inputTokens: usage?.inputTokens,
-      outputTokens: usage?.outputTokens,
+    return result.toUIMessageStreamResponse({
+      messageMetadata: () => ({
+        deflected: postDeflection != null,
+        target,
+      }),
     });
-
-    return Response.json({ draft: text });
   } catch (err) {
-    console.error("[unimate.sop] error", err);
+    console.error("[atlas-ai.sop] error", err);
     return Response.json(
       {
         error:

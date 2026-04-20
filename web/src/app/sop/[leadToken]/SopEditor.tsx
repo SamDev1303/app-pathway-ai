@@ -165,6 +165,9 @@ export function SopEditor({ lead, initialDraft, initialHistory }: Props) {
       let buf = "";
       let accumulated = "";
       let deflected = false;
+      let finalDraftId: string | null = null;
+      let finalVersionNumber: number | null = null;
+      let persistError: string | null = null;
 
       for (;;) {
         const { value, done } = await reader.read();
@@ -184,11 +187,21 @@ export function SopEditor({ lead, initialDraft, initialHistory }: Props) {
             if (obj.type === "text-delta" && typeof obj.delta === "string") {
               accumulated += obj.delta;
               setCurrentText(accumulated);
-            } else if (obj.type === "finish") {
-              const meta = obj.messageMetadata as
-                | { deflected?: boolean }
+            } else if (obj.type === "finish" || obj.type === "message-metadata") {
+              const meta = (obj.messageMetadata ?? obj.metadata) as
+                | {
+                    deflected?: boolean;
+                    draftId?: string | null;
+                    versionNumber?: number | null;
+                    persistError?: string | null;
+                  }
                 | undefined;
               if (meta?.deflected) deflected = true;
+              if (typeof meta?.draftId === "string") finalDraftId = meta.draftId;
+              if (typeof meta?.versionNumber === "number")
+                finalVersionNumber = meta.versionNumber;
+              if (typeof meta?.persistError === "string")
+                persistError = meta.persistError;
             }
           } catch {
             // Non-JSON frame — ignore.
@@ -202,18 +215,32 @@ export function SopEditor({ lead, initialDraft, initialHistory }: Props) {
         return;
       }
 
-      // Success: bump local version optimistically (server also persisted).
-      const newVersion = (currentVersion ?? 0) + 1;
-      const optimisticDraft: SopEditorDraft = {
-        id: `client-${Date.now()}`,
-        versionNumber: newVersion,
+      // Persistence must be authoritative — no client-* fallback ids.
+      // If the server didn't return a real draftId/versionNumber, treat as
+      // save failure: surface a banner and do NOT append a fake history entry.
+      if (!finalDraftId || finalVersionNumber == null || persistError) {
+        console.error(
+          "[SopEditor] missing persistence metadata",
+          { finalDraftId, finalVersionNumber, persistError },
+        );
+        setBanner({
+          kind: "error",
+          message: "Draft saved failed — please retry.",
+        });
+        setStatus("error");
+        return;
+      }
+
+      const persistedDraft: SopEditorDraft = {
+        id: finalDraftId,
+        versionNumber: finalVersionNumber,
         fullText: accumulated,
         createdAt: new Date().toISOString(),
         parentDraftId: opts?.parentDraftId ?? currentParentId ?? null,
       };
-      setCurrentVersion(newVersion);
-      setCurrentParentId(optimisticDraft.id);
-      setHistory((h) => [optimisticDraft, ...h]);
+      setCurrentVersion(finalVersionNumber);
+      setCurrentParentId(finalDraftId);
+      setHistory((h) => [persistedDraft, ...h]);
       setStatus("done");
     } catch (err) {
       console.error("[SopEditor] generate failed", err);
@@ -271,12 +298,100 @@ export function SopEditor({ lead, initialDraft, initialHistory }: Props) {
   }
   async function handleRestore(d: SopEditorDraft) {
     setPreviewDraft(null);
-    // Re-POST with parentDraftId = d.id, prefill currentText optimistically.
-    setCurrentText(d.fullText);
-    await handleGenerate({
-      restoreText: d.fullText,
-      parentDraftId: d.id.startsWith("client-") ? null : d.id,
-    });
+    // Restore = server-side short-circuit: insert new sop_drafts row with
+    // full_text=d.fullText, parent_draft_id=d.id, model="restored". Route
+    // streams the text back as a single chunk so the UI flow matches regen.
+    // Do NOT send selectedUniId/selectedCourseName — pure restore, not gen.
+    setStatus("streaming");
+    setBanner(null);
+    setCurrentText("");
+
+    try {
+      const res = await fetch("/api/sop", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          leadToken: lead.leadToken,
+          restoreText: d.fullText,
+          restoreFromDraftId: d.id,
+        }),
+      });
+      if (!res.ok || !res.body) {
+        setBanner({
+          kind: "error",
+          message: `Restore failed (${res.status}). Please retry.`,
+        });
+        setStatus("error");
+        return;
+      }
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      let accumulated = "";
+      let finalDraftId: string | null = null;
+      let finalVersionNumber: number | null = null;
+
+      for (;;) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const frames = buf.split("\n\n");
+        buf = frames.pop() ?? "";
+        for (const frame of frames) {
+          const line = frame.trim();
+          if (!line.startsWith("data:")) continue;
+          const payload = line.slice(5).trim();
+          if (!payload) continue;
+          try {
+            const obj = JSON.parse(payload) as Record<string, unknown>;
+            if (obj.type === "text-delta" && typeof obj.delta === "string") {
+              accumulated += obj.delta;
+              setCurrentText(accumulated);
+            } else if (
+              obj.type === "finish" ||
+              obj.type === "message-metadata"
+            ) {
+              const meta = (obj.messageMetadata ?? obj.metadata) as
+                | {
+                    draftId?: string | null;
+                    versionNumber?: number | null;
+                  }
+                | undefined;
+              if (typeof meta?.draftId === "string") finalDraftId = meta.draftId;
+              if (typeof meta?.versionNumber === "number")
+                finalVersionNumber = meta.versionNumber;
+            }
+          } catch {
+            // ignore non-JSON
+          }
+        }
+      }
+
+      if (!finalDraftId || finalVersionNumber == null) {
+        setBanner({
+          kind: "error",
+          message: "Draft saved failed — please retry.",
+        });
+        setStatus("error");
+        return;
+      }
+
+      const restoredDraft: SopEditorDraft = {
+        id: finalDraftId,
+        versionNumber: finalVersionNumber,
+        fullText: accumulated,
+        createdAt: new Date().toISOString(),
+        parentDraftId: d.id,
+      };
+      setCurrentVersion(finalVersionNumber);
+      setCurrentParentId(finalDraftId);
+      setHistory((h) => [restoredDraft, ...h]);
+      setStatus("done");
+    } catch (err) {
+      console.error("[SopEditor] restore failed", err);
+      setBanner({ kind: "error", message: "Network error. Please retry." });
+      setStatus("error");
+    }
   }
 
   return (

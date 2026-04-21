@@ -224,18 +224,25 @@
 ---
 
 ### Phase 5: AI Advisor Chat + basic RAG
-**Status:** not_started
-**Owner:** Gideon (AI SDK wiring) + Neo (system prompt + MARA-safe tone)
-**Research topic:** MARA-safe prompt patterns; streaming chat latency; pgvector retrieval
-**Plan check sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
-**Phase verify sign-off:** Gideon — | Neo — (fallback: Specter/NeMo Tron)
-**Tasks:**
-- [ ] Switch demo OpenRouter → OpenAI `gpt-4o-mini`
-- [ ] Embed 43 unis + CRICOS course metadata ONLY — no visa/PR/migration content (MARA rule from P0.5 + P4.5)
-- [ ] System prompt enforces deflection: visa/PR/migration questions → "Consult a registered MARA agent" + UniMate link
-- [ ] `/api/chat` streams with RAG retrieval + MARA disclaimer footer on every turn
-- [ ] Abort/disconnect/backpressure handling + per-IP rate limit (Gideon P0 plan-check non-blocking note)
-- [ ] Commit `feat(phase-5): chat with RAG + MARA-safe deflection + resilience`
+**Status:** done (2026-04-21 — 8 waves shipped; tracker row flipped 2026-04-21 via retroactive reconciliation after scout confirmed full delivery + Gideon fold-in commit landed on top)
+**Owner:** Gideon (AI SDK wiring) — single-seat protocol
+**Commits (newest → oldest):** `8f4c1e8` Gideon phase-verify fold-in + `3d6b796` W7 sign-off + `fbc4404` W6 /chat page + ChatClient + Sources pill + `01a1d82` W5 Upstash rate-limit + `2fccc41` W4 chat session cookie + persistence + `2507bb1` W3 belt-and-braces deflection post-filter + `mara_deflections` audit + `88508e0` W2 /api/chat RAG retrieval + model swap + `c44c621` W1 course embedding backfill script + `0e0c26b` W0 migrations 007/008/009 + `f3262a0` CONTEXT.md
+**Plan check sign-off:** Gideon (single-seat gpt-5.4, transcripts in session 51)
+**Phase verify sign-off:** Gideon PASS (single-seat gpt-5.4, 2026-04-21; fold-in `8f4c1e8` absorbed notes)
+**Shipped:**
+- [x] OpenRouter model `qwen/qwen3-next-80b-a3b-instruct:free` via `CHAT_PROVIDER` gate (superseded "gpt-4o-mini" plan item — free tier confirmed MARA-safe)
+- [x] Course embeddings via `gemini-embedding-001` (3072-dim) — `web/scripts/backfill-course-embeddings.ts`; migrations 007 (course_embeddings + RPC), 008 (mara_deflections + chat_dataset_gaps), 009 (chat_sessions + chat_messages)
+- [x] System prompt deflection: re-uses staged `CHAT_SYSTEM_PROMPT_V1` + 12 triggers from `web/src/lib/chat-system-prompt.ts` (P4.5 staging)
+- [x] `/api/chat` streams RAG retrieval with `<retrieved_courses>`/`<no_hits/>` injection + per-turn MARA footer (`web/src/app/api/chat/route.ts`, 12.6KB)
+- [x] Belt-and-braces deflection: pre-check short-circuit via `scanForDeflection` + post-filter `experimental_transform` with `stopStream()`; audit rows to `mara_deflections`
+- [x] Chat session cookie (`atlas_chat_session` httpOnly) + `chat_messages` persistence with `retrieved_course_ids` + `deflected` flag
+- [x] `@upstash/ratelimit` sliding window: 10/min IP + 50/hr session + 200/day global; fail-open without env; 429 streams Calendly CTA
+- [x] `/chat` page + shared `ChatClient` + `SourcesPill` citations (Suspense-wrapped for PPR); `ChatDrawer` delegates to `ChatClient`; Hero CTA links `/chat`
+- [x] `pnpm build` PASS (Next.js 16.2.3 Turbopack, 13 routes incl. `/chat`); MARA grep clean
+
+**Deferred to production launch (non-blockers for phase close):**
+- Paid-key unlock: `GOOGLE_AI_KEY`, `OPENROUTER_API_KEY`, Upstash Redis — required before first real user, fail-open today
+- Manual smoke 7-step post-env (see `5-PLAN.md` "Manual smoke" section)
 
 ---
 

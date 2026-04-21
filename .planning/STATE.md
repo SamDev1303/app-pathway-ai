@@ -24,7 +24,7 @@
 | P3 | ✅ done | Gideon APPROVE round 2 (single-seat, 2026-04-17 23:40 AEST) | Gideon PASS round 2 (2026-04-18 02:56 AEST) |
 | P4 | ✅ done (2026-04-20 00:55 AEST — 6 waves shipped; Round-5 4-persona contract PASS; 005 stretch_flag fix live; REVOKE/GRANT injection PASS; MARA grep clean; build PASS) | Gideon APPROVE r4 (single-seat gpt-5.4, 2026-04-19 19:22 AEST; 4 rounds: R1/R2/R3 BLOCK → absorbed 9 issues → R4 APPROVE) | Gideon PASS-WITH-NOTES (single-seat gpt-5.4, 2026-04-20 01:13 AEST; 4 PASS + 4 PASS-WITH-NOTES; zero push blockers — see `.planning/research/p4-phase-verify/gideon-v1.md`) |
 | P4.5 | ✅ done (2026-04-20 — 9/9 compliance must-haves shipped; 3 items escalated to P8 backlog) | retroactive audit 2026-04-21 (scout — no formal plan-check) | retroactive PASS — evidence in PHASE.md §4.5 |
-| P5 | not_started | — | — |
+| P5 | ✅ done (2026-04-21 — 8 waves shipped; Gideon fold-in commit `8f4c1e8` landed; `pnpm build` PASS; MARA grep clean; row flipped retroactively 2026-04-21 parallel to P4.5 reconcile) | Gideon (single-seat gpt-5.4, session 51) | Gideon PASS (single-seat gpt-5.4, 2026-04-21; fold-in `8f4c1e8` absorbed notes) |
 | P6 | ✅ done (2026-04-21 — 7 waves + 7 fix commits; lead-gated `/sop/[leadToken]`; sop_drafts versioned + UNIQUE(lead_id,version_number) retrofit via 011; streaming + real messageMetadata contract; client-side react-pdf; MARA pre-filter + cumulative post-filter; rate-limit 10/lead/day) | Gideon APPROVE-WITH-NOTES (single-seat gpt-5.4, 2026-04-21) | Gideon PASS R3 (4/4 personas PASS; 2 BLOCK rounds → 7 fix commits d7d6913+9acf76d+2f2dce1+9745717 → R3 clean — handoffs `koda-handoff-2026-04-21{,-r2,-r3}.md`) |
 | P7 | can run parallel with P1–P4 | — | — |
 | P8 | not_started | — | — |

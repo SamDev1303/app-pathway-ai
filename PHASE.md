@@ -189,7 +189,12 @@
 ---
 
 ### Phase 4.5: Compliance gate (HARD BLOCK on P5)
-**Status:** completed
+**Status:** done (2026-04-20 — 9/9 compliance must-haves shipped; tracker row flipped 2026-04-21 via retroactive reconciliation after scout audit confirmed P5/P6 shipped on top of fully-delivered P4.5 work)
+**Evidence:** site-wide MARA footer (`web/src/app/layout.tsx:42-44` + `web/src/components/Footer.tsx`); MARA registration# + link (`web/src/lib/content.ts:5-17`, `web/src/lib/mara-disclaimer.ts:20-30`); chat system prompt staged + per-turn footer (`web/src/lib/chat-system-prompt.ts:13-74`); consent split v3 (`web/src/lib/lead-schema.ts:65-78` + `web/src/components/lead/Step5Contact.tsx:98-125`); RLS live (`supabase/migrations/006_rls_policies.sql` on Sydney `fprqcugrmjvgrtbtohbf`); data residency `ap-southeast-2` (DEV-001 resolved, see `planning/atlas-ai/DEVIATIONS.md:9-22`); APP encryption attested (`docs/compliance-attestation-v1.md:108-115`); CI MARA grep gate (`.github/workflows/mara-grep-gate.yml`).
+**Deferred to P8 (not blockers — genuinely open backlog):**
+- Backfill 26 additional universities (17 → 43 total) — parked from P1
+- Populate per-course CRICOS codes (68 rows currently NULL) — parked from P1
+- Evaluate `getClaims()` migration for `web/src/lib/supabase/middleware.ts` — parked from P2 non-blocking note
 **Owner:** Gideon (code enforcement) + Koda (orchestrator) — Neo deferred per single-seat D10
 **Research sign-off:** Neo n/a (single-seat protocol per 4.5-CONTEXT.md D10)
 **Plan check sign-off:** Koda self-check + discovery-driven (Gideon plan-check dispatch failed on codex stdin; plan-review caught fake-MARN incident → Wave 0 scope expansion with Sam's HITL approval)
@@ -277,6 +282,9 @@
 - [ ] Verify UniMate MARA number + registration link in page footer
 - [ ] Full fact-check pass — `grep -riE "(subclass|MLTSSL|STSOL|PR points|PR pathway|visa success|migration advice)" web/src/ mobile/` returns zero hits
 - [ ] Generate compliance attestation doc for client handover pack (signed by Gideon + Neo)
+- [ ] Backfill 26 additional universities (17 → 43 total) — parked from P1 via P4.5
+- [ ] Populate per-course CRICOS codes (68 rows currently NULL) — parked from P1 via P4.5
+- [ ] Evaluate `getClaims()` migration for `web/src/lib/supabase/middleware.ts` — parked from P2
 - [ ] Commit `feat(phase-8): compliance final audit + attestation`
 
 ---

@@ -1,5 +1,8 @@
 import "@/global.css";
 
+import { initSentry, Sentry } from "@/lib/sentry";
+initSentry();
+
 import { useEffect } from "react";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -19,7 +22,7 @@ import { colors } from "@/lib/theme";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-export default function RootLayout() {
+function RootLayout() {
   const [serifLoaded] = useInstrumentSerif({
     InstrumentSerif_400Regular
   });
@@ -49,3 +52,7 @@ export default function RootLayout() {
     </>
   );
 }
+
+// Sentry.wrap installs an error boundary + routing instrumentation at the root.
+// It's a no-op when Sentry is not initialized (missing DSN), so dev/local works.
+export default Sentry.wrap(RootLayout);

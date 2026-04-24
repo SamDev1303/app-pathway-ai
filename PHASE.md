@@ -246,6 +246,41 @@
 
 ---
 
+### Phase 5.5: Observability & error tracking (HARD BLOCK on P6)
+**Status:** in_progress
+**Owner:** Koda (orchestrator) + Gideon (code review, single-seat `gpt-5.5`)
+**Why this exists:** Client meeting Saturday 9:30pm AEST lists "proper logging & debuggability" as a non-negotiable (agenda §2). Atlas-ai today has zero observability infrastructure — only ad-hoc `console.log` scattered across 17 API-route line references. `/api/leads` logs raw email on error paths (`route.ts:119`); `/api/chat` + `/api/sop` persist unredacted user messages to audit tables at the DB layer. Server-log layer is currently unscrubbed. P6 will add a new streaming LLM route (SOP generator); without logging + PII redaction wired FIRST, P6 ships another unredacted route and we retrofit twice.
+**Scope (locked — not re-litigated by planner):**
+- pino structured logger (web only) with redaction paths for `email`, `phone`, `user_message`, `content`, `notes`, `req.body.*`, `consent_wording_version`
+- Sentry Next.js (`@sentry/nextjs@9`) with `beforeSend` PII scrub on server + client + edge configs
+- Sentry Expo (`@sentry/react-native@6`) on mobile — no pino on RN
+- Swap `console.*` → `logger.*` across `/api/chat`, `/api/chat-simple`, `/api/leads`, `/api/sop`
+- `tracesSampleRate: 0.1` prod / `1.0` dev; `replaysSessionSampleRate: 0` + `replaysOnErrorSampleRate: 0` (MARA compliance — no session replays)
+- Log sink: stdout only (Vercel log drains). No Axiom/Datadog/external log SaaS.
+**Out of scope (deliberate):**
+- DB audit tables (`mara_deflections`, `chat_messages`, `sop_drafts`) remain unredacted — legally required MARA compliance records; redacting would undermine audit trail
+- Log-based alerting beyond Sentry defaults → P9 handover
+- Custom `/admin/analytics` dashboard → §5 client decision, possibly P8
+**Execution vehicle:** `/gsd-quick --validate` (speed — ~32h to meeting, well-known scope, 2-iteration plan-check max). Quick task writes `.planning/quick/YYMMDD-xxx-<slug>/PLAN.md` + SUMMARY + VERIFICATION.md.
+**Plan check sign-off:** gsd-plan-checker (inside /gsd-quick --validate)
+**Phase verify sign-off:** Gideon single-seat `gpt-5.5` PASS / PASS-WITH-NOTES required before row flips to `done`; BLOCK triggers targeted fix commit first.
+**Tasks:**
+- [ ] `chore(phase-5.5): insert P5.5 Observability phase — HARD BLOCK on P6` (governance-only, this commit)
+- [ ] `/gsd-quick --validate` — scope per "Scope (locked)" block above
+- [ ] `web/src/lib/logger.ts` + `web/src/lib/logger-redact.ts` (pino wrapper + redaction path constants)
+- [ ] `web/sentry.{client,server,edge}.config.ts` + `web/instrumentation.ts` + `withSentryConfig` wrap in `web/next.config.ts`
+- [ ] `console.*` → `logger.*` swap in 4 API routes (chat, chat-simple, leads, sop); critical: `leads/route.ts` line 116/119 must stop logging raw email
+- [ ] `mobile/lib/sentry.ts` + `mobile/app.config.ts` plugin + `mobile/eas.json` `SENTRY_DSN` secretEnv
+- [ ] `web/.env.example` + `web/package.json` + `mobile/package.json` updated
+- [ ] `scripts/smoke-logger.ts` — synthetic lead payload proves `[Redacted]` masking
+- [ ] Verification: `tsc --noEmit` clean; `grep -rn "console\." web/src/app/api/` zero hits; smoke-logger redaction proof; Sentry smoke-fire with no PII in payload
+- [ ] Gideon review dispatch (`gpt-5.5` single-seat) on logger.ts + logger-redact.ts + 4 API route swaps + Sentry `beforeSend` hooks
+- [ ] Row flip commit: `chore(phase-5.5): mark done — Gideon PASS, pino + Sentry shipped, MARA PII redaction verified`
+
+**Update-rule compliance note (s51 lesson):** Row flip commit MUST cite gsd-executor commit hashes + Gideon review file path + VERIFICATION.md status. A row flip that lags the code ship is a drift smell — do not repeat s51's two-phase-row-stuck pattern.
+
+---
+
 ### Phase 6: SOP Generator + PDF export
 **Status:** not_started
 **Owner:** Gideon (react-pdf component) + Neo (SOP template voice)

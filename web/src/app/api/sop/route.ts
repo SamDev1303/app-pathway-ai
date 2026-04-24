@@ -31,7 +31,10 @@ import {
 } from "@/lib/sop-prompt";
 import { scanForDeflection } from "@/lib/chat-deflection";
 import { CHAT_MARA_DEFLECTION_RESPONSE } from "@/lib/chat-system-prompt";
+import { logger } from "@/lib/logger";
 import { checkSopRateLimit, SOP_RATE_LIMIT_MESSAGE } from "@/lib/ratelimit";
+
+const log = logger.child({ route: "/api/sop" });
 
 export const maxDuration = 60;
 
@@ -97,7 +100,7 @@ async function logDeflection(
     user_message: userMessage.slice(0, 2000),
     triggered_phrase: triggeredPhrase,
   });
-  if (error) console.warn("[atlas-ai.sop] deflection log failed", error.message);
+  if (error) log.warn({ err: error.message }, "deflection log failed");
 }
 
 async function nextVersionNumber(
@@ -112,7 +115,7 @@ async function nextVersionNumber(
     .limit(1)
     .maybeSingle();
   if (error) {
-    console.warn("[atlas-ai.sop] version lookup failed", error.message);
+    log.warn({ err: error.message }, "version lookup failed");
     return 1;
   }
   return ((data?.version_number as number | undefined) ?? 0) + 1;
@@ -161,10 +164,10 @@ async function insertDraftWithRetry(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const code = (insert.error as any)?.code;
     if (code !== "23505") {
-      console.warn("[atlas-ai.sop] persist failed (non-retryable)", lastErr);
+      log.warn({ err: lastErr }, "persist failed (non-retryable)");
       return { error: lastErr };
     }
-    console.warn(
+    log.warn(
       `[atlas-ai.sop] 23505 on attempt ${attempt}/${MAX_ATTEMPTS} — retrying`,
     );
   }
@@ -343,7 +346,7 @@ export async function POST(req: Request) {
       .maybeSingle<LeadRow>();
 
     if (leadErr) {
-      console.error("[atlas-ai.sop] lead lookup failed", leadErr.message);
+      log.error({ err: leadErr.message }, "lead lookup failed");
       return Response.json({ error: "Lookup failed" }, { status: 500 });
     }
     if (!lead) {
@@ -396,7 +399,7 @@ export async function POST(req: Request) {
       leadId: lead.id,
     });
     if (!rl.ok) {
-      console.warn("[atlas-ai.sop] rate-limit hit", rl.reason);
+      log.warn({ reason: rl.reason, leadId: lead.id }, "rate-limit hit");
       return simpleStreamResponse(
         SOP_RATE_LIMIT_MESSAGE,
         { rateLimited: true, reason: rl.reason },
@@ -433,9 +436,9 @@ export async function POST(req: Request) {
         .eq("id", restoreFromDraftId)
         .maybeSingle<{ id: string; lead_id: string }>();
       if (parentErr || !parentDraft || parentDraft.lead_id !== lead.id) {
-        console.warn(
-          "[atlas-ai.sop] restore_source_invalid",
+        log.warn(
           { leadId: lead.id, restoreFromDraftId },
+          "restore_source_invalid",
         );
         return Response.json(
           { error: "restore_source_invalid" },
@@ -449,7 +452,7 @@ export async function POST(req: Request) {
         model: "restored",
       });
       if ("error" in result) {
-        console.warn("[atlas-ai.sop] restore persist failed", result.error);
+        log.warn({ err: result.error, leadId: lead.id }, "restore persist failed");
         return Response.json(
           { error: "Restore failed — please retry." },
           { status: 503 },
@@ -521,9 +524,9 @@ export async function POST(req: Request) {
             });
             if ("error" in result) {
               // Log real DB error server-side; client gets generic signal only.
-              console.error(
-                "[atlas-ai.sop] persist_failed",
-                { leadId: lead.id, error: result.error },
+              log.error(
+                { leadId: lead.id, err: result.error },
+                "persist_failed",
               );
               persistError = "persist_failed";
             } else {
@@ -531,16 +534,17 @@ export async function POST(req: Request) {
             }
           }
 
-          console.log("[atlas-ai.sop]", {
+          log.info({
             model: SOP_MODEL,
             promptVersion: SOP_SYSTEM_PROMPT_VERSION,
             deflected: postDeflection != null,
             ms: Date.now() - startedAt,
+            leadId: lead.id,
             inputTokens: usage?.inputTokens,
             outputTokens: usage?.outputTokens,
-          });
+          }, "sop completed");
         } catch (err) {
-          console.error("[atlas-ai.sop] onFinish error", err);
+          log.error({ err, leadId: lead.id }, "onFinish error");
         }
       },
     });
@@ -563,7 +567,7 @@ export async function POST(req: Request) {
       },
     });
   } catch (err) {
-    console.error("[atlas-ai.sop] error", err);
+    log.error({ err }, "sop error");
     return Response.json(
       {
         error:

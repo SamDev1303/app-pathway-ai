@@ -12,7 +12,10 @@ import {
 } from "@/lib/chat-system-prompt";
 import { scanForDeflection } from "@/lib/chat-deflection";
 import { getOrCreateChatSession, persistChatMessage } from "@/lib/chat-session";
+import { logger } from "@/lib/logger";
 import { checkChatRateLimit, RATE_LIMIT_MESSAGE } from "@/lib/ratelimit";
+
+const log = logger.child({ route: "/api/chat" });
 
 export const maxDuration = 30;
 
@@ -71,13 +74,13 @@ async function embedQuery(text: string): Promise<number[] | null> {
       }),
     });
     if (!res.ok) {
-      console.warn("[atlas-ai.chat] embed failed", res.status);
+      log.warn({ status: res.status }, "embed failed");
       return null;
     }
     const json = (await res.json()) as { embedding?: { values: number[] } };
     return json.embedding?.values ?? null;
   } catch (err) {
-    console.warn("[atlas-ai.chat] embed error", err);
+    log.warn({ err }, "embed error");
     return null;
   }
 }
@@ -111,7 +114,7 @@ async function retrieveCourses(queryEmbedding: number[]): Promise<RetrievedCours
     threshold: 0.65,
   });
   if (error) {
-    console.warn("[atlas-ai.chat] rpc failed", error.message);
+    log.warn({ err: error.message }, "rpc failed");
     return [];
   }
   return (data as RetrievedCourse[]) ?? [];
@@ -129,7 +132,7 @@ async function logDeflection(
     user_message: userMessage,
     triggered_phrase: triggeredPhrase,
   });
-  if (error) console.warn("[atlas-ai.chat] deflection log failed", error.message);
+  if (error) log.warn({ err: error.message, sessionId }, "deflection log failed");
 }
 
 async function logDatasetGap(userMessage: string, sessionId: string | null): Promise<void> {
@@ -139,7 +142,7 @@ async function logDatasetGap(userMessage: string, sessionId: string | null): Pro
     session_id: sessionId,
     user_message: userMessage,
   });
-  if (error) console.warn("[atlas-ai.chat] gap log failed", error.message);
+  if (error) log.warn({ err: error.message, sessionId }, "gap log failed");
 }
 
 /**
@@ -230,7 +233,7 @@ export async function POST(req: Request) {
   try {
     const rl = await checkChatRateLimit({ ip: clientIp(req), sessionId });
     if (!rl.ok) {
-      console.warn("[atlas-ai.chat] rate-limit hit", rl.reason);
+      log.warn({ reason: rl.reason, sessionId }, "rate-limit hit");
       return deflectionStreamResponse(
         { rateLimited: true, reason: rl.reason },
         RATE_LIMIT_MESSAGE,
@@ -319,14 +322,15 @@ export async function POST(req: Request) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       experimental_transform: postFilter as any,
       onFinish: async ({ usage, text }) => {
-        console.log("[atlas-ai.chat]", {
+        log.info({
           model: CHAT_MODEL,
           retrieved: retrieved.length,
           deflected: postDeflection != null,
           ms: Date.now() - startedAt,
+          sessionId,
           inputTokens: usage?.inputTokens,
           outputTokens: usage?.outputTokens,
-        });
+        }, "chat completed");
         if (postDeflection && lastUser) {
           await logDeflection(lastUser, postDeflection.phrase, sessionId);
         }
@@ -359,7 +363,7 @@ export async function POST(req: Request) {
       }),
     });
   } catch (err) {
-    console.error("[atlas-ai.chat] error", err);
+    log.error({ err, sessionId }, "chat error");
     return new Response(
       JSON.stringify({
         error:

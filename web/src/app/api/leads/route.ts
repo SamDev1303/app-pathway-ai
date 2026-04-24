@@ -5,8 +5,11 @@ import {
   type LeadInput,
 } from "@/lib/lead-schema";
 import { computeScore } from "@/lib/lead-score";
+import { logger } from "@/lib/logger";
 import { MATCH_WEIGHTS_JSON } from "@/lib/match-weights";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
+
+const log = logger.child({ route: "/api/leads" });
 
 /**
  * Atomic lead capture:
@@ -67,7 +70,7 @@ export async function POST(req: Request) {
     .single();
 
   if (insertError) {
-    console.error("[atlas-ai.leads] INSERT failed", insertError);
+    log.error({ err: insertError }, "INSERT failed");
     return Response.json(
       {
         ok: false,
@@ -89,17 +92,17 @@ export async function POST(req: Request) {
       p_weights: MATCH_WEIGHTS_JSON,
     });
     if (rpcError) {
-      console.error(
-        "[atlas-ai.leads] match_unis_for_lead RPC failed — lead saved, matches null",
+      log.error(
         { lead_id: inserted!.id, err: rpcError },
+        "match_unis_for_lead RPC failed — lead saved, matches null",
       );
     } else {
       matchesReady = true;
     }
   } catch (err) {
-    console.error(
-      "[atlas-ai.leads] match_unis_for_lead RPC threw — lead saved, matches null",
+    log.error(
       { lead_id: inserted!.id, err },
+      "match_unis_for_lead RPC threw — lead saved, matches null",
     );
   }
 
@@ -113,10 +116,9 @@ export async function POST(req: Request) {
   });
 
   if (!emailOk) {
-    console.warn(
-      "[atlas-ai.leads] Lead INSERT succeeded but email notification failed —",
-      "lead row is captured in Supabase; Sam should check the manual audit trail",
-      { email: lead.email, score, tier },
+    log.warn(
+      { lead_id: inserted!.id, score, tier },
+      "Lead INSERT succeeded but email notification failed — lead row is captured in Supabase; check manual audit trail",
     );
   }
 
@@ -185,7 +187,7 @@ async function sendNotificationEmails({
 }): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.error("[atlas-ai.leads] RESEND_API_KEY not set — skipping email send");
+    log.error("RESEND_API_KEY not set — skipping email send");
     return false;
   }
 
@@ -199,8 +201,8 @@ async function sendNotificationEmails({
     .filter(Boolean);
 
   if (recipients.length === 0) {
-    console.error(
-      "[atlas-ai.leads] LEAD_NOTIFY_EMAILS resolved to empty list after trim — falling back to sam@claudeking.org",
+    log.error(
+      "LEAD_NOTIFY_EMAILS resolved to empty list after trim — falling back to sam@claudeking.org",
     );
     recipients.push("sam@claudeking.org");
   }
@@ -252,7 +254,7 @@ async function sendNotificationEmails({
     });
     return true;
   } catch (err) {
-    console.error("[atlas-ai.leads] Resend error", err);
+    log.error({ err }, "Resend error");
     return false;
   }
 }

@@ -1,5 +1,8 @@
 import { generateText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
+import { logger } from "@/lib/logger";
+
+const log = logger.child({ route: "/api/chat-simple" });
 
 export const maxDuration = 30;
 
@@ -51,15 +54,19 @@ export async function POST(req: Request) {
       temperature: 0.5,
     });
 
-    console.log("[atlas-ai.chat-simple]", {
-      ms: Date.now() - startedAt,
-      inputTokens: usage?.inputTokens,
-      outputTokens: usage?.outputTokens,
-    });
+    log.info(
+      {
+        ms: Date.now() - startedAt,
+        inputTokens: usage?.inputTokens,
+        outputTokens: usage?.outputTokens,
+        promptLength: prompt.length,
+      },
+      "chat-simple completed",
+    );
 
     return Response.json({ text });
   } catch (err) {
-    console.error("[atlas-ai.chat-simple] error", err);
+    log.error({ err }, "chat-simple error");
     return Response.json(
       {
         error:

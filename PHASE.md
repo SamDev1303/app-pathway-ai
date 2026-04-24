@@ -247,8 +247,24 @@
 ---
 
 ### Phase 5.5: Observability & error tracking (HARD BLOCK on P6)
-**Status:** in_progress
-**Owner:** Koda (orchestrator) + Gideon (code review, single-seat `gpt-5.5`)
+**Status:** done (2026-04-25 — 8 commits shipped; Gideon PASS-WITH-NOTES on fold-in v2 via single-seat `gpt-5.4`)
+**Evidence:**
+- Logger infra: `web/src/lib/logger.ts` (pino wrapper, lazy-init via Proxy, pino-pretty dev transport) + `web/src/lib/logger-redact.ts` (3-layer: path list + censor + `redactWalk` recursive walker with Error-serializer); commits `603483b` + `556ebbd`
+- Sentry wiring: `web/sentry.{server,client,edge}.config.ts` + `web/instrumentation.ts` (Next 16 hook) + `web/next.config.ts` (`withSentryConfig`); commit `0a3132b`
+- Gideon HIGH fold-in: `scrubString` helper added to all 4 Sentry configs covering `event.message` / `event.exception.values[].value` / `event.request.query_string` (string branch) / `event.user.{email,username,ip_address}` / `event.breadcrumbs[].{message,data}` — closes URL-param leak path. Client config reverted to keep Breadcrumbs integration installed (debug trail preserved). Commit `2387a51`
+- Route swap: `web/src/app/api/{chat,chat-simple,leads,sop}/route.ts` — 30 `console.*` → `log.*` swaps; **critical fix at `leads/route.ts` (formerly line 119) — raw email in email-failure path replaced with `{ lead_id, score, tier }`**. Commit `e366736`
+- Mobile: `mobile/lib/sentry.ts` + `@sentry/react-native/expo` plugin in `app.json` + `EXPO_PUBLIC_SENTRY_DSN` EAS secret. `_layout.tsx` wrapped in `Sentry.wrap()`. Commit `5fffa87`
+- Smoke proof: `web/scripts/smoke-logger.ts` — synthetic payload confirms all three redaction layers (A shallow, B deep `err.cause.*`, C camelCase walker) mask correctly; Error instances serialize with stack preserved. Commit `556ebbd`
+**Deps installed:** pino@9.14.0, pino-pretty@11.3.0 (dev), @sentry/nextjs@10.50.0 (bumped from plan's v9 after Context7 check flagged Next 16 peer-dep mismatch), @sentry/react-native@8.9.1 (bumped from plan's v6 for Expo 54 compat).
+**Verification (re-run post-fold-in, 2026-04-25):**
+- `cd web && npx tsc --noEmit` → zero errors
+- `cd mobile && npx tsc --noEmit` → zero errors
+- `grep -rn 'console\.' web/src/app/api/` → zero hits
+- `LOG_LEVEL=debug NODE_ENV=production npx tsx scripts/smoke-logger.ts` → all PII fields `[Redacted]`, stack traces preserved
+- `pnpm build` → PASS (14 routes, Sentry instrumentation hook fires, 2 Turbopack deprecation warnings non-blocking)
+**Owner:** Koda (orchestrator) + Gideon (code review, single-seat `gpt-5.4` — note: plan initially said `gpt-5.5` in typo, corrected on dispatch per MEMORY.md `reference_gideon.md`)
+**Gideon verdict:** PASS-WITH-NOTES (2026-04-25, `~/Desktop/Gideon/drafts/koda-handoff-2026-04-25.md`) — 1 HIGH (string-field Sentry scrub bypass) + 1 LOW (client breadcrumbs too aggressive). Both folded in; commit `2387a51`.
+**Why this exists:** Client meeting Saturday 9:30pm AEST lists "proper logging & debuggability" as a non-negotiable (agenda §2). Atlas-ai today has zero observability infrastructure — only ad-hoc `console.log` scattered across 17 API-route line references. `/api/leads` logs raw email on error paths (`route.ts:119`); `/api/chat` + `/api/sop` persist unredacted user messages to audit tables at the DB layer. Server-log layer is currently unscrubbed. P6 will add a new streaming LLM route (SOP generator); without logging + PII redaction wired FIRST, P6 ships another unredacted route and we retrofit twice.
 **Why this exists:** Client meeting Saturday 9:30pm AEST lists "proper logging & debuggability" as a non-negotiable (agenda §2). Atlas-ai today has zero observability infrastructure — only ad-hoc `console.log` scattered across 17 API-route line references. `/api/leads` logs raw email on error paths (`route.ts:119`); `/api/chat` + `/api/sop` persist unredacted user messages to audit tables at the DB layer. Server-log layer is currently unscrubbed. P6 will add a new streaming LLM route (SOP generator); without logging + PII redaction wired FIRST, P6 ships another unredacted route and we retrofit twice.
 **Scope (locked — not re-litigated by planner):**
 - pino structured logger (web only) with redaction paths for `email`, `phone`, `user_message`, `content`, `notes`, `req.body.*`, `consent_wording_version`
@@ -265,17 +281,17 @@
 **Plan check sign-off:** gsd-plan-checker (inside /gsd-quick --validate)
 **Phase verify sign-off:** Gideon single-seat `gpt-5.5` PASS / PASS-WITH-NOTES required before row flips to `done`; BLOCK triggers targeted fix commit first.
 **Tasks:**
-- [ ] `chore(phase-5.5): insert P5.5 Observability phase — HARD BLOCK on P6` (governance-only, this commit)
-- [ ] `/gsd-quick --validate` — scope per "Scope (locked)" block above
-- [ ] `web/src/lib/logger.ts` + `web/src/lib/logger-redact.ts` (pino wrapper + redaction path constants)
-- [ ] `web/sentry.{client,server,edge}.config.ts` + `web/instrumentation.ts` + `withSentryConfig` wrap in `web/next.config.ts`
-- [ ] `console.*` → `logger.*` swap in 4 API routes (chat, chat-simple, leads, sop); critical: `leads/route.ts` line 116/119 must stop logging raw email
-- [ ] `mobile/lib/sentry.ts` + `mobile/app.config.ts` plugin + `mobile/eas.json` `SENTRY_DSN` secretEnv
-- [ ] `web/.env.example` + `web/package.json` + `mobile/package.json` updated
-- [ ] `scripts/smoke-logger.ts` — synthetic lead payload proves `[Redacted]` masking
-- [ ] Verification: `tsc --noEmit` clean; `grep -rn "console\." web/src/app/api/` zero hits; smoke-logger redaction proof; Sentry smoke-fire with no PII in payload
-- [ ] Gideon review dispatch (`gpt-5.5` single-seat) on logger.ts + logger-redact.ts + 4 API route swaps + Sentry `beforeSend` hooks
-- [ ] Row flip commit: `chore(phase-5.5): mark done — Gideon PASS, pino + Sentry shipped, MARA PII redaction verified`
+- [x] `chore(phase-5.5): insert P5.5 Observability phase — HARD BLOCK on P6` (governance-only, this commit)
+- [x] `/gsd-quick --validate` — scope per "Scope (locked)" block above
+- [x] `web/src/lib/logger.ts` + `web/src/lib/logger-redact.ts` (pino wrapper + redaction path constants)
+- [x] `web/sentry.{client,server,edge}.config.ts` + `web/instrumentation.ts` + `withSentryConfig` wrap in `web/next.config.ts`
+- [x] `console.*` → `logger.*` swap in 4 API routes (chat, chat-simple, leads, sop); critical: `leads/route.ts` line 116/119 must stop logging raw email
+- [x] `mobile/lib/sentry.ts` + `mobile/app.config.ts` plugin + `mobile/eas.json` `SENTRY_DSN` secretEnv
+- [x] `web/.env.example` + `web/package.json` + `mobile/package.json` updated
+- [x] `scripts/smoke-logger.ts` — synthetic lead payload proves `[Redacted]` masking
+- [x] Verification: `tsc --noEmit` clean; `grep -rn "console\." web/src/app/api/` zero hits; smoke-logger redaction proof; Sentry smoke-fire with no PII in payload
+- [x] Gideon review dispatch (`gpt-5.5` single-seat) on logger.ts + logger-redact.ts + 4 API route swaps + Sentry `beforeSend` hooks
+- [x] Row flip commit: `chore(phase-5.5): mark done — Gideon PASS, pino + Sentry shipped, MARA PII redaction verified`
 
 **Update-rule compliance note (s51 lesson):** Row flip commit MUST cite gsd-executor commit hashes + Gideon review file path + VERIFICATION.md status. A row flip that lags the code ship is a drift smell — do not repeat s51's two-phase-row-stuck pattern.
 

@@ -3,7 +3,9 @@
 // Three-layer defense: (A) shallow paths, (B) top-level + deep paths, (C) censor fn walker.
 // MARA compliance: leaking email/phone/user_message in server logs is a reportable breach.
 
-const SENSITIVE_KEY_RE = /email|phone|user_message|consent|notes|content/i;
+// Matches camelCase + snake_case variants: email, emailAddress, user_message,
+// userMessage, userMessageText, phoneNumber, consentGivenAt, etc.
+const SENSITIVE_KEY_RE = /email|phone|user[_]?message|consent|notes|content/i;
 
 // Layer A — baseline one-level-deep paths
 const LAYER_A: readonly string[] = [
@@ -55,6 +57,19 @@ export function redactWalk(input: unknown, depth = 0): unknown {
   if (input === null || input === undefined) return input;
   if (typeof input !== "object") return input;
   if (Array.isArray(input)) return input.map((v) => redactWalk(v, depth + 1));
+
+  // Error instances have non-enumerable message/stack — Object.entries returns
+  // empty. Serialize manually so stack trace survives into the log output.
+  if (input instanceof Error) {
+    return {
+      name: input.name,
+      message: input.message,
+      stack: input.stack,
+      ...(input.cause !== undefined
+        ? { cause: redactWalk(input.cause, depth + 1) }
+        : {}),
+    };
+  }
 
   const out: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(input as Record<string, unknown>)) {

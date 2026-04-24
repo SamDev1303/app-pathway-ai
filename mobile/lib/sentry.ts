@@ -27,6 +27,19 @@ function scrubObject(obj: Record<string, unknown> | undefined | null): void {
   }
 }
 
+const PII_RE = /[\w.+-]+@[\w-]+\.[\w.-]+|\+?\d[\d\s()-]{7,}/g;
+const SENSITIVE_QS_KEY_RE = /email|phone|user[_]?message|consent|notes/i;
+
+function scrubString(s: string | undefined | null): string | undefined {
+  if (typeof s !== "string") return s ?? undefined;
+  let out = s.replace(PII_RE, "[Redacted]");
+  out = out.replace(/([?&])([^=&]+)=([^&]*)/g, (m, sep, k) => {
+    if (SENSITIVE_QS_KEY_RE.test(k)) return `${sep}${k}=[Redacted]`;
+    return m;
+  });
+  return out;
+}
+
 let _initialized = false;
 
 export function initSentry(): void {
@@ -51,6 +64,25 @@ export function initSentry(): void {
       scrubObject(event.extra as Record<string, unknown>);
       scrubObject(event.contexts as Record<string, unknown>);
       scrubObject(event.tags as Record<string, unknown>);
+
+      // String-bearing fields: scrubObject only walks object keys.
+      if (event.message) event.message = scrubString(event.message) ?? event.message;
+      if (event.user) {
+        if (event.user.email) event.user.email = "[Redacted]";
+        if (event.user.username) event.user.username = scrubString(event.user.username) ?? event.user.username;
+        if (event.user.ip_address) delete event.user.ip_address;
+      }
+      if (event.exception?.values) {
+        for (const ex of event.exception.values) {
+          if (ex.value) ex.value = scrubString(ex.value) ?? ex.value;
+        }
+      }
+      if (event.breadcrumbs) {
+        for (const bc of event.breadcrumbs) {
+          if (bc.message) bc.message = scrubString(bc.message) ?? bc.message;
+          if (bc.data) scrubObject(bc.data);
+        }
+      }
       return event;
     },
 

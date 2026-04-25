@@ -262,6 +262,13 @@ export function LeadModal({
       }
       setStatus("success");
       clearDraft();
+      // Smart-client demo path: as soon as the lead row + match_token come
+      // back, jump straight to the ranked /matches/[token] page so the
+      // student sees their ranked universities, not a generic "thanks" card.
+      // The success render still appears for the brief navigation gap.
+      if (typeof window !== "undefined" && typeof data.match_token === "string") {
+        window.location.assign(`/matches/${data.match_token}`);
+      }
     } catch {
       setStatus("error");
       setErrorMsg("Network issue. Please try again or call our Liverpool office.");

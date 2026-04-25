@@ -364,14 +364,12 @@ export async function POST(req: Request) {
     });
   } catch (err) {
     log.error({ err, sessionId }, "chat error");
-    return new Response(
-      JSON.stringify({
-        error:
-          CHAT_MARA_DEFLECTION_RESPONSE +
-          "\n\n" +
-          CHAT_PER_TURN_FOOTER,
-      }),
-      { status: 503, headers: { "Content-Type": "application/json" } },
+    // Use SSE deflection stream so the client UI renders a graceful MARA-safe
+    // fallback instead of a hard error envelope. Helper handles the
+    // text-delta + finish frames + ai-message-stream header.
+    return deflectionStreamResponse(
+      { error: true },
+      CHAT_MARA_DEFLECTION_RESPONSE,
     );
   }
 }

@@ -88,7 +88,7 @@ export function Footer() {
             <p className="mt-2 text-xs text-[var(--color-cream)]/60 leading-relaxed">
               Operated under UniMate Pty Ltd's MARA registration.{" "}
               <a
-                href="https://www.mara.gov.au/search-the-register-of-migration-agents/"
+                href="https://portal.mara.gov.au/search-the-register-of-migration-agents/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline hover:text-[var(--color-gold-400)]"

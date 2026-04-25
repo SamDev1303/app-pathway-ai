@@ -76,7 +76,7 @@ export const footer = {
   },
   legal: [
     "© 2026 Atlas AI — powered by UniMate Pty Ltd, Liverpool NSW.",
-    "Operated under UniMate's MARA registration. Search the public register: https://www.mara.gov.au/search-the-register-of-migration-agents/",
+    "Operated under UniMate's MARA registration. Search the public register: https://portal.mara.gov.au/search-the-register-of-migration-agents/",
     "Atlas AI is an information and matching service. It is not migration advice. Consult a registered MARA agent for binding advice.",
   ],
 } as const;

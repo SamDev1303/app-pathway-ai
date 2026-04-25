@@ -98,7 +98,7 @@ export default function LoginPage() {
 
             <p className="text-[10px] text-[var(--color-navy-950)]/55 text-center pt-1">
               Atlas AI uses Supabase Auth for sign-in. Your email is stored with
-              UniMate (MARN [PENDING_FROM_UNIMATE]) per the Privacy Act 1988 (Cth).
+              UniMate Pty Ltd (MARA-registered) per the Privacy Act 1988 (Cth).
             </p>
           </form>
         )}

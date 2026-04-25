@@ -70,10 +70,10 @@ export function Footer() {
             <span>→</span>
           </button>
           <a
-            href={`tel:${brand.phone.replace(/\s/g, "")}`}
+            href={`mailto:${brand.email}`}
             className="inline-flex items-center justify-center gap-2 border border-[var(--color-cream)]/30 hover:border-[var(--color-gold-400)] text-[var(--color-cream)] px-8 py-4 font-display text-xl transition-colors"
           >
-            {brand.phone}
+            {brand.email}
           </a>
         </div>
 
@@ -86,17 +86,26 @@ export function Footer() {
               {brand.mara_number}
             </p>
             <p className="mt-2 text-xs text-[var(--color-cream)]/60 leading-relaxed">
-              Migration Agents Registration Authority — the Australian Government regulator for migration advice.
+              Operated under UniMate Pty Ltd's MARA registration.{" "}
+              <a
+                href="https://www.mara.gov.au/search-the-register-of-migration-agents/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-[var(--color-gold-400)]"
+              >
+                Search the public register
+              </a>
+              .
             </p>
           </div>
           <div>
             <p className="eyebrow" style={{ color: "var(--color-gold-400)" }}>
-              QEAC + ABN
+              QEAC certified
             </p>
             <p className="mt-3 text-sm text-[var(--color-cream)]/85 leading-relaxed">
               {brand.qeac_number}
               <br />
-              ABN [PENDING_FROM_UNIMATE]
+              Atlas AI is information & matching only — not migration advice.
             </p>
           </div>
           <div>

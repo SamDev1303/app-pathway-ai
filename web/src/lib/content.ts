@@ -9,10 +9,10 @@ export const brand = {
   poweredBy: "Powered by UniMate Pty Ltd",
   established: "Established 2018",
   city: "Liverpool, NSW",
-  mara_number: "MARN [PENDING_FROM_UNIMATE]",
-  qeac_number: "QEAC [PENDING_FROM_UNIMATE]",
+  mara_number: "MARA-registered (UniMate Pty Ltd)",
+  qeac_number: "QEAC-certified counsellor on staff",
   email: "hello@atlasai.com.au",
-  phone: "+61 2 {PENDING}",
+  phone: "Liverpool NSW office",
   address: "Level 2, 99 Macquarie Street, Liverpool NSW 2170",
 } as const;
 
@@ -21,7 +21,7 @@ export const hero = {
   headline: "Find your Australian university in",
   headlineEm: "thirty seconds.",
   subhead:
-    "No signup. No forms. No waiting. Three questions, three CRICOS-registered matches from Group of Eight and regional Australian universities.",
+    "Tell us your GPA, IELTS, and budget. Get ranked CRICOS-registered matches from Group of Eight and regional Australian universities — drawn from Atlas AI's curated dataset.",
   metadata: {
     title: "UniMate Pty Ltd — MARA-registered education consultancy",
     location: "Liverpool, NSW",
@@ -35,7 +35,7 @@ export const matcherSection = {
   headline2: "Three universities.",
   headline3: "Thirty seconds.",
   subhead:
-    "Powered by 40 Group of Eight and regional Australian universities. Real CRICOS-registered courses with real fees — no paid placements.",
+    "Curated from Group of Eight and regional Australian universities. Real CRICOS-registered courses with real fees — no paid placements. Dataset expands with each engagement.",
 } as const;
 
 export const trust = {
@@ -61,8 +61,8 @@ export const trust = {
 } as const;
 
 export const stats = [
-  { value: 40, suffix: "+", label: "Australian universities" },
-  { value: 117, suffix: "", label: "Flagship courses indexed" },
+  { value: 17, suffix: "", label: "Universities seeded (expanding to 43)" },
+  { value: 68, suffix: "", label: "Flagship courses indexed" },
   { value: 30, suffix: "s", label: "Average match time" },
   { value: 2018, suffix: "", label: "Partner est." },
 ] as const;
@@ -75,9 +75,8 @@ export const footer = {
     button: "Book a free consultation",
   },
   legal: [
-    "© 2026 Atlas AI — powered by UniMate Pty Ltd. ABN [PENDING_FROM_UNIMATE].",
-    "MARN [PENDING_FROM_UNIMATE] — Migration Agents Registration Authority (UniMate Pty Ltd)",
-    "QEAC {PENDING} — Qualified Education Agent Counsellor",
+    "© 2026 Atlas AI — powered by UniMate Pty Ltd, Liverpool NSW.",
+    "Operated under UniMate's MARA registration. Search the public register: https://www.mara.gov.au/search-the-register-of-migration-agents/",
     "Atlas AI is an information and matching service. It is not migration advice. Consult a registered MARA agent for binding advice.",
   ],
 } as const;

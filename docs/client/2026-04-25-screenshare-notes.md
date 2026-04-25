@@ -26,8 +26,8 @@
 | Step | URL / file | What they see | Time |
 |---|---|---|---|
 | 1 | atlas-ai.vercel.app | Landing page + MARA footer | 30s |
-| 2 | atlas-ai.vercel.app/matches | Lead form (5 steps) | 60s |
-| 3 | Submit → match token | Ranked university list | 30s |
+| 2 | Click "Find your match" CTA on landing | Lead form (5 steps) — submitting redirects to `/matches/[token]` | 60s |
+| 3 | Auto-redirect to `/matches/[token]` | Ranked university list | 30s |
 | 4 | atlas-ai.vercel.app/chat | Ask "what's a good IT course in Sydney?" → streamed RAG answer with source citations | 60s |
 | 5 | Same page: ask "can I get PR after this?" | Instant deflection to MARA agent + audit row written | 30s |
 | 6 | IDE: open `web/src/lib/logger.ts` + `sentry.server.config.ts` | Show 3-layer redaction + scrubString | 60s |

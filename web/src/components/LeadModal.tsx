@@ -410,7 +410,7 @@ export function LeadModal({
                     </div>
 
                     <p className="text-[10px] text-[var(--color-navy-950)]/55 text-center pt-4">
-                      MARN [PENDING_FROM_UNIMATE] · QEAC [PENDING_FROM_UNIMATE] · ABN [PENDING_FROM_UNIMATE]
+                      MARA-registered · QEAC-certified · UniMate Pty Ltd, Liverpool NSW
                     </p>
                   </form>
                 </>

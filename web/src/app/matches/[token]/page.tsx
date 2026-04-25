@@ -2,6 +2,9 @@ import { Suspense } from "react";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { MatchesJsonbSchema } from "@/lib/match-schema";
 import { TOKEN_TTL_MINUTES } from "@/lib/match-weights";
+import { logger } from "@/lib/logger";
+
+const log = logger.child({ route: "/matches/[token]" });
 import { MaraBanner } from "@/components/matches/MaraBanner";
 import { MatchesHero } from "@/components/matches/MatchesHero";
 import { MatchList } from "@/components/matches/MatchList";
@@ -64,7 +67,7 @@ async function MatchesContent({ params }: { params: Promise<{ token: string }> }
     .maybeSingle();
 
   if (error) {
-    console.error("[atlas-ai.matches] lookup failed", { token, error });
+    log.error({ token, err: error }, "lookup failed");
     return <NotFoundFallback />;
   }
   if (!lead) {
@@ -81,10 +84,7 @@ async function MatchesContent({ params }: { params: Promise<{ token: string }> }
   // Validate jsonb shape (Landmine #10 — Zod parse on read)
   const parsed = MatchesJsonbSchema.safeParse(lead.matches);
   if (!parsed.success) {
-    console.error("[atlas-ai.matches] jsonb schema drift", {
-      token,
-      issues: parsed.error.issues,
-    });
+    log.error({ token, issues: parsed.error.issues }, "jsonb schema drift");
     return <PendingMatches leadId={lead.id} email={lead.email} />;
   }
   const matches = parsed.data;

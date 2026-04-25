@@ -194,7 +194,10 @@ async function sendNotificationEmails({
   const fromEmail =
     process.env.RESEND_FROM_EMAIL ?? "UniMate <onboarding@resend.dev>";
 
-  const notifyRaw = process.env.LEAD_NOTIFY_EMAILS ?? "sam@claudeking.org";
+  const notifyRaw =
+    process.env.LEAD_NOTIFY_EMAILS ??
+    process.env.ADMIN_NOTIFICATION_EMAIL ??
+    "sam@claudeking.org";
   const recipients = notifyRaw
     .split(",")
     .map((s) => s.trim())

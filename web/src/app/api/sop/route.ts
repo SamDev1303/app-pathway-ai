@@ -22,6 +22,7 @@
 import { streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { z } from "zod";
 import {
   SOP_SYSTEM_PROMPT_V1,
   SOP_SYSTEM_PROMPT_VERSION,
@@ -33,6 +34,8 @@ import { scanForDeflection } from "@/lib/chat-deflection";
 import { CHAT_MARA_DEFLECTION_RESPONSE } from "@/lib/chat-system-prompt";
 import { logger } from "@/lib/logger";
 import { checkSopRateLimit, SOP_RATE_LIMIT_MESSAGE } from "@/lib/ratelimit";
+
+const LeadTokenSchema = z.uuid();
 
 const log = logger.child({ route: "/api/sop" });
 
@@ -321,9 +324,10 @@ export async function POST(req: Request) {
   const startedAt = Date.now();
   try {
     const body = (await req.json()) as Partial<SopRequest>;
-    if (!body.leadToken || typeof body.leadToken !== "string") {
+    const tokenParse = LeadTokenSchema.safeParse(body.leadToken);
+    if (!tokenParse.success) {
       return Response.json(
-        { error: "Missing leadToken" },
+        { error: "Invalid leadToken (expected uuid)" },
         { status: 400 },
       );
     }

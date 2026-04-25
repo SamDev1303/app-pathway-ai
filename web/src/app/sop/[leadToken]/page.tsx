@@ -3,6 +3,9 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import { SopEditor } from "./SopEditor";
 import type { SopEditorLead, SopEditorDraft } from "./SopEditor";
 import { NotFoundFallback } from "@/components/matches/NotFoundFallback";
+import { logger } from "@/lib/logger";
+
+const log = logger.child({ route: "/sop/[leadToken]" });
 
 // Mirrors /matches/[token]/page.tsx posture for Next 16 Cache Components.
 // Dynamic params + uncached Supabase read → MUST live under <Suspense>.
@@ -50,10 +53,7 @@ async function SopContent({
     .maybeSingle();
 
   if (error) {
-    console.error("[atlas-ai.sop-page] lookup failed", {
-      leadToken,
-      error: error.message,
-    });
+    log.error({ leadToken, err: error.message }, "lookup failed");
     return <NotFoundFallback />;
   }
   if (!lead) {

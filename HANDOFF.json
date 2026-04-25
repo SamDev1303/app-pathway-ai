@@ -1,0 +1,41 @@
+{
+  "project": "atlas-ai",
+  "status": "paused",
+  "paused_at": "2026-04-25T10:30:00+10:00",
+  "reason": "pre-client-meeting closeout (meeting 2026-04-25 15:30 AEST)",
+  "current_phase": {
+    "id": "5.5",
+    "name": "observability",
+    "status": "done",
+    "shipped_commits": 8,
+    "pushed": true
+  },
+  "next_phase": {
+    "id": "6",
+    "name": "sop-generator",
+    "status": "blocked",
+    "estimated_days": 1,
+    "blocked_on": "client meeting decision re: analytics dashboard sequencing"
+  },
+  "blocked_on_client": [
+    "analytics dashboard build choice",
+    "auth provider (magic-link / Google SSO / both)",
+    "dataset source (Sydney pilot vs 43-uni backfill)",
+    "domain (atlasai.com.au vs subdomain)",
+    "AI provider (direct Anthropic vs AI Gateway)",
+    "launch date",
+    "MARA reg# + ABN values"
+  ],
+  "audits": {
+    "gideon_workspace_audit": "~/Desktop/Gideon/drafts/koda-handoff-2026-04-25-workspace-audit.md"
+  },
+  "resume": {
+    "command": "/gsd-resume-work",
+    "first_steps": [
+      "read gideon workspace audit, apply any BLOCK fixes",
+      "capture meeting decisions to docs/client/2026-04-25-meeting-decisions.md",
+      "re-size P6 vs analytics decision",
+      "/gsd-discuss-phase 6"
+    ]
+  }
+}

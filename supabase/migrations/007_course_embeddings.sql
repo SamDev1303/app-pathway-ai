@@ -18,12 +18,15 @@ CREATE TABLE IF NOT EXISTS course_embeddings (
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 
--- HNSW cosine index for fast semantic search.
--- m=16, ef_construction=64 balances build time + recall for ~200-row scale.
-CREATE INDEX IF NOT EXISTS idx_course_embeddings_hnsw
-  ON course_embeddings
-  USING hnsw (embedding vector_cosine_ops)
-  WITH (m = 16, ef_construction = 64);
+-- NOTE 2026-04-25: HNSW removed — pgvector caps HNSW at 2000 dims and Gemini
+-- `gemini-embedding-001` is 3072-dim. At 17-uni / ~68-course scale a linear
+-- scan over `<=>` is sub-millisecond, so no index is the right call. When we
+-- backfill to 43+ unis, switch to IVFFlat (supports >2000 dims) or truncate
+-- the embedding to 2000 dims via Matryoshka before storing.
+-- CREATE INDEX IF NOT EXISTS idx_course_embeddings_hnsw
+--   ON course_embeddings
+--   USING hnsw (embedding vector_cosine_ops)
+--   WITH (m = 16, ef_construction = 64);
 
 -- ================================================================
 -- RPC: match_courses_for_chat — pgvector cosine similarity search

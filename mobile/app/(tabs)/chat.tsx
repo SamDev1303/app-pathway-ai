@@ -167,7 +167,7 @@ export default function ChatScreen() {
  Pathway-AI Counsel
  </Text>
  <Text style={[typography.body, { marginTop: 8, fontSize: 14, lineHeight: 22, color: "rgba(255,255,255,0.92)" }]}>
- Ask a migration-study question. Powered by -trained guidance.
+ Ask about Australian universities, courses, IELTS, and study pathways.
  </Text>
  </View>
  </View>
@@ -255,7 +255,7 @@ export default function ChatScreen() {
  <TextInput
  value={input}
  onChangeText={setInput}
- placeholder="Ask about visas, IELTS, Group of Eight…"
+ placeholder="Ask about courses, IELTS, Group of Eight…"
  placeholderTextColor="#8892b4"
  style={{
  flex: 1,

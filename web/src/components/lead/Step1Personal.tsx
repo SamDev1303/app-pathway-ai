@@ -16,9 +16,9 @@ export function Step1Personal({ values, onChange }: StepProps) {
  Collection notice (APP 5)
  </p>
  <p className="mt-1.5 text-xs text-[var(--color-navy-950)]/80 leading-relaxed">
- Pathway-AI Australia (registered, QEAC-certified, ) collects this information so our
- registered counsellors can respond. <strong>Nothing is stored on our servers until you
- tick consent on the final step.</strong>
+ Pathway-AI collects this information so our advisors can respond.
+ <strong>Nothing is stored on our servers until you tick consent on the
+ final step.</strong>
  </p>
  <p className="mt-1.5 text-xs text-[var(--color-navy-950)]/70 leading-relaxed">
  Progress is saved to this browser only — clearing browser data, private mode, or switching

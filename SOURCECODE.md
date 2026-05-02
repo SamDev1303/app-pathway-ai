@@ -304,11 +304,13 @@ Production: managed via `vercel env`. Never commit `.env.local`.
 **Built:** Expo SDK 54, expo-router tabs (5 tabs: index, match, profile, chat, sop), Sentry wired, theme + haptics + icons primitives.
 
 **NOT yet wired:**
-- Bundle ID still `cloud.claudeking.unimate` and display name `Pathway-AI Australia` (P7 rebrand pending).
-- `mobile/lib/api.ts` hardcodes `https://unimate-demo.vercel.app` — needs to point at `pathway-ai.vercel.app` (or env-gated).
 - Mobile uses `mockData.ts`, not the live `match_unis_for_lead` RPC.
-- Chat tab placeholder still mentions "visas" — needs -safe rewrite to match web side.
-- `mobile/tunnel-demo.sh` references stale path `~/Desktop/Unimate-demo/mobile`.
+- `mobile/tunnel-demo.sh` references stale path — needs update to `~/Desktop/AppHeaven/A-tier/Pathway-AI/code/mobile`.
+
+**Done in 2026-05-02 rebrand:**
+- Bundle ID, slug, scheme rebranded to `pathway-ai` / `cloud.claudeking.pathwayai`.
+- `mobile/lib/api.ts` API_BASE points at `pathway-ai.vercel.app`.
+- Chat tab copy rewritten to drop visa/migration phrasing.
 
 **Planned in P7 (mobile rebrand) + parallelizable with P6:**
 1. Rename bundle / app.json / package name → pathway-ai.

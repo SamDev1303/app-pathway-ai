@@ -77,27 +77,7 @@ export function Footer() {
  </a>
  </div>
 
- <div className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-10 pt-10 border-t border-[var(--color-cream)]/15">
- <div className="md:col-span-1">
- <p className="eyebrow" style={{ color: "var(--color-gold-400)" }}>
- registered
- </p>
- <p className="mt-3 font-display text-2xl text-[var(--color-cream)]">
- {brand.mara_number}
- </p>
- <p className="mt-2 text-xs text-[var(--color-cream)]/60 leading-relaxed">
- Operated under Pathway-AI's registration.{" "}
- <a
- href="https://portal.mara.gov.au/search-the-register-of-migration-agents/"
- target="_blank"
- rel="noopener noreferrer"
- className="underline hover:text-[var(--color-gold-400)]"
- >
- Search the public register
- </a>
- .
- </p>
- </div>
+ <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-10 pt-10 border-t border-[var(--color-cream)]/15">
  <div>
  <p className="eyebrow" style={{ color: "var(--color-gold-400)" }}>
  QEAC certified
@@ -105,19 +85,15 @@ export function Footer() {
  <p className="mt-3 text-sm text-[var(--color-cream)]/85 leading-relaxed">
  {brand.qeac_number}
  <br />
- Pathway-AI is information & matching only — not migration advice.
+ Pathway-AI is educational information & matching only — not migration advice.
  </p>
  </div>
  <div>
  <p className="eyebrow" style={{ color: "var(--color-gold-400)" }}>
- Office
+ Contact
  </p>
  <p className="mt-3 text-sm text-[var(--color-cream)]/85 leading-relaxed">
- {brand.address}
- <br />
  {brand.email}
- <br />
- {brand.phone}
  </p>
  </div>
  </div>

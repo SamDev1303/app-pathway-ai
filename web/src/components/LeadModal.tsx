@@ -417,7 +417,7 @@ export function LeadModal({
  </div>
 
  <p className="text-[10px] text-[var(--color-navy-950)]/55 text-center pt-4">
- registered · QEAC-certified · Pathway-AI, 
+ Pathway-AI · QEAC-certified counsellor on staff
  </p>
  </form>
  </>

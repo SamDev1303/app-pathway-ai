@@ -1,19 +1,17 @@
 // Pathway-AI landing copy.
-// -safe: NO migration/visa advice claims. No PR/visa success stats.
-// Client's /QEAC numbers are placeholders until Pathway-AI provides them.
+// No migration/visa advice claims. No PR/visa success stats.
 
 export const brand = {
  name: "Pathway-AI",
  tagline: "for Australian study",
  full: "Pathway-AI",
- poweredBy: "Powered by Pathway-AI",
- established: "Established 2018",
- city: "",
- mara_number: "registered (Pathway-AI)",
+ poweredBy: "Pathway-AI",
+ established: "Established 2026",
+ city: "Sydney",
  qeac_number: "QEAC-certified counsellor on staff",
- email: "hello@atlasai.com.au",
- phone: " office",
- address: "Level 2, 99 Macquarie Street, 2170",
+ email: "hello@pathway-ai.com",
+ phone: "",
+ address: "",
 } as const;
 
 export const hero = {
@@ -23,9 +21,9 @@ export const hero = {
  subhead:
  "Tell us your GPA, IELTS, and budget. Get ranked CRICOS-registered matches from Group of Eight and regional Australian universities — drawn from Pathway-AI's curated dataset.",
  metadata: {
- title: "Pathway-AI — registered education consultancy",
- location: "",
- since: "Since 2018",
+ title: "Pathway-AI — AI study-abroad advisor for Australia",
+ location: "Sydney",
+ since: "Since 2026",
  },
 } as const;
 
@@ -39,14 +37,9 @@ export const matcherSection = {
 } as const;
 
 export const trust = {
- eyebrow: "Registered & Certified",
- tagline: "Built with a registered partner.",
+ eyebrow: "Built on real data",
+ tagline: "Australian universities, indexed.",
  credentials: [
- {
- label: "",
- number: brand.mara_number,
- caption: "Migration Agents Registration Authority (Pathway-AI)",
- },
  {
  label: "QEAC",
  number: brand.qeac_number,
@@ -64,19 +57,18 @@ export const stats = [
  { value: 17, suffix: "", label: "Universities seeded (expanding to 43)" },
  { value: 68, suffix: "", label: "Flagship courses indexed" },
  { value: 30, suffix: "s", label: "Average match time" },
- { value: 2018, suffix: "", label: "Partner est." },
+ { value: 2026, suffix: "", label: "Founded" },
 ] as const;
 
 export const footer = {
  cta: {
- eyebrow: "Ready to talk to a real counsellor?",
- headline: "Bring your match to Pathway-AI's office.",
- sub: "Walk in with your three matches. Talk to a registered agent about your options. Pathway-AI is not migration advice — your Pathway-AI counsellor is.",
+ eyebrow: "Ready to talk to a real advisor?",
+ headline: "Talk to a Pathway-AI advisor.",
+ sub: "Bring your three matches. Talk to a Pathway-AI advisor about your study options. For visa or migration questions we will refer you to a licensed migration agent.",
  button: "Book a free consultation",
  },
  legal: [
- "© 2026 Pathway-AI — powered by Pathway-AI, .",
- "Operated under Pathway-AI's registration. Search the public register: https://portal.mara.gov.au/search-the-register-of-migration-agents/",
- "Pathway-AI is an information and matching service. It is not migration advice. Consult a registered advisor for binding advice.",
+ "© 2026 Pathway-AI.",
+ "Pathway-AI is an educational information and matching service. It is not migration advice. For visa, migration, or PR questions, consult a licensed migration agent.",
  ],
 } as const;

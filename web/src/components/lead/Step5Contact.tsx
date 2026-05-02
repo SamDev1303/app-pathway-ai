@@ -24,9 +24,9 @@ function CollectionNotice() {
  return (
  <div className="text-[11px] text-[var(--color-navy-950)]/75 pt-2 leading-relaxed space-y-2">
  <p>
- <span className="font-semibold">Collection notice (APP 5).</span> Pathway-AI Australia
- (registered, QEAC-certified, ) collects the information on this form so our
- registered counsellors can contact you about your enquiry.
+ <span className="font-semibold">Collection notice (APP 5).</span> Pathway-AI
+ collects the information on this form so our advisors can contact you about
+ your enquiry.
  </p>
  <p>
  <span className="font-semibold">Why we need it.</span> Your name, email, and phone are required
@@ -34,7 +34,7 @@ function CollectionNotice() {
  </p>
  <p>
  <span className="font-semibold">Who we share it with.</span> Your details stay with
- Pathway-AI&apos;s counsellors and the service providers who help us operate this platform
+ Pathway-AI&apos;s advisors and the service providers who help us operate this platform
  (email + database hosting). We do not sell or disclose your information to third-party
  marketers. Disclosure may occur where required by Australian law.
  </p>
@@ -47,7 +47,7 @@ function CollectionNotice() {
  <p>
  <span className="font-semibold">Your rights.</span> You can request access or correction,
  or ask us to delete your record, by emailing{" "}
- <a className="underline" href="mailto:privacy@unimate.com.au">privacy@unimate.com.au</a>.
+ <a className="underline" href="mailto:hello@pathway-ai.com">hello@pathway-ai.com</a>.
  Our full APP Privacy Policy is available on request.
  </p>
  <p>

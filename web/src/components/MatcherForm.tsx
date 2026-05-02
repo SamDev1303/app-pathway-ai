@@ -260,10 +260,9 @@ function ResultsView({ results, onBook }: { results: MatchResponse; onBook: () =
  <p className="text-xs text-[var(--color-navy-700)] leading-relaxed max-w-3xl mx-auto text-center italic">
  <span className="font-semibold">Indicative only.</span> Match scores
  are based on published 2025 IELTS, GPA, and tuition data and do not
- guarantee admission. Pathway-AI is an information and matching service;
- it is not migration advice. Pathway-AI Australia is a registered
- migration consultancy. For binding eligibility or
- migration advice, book a free consultation at our office.
+ guarantee admission. Pathway-AI is an educational information and
+ matching service; it is not migration advice. For visa or migration
+ questions, consult a licensed migration agent.
  </p>
  </div>
  </div>

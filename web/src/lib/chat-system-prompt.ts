@@ -40,7 +40,7 @@ export const CHAT_MARA_DEFLECTION_RESPONSE =
  * Satisfies PHASE.md P4.5 task #4 (per-turn chat-message footer disclaimer).
  */
 export const CHAT_PER_TURN_FOOTER =
- "Educational information only, not migration advice. For visas or PR, consult a advisor.";
+ "Educational information only, not migration advice. For visas or PR, consult a licensed migration agent.";
 
 export const CHAT_SYSTEM_PROMPT_V1 = `
 You are Pathway-AI, an educational guidance assistant for Australian universities.

@@ -1,8 +1,8 @@
 // Pathway-AI mobile → web API client.
-// All endpoints live on the deployed web app (unimate-demo.vercel.app).
+// All endpoints live on the deployed web app (pathway-ai.vercel.app).
 // Mobile never talks to OpenRouter directly — keeps keys server-side only.
 
-const API_BASE = "https://unimate-demo.vercel.app";
+const API_BASE = "https://pathway-ai.vercel.app";
 
 // Client-side hard timeouts prevent the demo UI from hanging on weak venue wifi.
 // Chat is interactive and should feel snappy — shorter cap. SOP is a longer

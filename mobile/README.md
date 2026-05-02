@@ -1,10 +1,10 @@
-# Pathway-AI Australia Mobile
+# Pathway-AI Mobile
 
-Expo SDK 55 demo app for an AI-powered migration consultancy concept.
+Expo SDK 54 mobile app for the Pathway-AI study-abroad advisor.
 
 ## Stack
 
-- Expo SDK 55
+- Expo SDK 54
 - Expo Router tabs
 - TypeScript
 - NativeWind v4
@@ -14,7 +14,7 @@ Expo SDK 55 demo app for an AI-powered migration consultancy concept.
 
 ## Quickstart
 
-1. `cd /Users/shamalkrishna/Desktop/claudeking.cloud/unimate-mobile`
+1. `cd ~/Desktop/AppHeaven/A-tier/Pathway-AI/code/mobile`
 2. `npm install`
 3. `npx expo start --tunnel`
 4. Open Expo Go on your phone

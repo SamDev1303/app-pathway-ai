@@ -188,7 +188,7 @@ function deflectionStreamResponse(
 function buildSystemPrompt(retrieved: RetrievedCourse[]): string {
  const base = CHAT_SYSTEM_PROMPT_V1;
  if (retrieved.length === 0) {
- return `${base}\n\n<no_hits/>\nThe user's question has no matching courses in the Atlas dataset. Honestly say the dataset doesn't cover it and offer a /consult booking. Do NOT fabricate universities or courses.`;
+ return `${base}\n\n<no_hits/>\nThe user's question has no matching courses in the Pathway-AI dataset. Honestly say the dataset doesn't cover it and offer a /consult booking. Do NOT fabricate universities or courses.`;
  }
  const rows = retrieved
  .map(

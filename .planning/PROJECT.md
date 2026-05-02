@@ -4,12 +4,12 @@ This file satisfies the GSD `.planning/` scaffold requirement. Canonical content
 
 | Meta | Value |
 |---|---|
-| Project | Pathway-AI v1 |
-| Client | Pathway-AI (Sydney NSW, /QEAC licensed) |
-| Product type | No-code / low-code web + companion Expo app |
-| Budget | $3,000 AUD fixed (HARD-CUT — see PRD §3) |
-| Timeline | 3 weeks from 50% deposit |
+| Project | Pathway-AI |
+| Owner | Koda Labs (own SaaS product) |
+| Product type | AI study-abroad advisor for Australian universities — Next.js web + Expo mobile |
+| Status | v1 shipped 2026-04 (under former working title `Atlas AI`); rebranded to Pathway-AI 2026-05-02; v2 scope TBD |
 | Requirements | → [`../PRD.md`](../PRD.md) |
+| v1 research summary | → [`../_reference/v1-research-summary.md`](../_reference/v1-research-summary.md) |
 | Roadmap | → [`../PHASE.md`](../PHASE.md) |
 | Architecture | → [`../SOURCECODE.md`](../SOURCECODE.md) |
 | Governance | → [`../CLAUDE.md`](../CLAUDE.md) |

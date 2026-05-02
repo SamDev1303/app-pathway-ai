@@ -9,10 +9,10 @@
 
 ### ✅ DONE by Koda
 1. `web/.env.local` written with Sam's Supabase creds (gitignored):
-   - URL: `https://szuqcptsmmgycvagteza.supabase.co`
-   - Legacy JWT anon key (`NEXT_PUBLIC_SUPABASE_ANON_KEY`)
-   - Legacy JWT service_role key (`SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_SERVICE_KEY` for backward-compat)
-   - New v2 keys (`SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`)
+ - URL: `https://szuqcptsmmgycvagteza.supabase.co`
+ - Legacy JWT anon key (`NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+ - Legacy JWT service_role key (`SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_SERVICE_KEY` for backward-compat)
+ - New v2 keys (`SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`)
 2. Schema staged: `supabase/migrations/001_initial_schema.sql` (universities + courses + leads + embeddings + pgvector + RLS)
 3. Seed data staged: `web/src/lib/universities-seed.ts` (43 AU universities, renamed `industry_placement`)
 
@@ -20,23 +20,23 @@
 The following require Sam's dashboard access or terminal — cannot be done autonomously by Koda:
 
 1. **Confirm region = `ap-southeast-2`** (Sydney)
-   - Open: https://supabase.com/dashboard/project/szuqcptsmmgycvagteza/settings/general
-   - Required per PRD §6 (data residency — Privacy Act 1988 + MARA Code of Conduct)
-   - **If region is different:** project needs to be recreated in `ap-southeast-2` before any PII lands in it
+ - Open: https://supabase.com/dashboard/project/szuqcptsmmgycvagteza/settings/general
+ - Required per PRD §6 (data residency — Privacy Act 1988 + Code of Conduct)
+ - **If region is different:** project needs to be recreated in `ap-southeast-2` before any PII lands in it
 
 2. **Enable pgvector extension**
-   - Open: https://supabase.com/dashboard/project/szuqcptsmmgycvagteza/database/extensions
-   - Search "vector" → toggle ON
-   - Required — the migration will fail without it
+ - Open: https://supabase.com/dashboard/project/szuqcptsmmgycvagteza/database/extensions
+ - Search "vector" → toggle ON
+ - Required — the migration will fail without it
 
 3. **Provide DB password** for `supabase link`
-   - Retrieve from: https://supabase.com/dashboard/project/szuqcptsmmgycvagteza/settings/database (under "Database password")
-   - Format: paste the password into a Telegram message OR add it to `web/.env.local` as `SUPABASE_DB_PASSWORD=...`
+ - Retrieve from: https://supabase.com/dashboard/project/szuqcptsmmgycvagteza/settings/database (under "Database password")
+ - Format: paste the password into a Telegram message OR add it to `web/.env.local` as `SUPABASE_DB_PASSWORD=...`
 
 4. **CLI login on the new account**
-   - Run in terminal: `supabase login`
-   - Browser opens for OAuth with the Supabase account owning project `szuqcptsmmgycvagteza`
-   - NOT the same account currently logged into the CLI — must re-auth
+ - Run in terminal: `supabase login`
+ - Browser opens for OAuth with the Supabase account owning project `szuqcptsmmgycvagteza`
+ - NOT the same account currently logged into the CLI — must re-auth
 
 ---
 
@@ -44,7 +44,7 @@ The following require Sam's dashboard access or terminal — cannot be done auto
 
 ### Step 1: Link + Apply migration
 ```bash
-cd ~/Desktop/atlas-ai
+cd ~/Desktop/pathway-ai
 supabase link --project-ref szuqcptsmmgycvagteza
 # Enter DB password when prompted
 
@@ -64,7 +64,7 @@ supabase db dump --schema public
 ### Step 3: Seed the 43 universities
 ```bash
 # Write the seed script (not yet committed — P1 execution task)
-cd ~/Desktop/atlas-ai
+cd ~/Desktop/pathway-ai
 # Script TBD: scripts/seed-universities.ts
 # Reads web/src/lib/universities-seed.ts
 # Uses SUPABASE_SERVICE_ROLE_KEY to bypass RLS
@@ -103,8 +103,8 @@ Dual-seat: Gideon (primary) + Specter (fallback since Neo OpenCode is flaky).
 | What | Where |
 |---|---|
 | Supabase project | https://supabase.com/dashboard/project/szuqcptsmmgycvagteza |
-| Env file | `~/Desktop/atlas-ai/web/.env.local` (gitignored) |
-| Schema | `~/Desktop/atlas-ai/supabase/migrations/001_initial_schema.sql` |
-| Seed | `~/Desktop/atlas-ai/web/src/lib/universities-seed.ts` |
-| PRD region rule | `~/Desktop/atlas-ai/PRD.md` §6 |
-| Approval | `~/Desktop/atlas-ai/planning/atlas-ai/APPROVAL.md` |
+| Env file | `~/Desktop/pathway-ai/web/.env.local` (gitignored) |
+| Schema | `~/Desktop/pathway-ai/supabase/migrations/001_initial_schema.sql` |
+| Seed | `~/Desktop/pathway-ai/web/src/lib/universities-seed.ts` |
+| PRD region rule | `~/Desktop/pathway-ai/PRD.md` §6 |
+| Approval | `~/Desktop/pathway-ai/planning/pathway-ai/APPROVAL.md` |

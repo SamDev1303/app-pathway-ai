@@ -1,4 +1,4 @@
-# Org Synthesis — Atlas AI University Data: Verify + Expand
+# Org Synthesis — Pathway-AI University Data: Verify + Expand
 
 **Date:** 2026-04-20 02:30 AEST
 **Agents dispatched:** 3/3 responded (Atlas Gemini, Sonnet, Haiku — web-search-capable subset)
@@ -8,11 +8,11 @@
 
 ## Consensus
 
-1. **All 12 seeded CRICOS provider codes are accurate.** Haiku verified 4 G8 codes directly against the MARA/Department register; Sonnet verified all 12. Zero discrepancies. Fake-MARN incident (Wave 0) did NOT extend to CRICOS codes — those are real.
+1. **All 12 seeded CRICOS provider codes are accurate.** Haiku verified 4 G8 codes directly against the /Department register; Sonnet verified all 12. Zero discrepancies. Fake-incident (Wave 0) did NOT extend to CRICOS codes — those are real.
 
 2. **QS 2025 rankings for the 12 unis need 2 corrections.** Seed holds stale values:
-   - **WSU:** 376 → 384 (off by 8)
-   - **RMIT:** 123 → 125 (seed has 2024 value; 2025 moved 2 places down)
+ - **WSU:** 376 → 384 (off by 8)
+ - **RMIT:** 123 → 125 (seed has 2024 value; 2025 moved 2 places down)
 
 3. **Adelaide IELTS UG understated.** Seed says 6.0 (absolute floor for special-entry pathways); real standard requirement for Computer Science / comparable programs is 6.5.
 
@@ -52,7 +52,7 @@
 
 ### Tier 2 — Ship with caveat (unverified but Atlas's list looks plausible)
 5. Add 30 new universities from Atlas's expansion list. Total seed: 12 + 30 = **42 unis** (matches PRD §5 target ±1).
-   - **RISK:** Atlas's CRICOS provider codes for the new 30 have NOT been cross-verified. Shipping them with `cricos_code` populated = potentially propagating fake-looking real-looking identifiers (same class of bug Wave 0 just fixed). Recommended mitigation: add all 30 with `cricos_code: null` and flag them as `verified: false`, then run a follow-up verification spike (est 1h) in a P4.5.1 or P8 pass to confirm each code from cricos.education.gov.au before exposing in the UI.
+ - **RISK:** Atlas's CRICOS provider codes for the new 30 have NOT been cross-verified. Shipping them with `cricos_code` populated = potentially propagating fake-looking real-looking identifiers (same class of bug Wave 0 just fixed). Recommended mitigation: add all 30 with `cricos_code: null` and flag them as `verified: false`, then run a follow-up verification spike (est 1h) in a P4.5.1 or P8 pass to confirm each code from cricos.education.gov.au before exposing in the UI.
 
 ### Tier 3 — Defer to P8 (needs human judgement)
 6. Verify USyd + Melbourne 2025 BCS fees against official fee PDFs.

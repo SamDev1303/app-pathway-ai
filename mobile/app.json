@@ -1,34 +1,34 @@
 {
-  "expo": {
-    "name": "UniMate Australia",
-    "slug": "unimate-australia",
-    "scheme": "unimate",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#1a2f6e"
-    },
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "cloud.claudeking.unimate"
-    },
-    "android": {
-      "package": "cloud.claudeking.unimate",
-      "adaptiveIcon": {
-        "backgroundColor": "#1a2f6e",
-        "foregroundImage": "./assets/adaptive-icon.png"
-      }
-    },
-    "plugins": [
-      "expo-router",
-      "@sentry/react-native/expo"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
-  }
+ "expo": {
+ "name": "Pathway-AI Australia",
+ "slug": "unimate-australia",
+ "scheme": "unimate",
+ "version": "1.0.0",
+ "orientation": "portrait",
+ "icon": "./assets/icon.png",
+ "userInterfaceStyle": "light",
+ "splash": {
+ "image": "./assets/splash.png",
+ "resizeMode": "contain",
+ "backgroundColor": "#1a2f6e"
+ },
+ "ios": {
+ "supportsTablet": true,
+ "bundleIdentifier": "cloud.claudeking.unimate"
+ },
+ "android": {
+ "package": "cloud.claudeking.unimate",
+ "adaptiveIcon": {
+ "backgroundColor": "#1a2f6e",
+ "foregroundImage": "./assets/adaptive-icon.png"
+ }
+ },
+ "plugins": [
+ "expo-router",
+ "@sentry/react-native/expo"
+ ],
+ "experiments": {
+ "typedRoutes": true
+ }
+ }
 }

@@ -5,26 +5,26 @@
 // Edit rule: bumping content requires bumping CHAT_SYSTEM_PROMPT_VERSION in the
 // same commit, mirroring MARA_DISCLAIMER_VERSION pattern in mara-disclaimer.ts.
 //
-// Design constraint (MARA Act 1958 s.280): MUST deflect all visa/PR/migration
+// Design constraint ( Act 1958 s.280): MUST deflect all visa/PR/migration
 // questions WITHOUT hedging. "I'm not sure if I can answer that" is WORSE than
-// "I can't answer that — consult a MARA agent". Hedging = liability surface.
-// Deflection = MARA-compliant.
+// "I can't answer that — consult a advisor". Hedging = liability surface.
+// Deflection = compliant.
 
 export const CHAT_SYSTEM_PROMPT_VERSION = "2026-04-20.v1";
 
 export const CHAT_MARA_DEFLECTION_TRIGGERS = [
-  "visa",
-  "migration",
-  "PR",
-  "permanent residency",
-  "MLTSSL",
-  "subclass",
-  "points test",
-  "post-study work",
-  "485",
-  "immigration",
-  "citizenship",
-  "bridging",
+ "visa",
+ "migration",
+ "PR",
+ "permanent residency",
+ "MLTSSL",
+ "subclass",
+ "points test",
+ "post-study work",
+ "485",
+ "immigration",
+ "citizenship",
+ "bridging",
 ] as const;
 
 /**
@@ -33,17 +33,17 @@ export const CHAT_MARA_DEFLECTION_TRIGGERS = [
  * input matches any CHAT_MARA_DEFLECTION_TRIGGERS keyword.
  */
 export const CHAT_MARA_DEFLECTION_RESPONSE =
-  "That's a migration-advice question, which is regulated in Australia. I can't answer it — but UniMate's registered MARA agents can. Book a free consultation: /consult";
+ "That's a migration-advice question, which is regulated in Australia. I can't answer it — but Pathway-AI's registered advisors can. Book a free consultation: /consult";
 
 /**
  * Per-reply footer disclaimer — MUST be appended to every LLM response.
  * Satisfies PHASE.md P4.5 task #4 (per-turn chat-message footer disclaimer).
  */
 export const CHAT_PER_TURN_FOOTER =
-  "Educational information only, not migration advice. For visas or PR, consult a MARA agent.";
+ "Educational information only, not migration advice. For visas or PR, consult a advisor.";
 
 export const CHAT_SYSTEM_PROMPT_V1 = `
-You are Atlas AI, an educational guidance assistant for Australian universities.
+You are Pathway-AI, an educational guidance assistant for Australian universities.
 
 ## Your scope (ALLOWED)
 - CRICOS-registered course recommendations based on the user's profile

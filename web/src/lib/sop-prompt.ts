@@ -3,13 +3,13 @@
 //
 // The SYSTEM prompt the AI SDK provider receives on every /api/sop call.
 // Lifted verbatim from the pre-P6 inline constant in /api/sop/route.ts
-// (already MARA-safe — audited at plan-phase).
+// (already -safe — audited at plan-phase).
 //
 // Edit rule: bumping content requires bumping SOP_SYSTEM_PROMPT_VERSION in
 // the same commit, mirroring MARA_DISCLAIMER_VERSION and
 // CHAT_SYSTEM_PROMPT_VERSION.
 //
-// Design constraint (MARA Act 1958 s.280): the prompt MUST instruct the model
+// Design constraint ( Act 1958 s.280): the prompt MUST instruct the model
 // to exclude visa / migration / PR / post-study work content from the SOP
 // body. Layer-2 (cumulative-buffer scanForDeflection) is the belt; this is
 // the braces.
@@ -21,9 +21,9 @@ export const SOP_SYSTEM_PROMPT_VERSION = "2026-04-21.v1";
  * Satisfies P6 CONTEXT §Inherited "Per-turn footer" rule.
  */
 export const SOP_PER_TURN_FOOTER =
-  "Educational SOP draft — not migration advice. For binding advice consult a MARA-registered agent.";
+ "Educational SOP draft — not migration advice. For binding advice consult a registered agent.";
 
-export const SOP_SYSTEM_PROMPT_V1 = `You are a senior MARA-registered education counsellor at UniMate Australia's Liverpool, NSW office drafting a Statement of Purpose for an international student applying to an Australian university.
+export const SOP_SYSTEM_PROMPT_V1 = `You are a senior registered education counsellor at Pathway-AI Australia's office drafting a Statement of Purpose for an international student applying to an Australian university.
 
 Writing style:
 - First person, the student's voice
@@ -59,12 +59,12 @@ Hard rules:
  * word prefix (prior, practice, program). Uppercase PR is the migration term.
  */
 export const SOP_NOTES_FORBIDDEN_PHRASES: RegExp[] = [
-  /\bvisa\b/i,
-  /\bPR\b/, // case-sensitive — see note above
-  /\bpermanent resident(ce|cy)?\b/i,
-  /\b(485|500|482|186|189|190|491)\b/,
-  /\bmigration (agent|advice|pathway|status)\b/i,
-  /\bpathway to (PR|residency|citizenship)\b/i,
+ /\bvisa\b/i,
+ /\bPR\b/, // case-sensitive — see note above
+ /\bpermanent resident(ce|cy)?\b/i,
+ /\b(485|500|482|186|189|190|491)\b/,
+ /\bmigration (agent|advice|pathway|status)\b/i,
+ /\bpathway to (PR|residency|citizenship)\b/i,
 ];
 
 /**
@@ -72,13 +72,13 @@ export const SOP_NOTES_FORBIDDEN_PHRASES: RegExp[] = [
  * Called by /api/sop BEFORE sending to the model.
  */
 export function scanNotesForForbidden(notes: string): string | null {
-  if (!notes) return null;
-  for (const re of SOP_NOTES_FORBIDDEN_PHRASES) {
-    const m = notes.match(re);
-    if (m) return m[0];
-  }
-  return null;
+ if (!notes) return null;
+ for (const re of SOP_NOTES_FORBIDDEN_PHRASES) {
+ const m = notes.match(re);
+ if (m) return m[0];
+ }
+ return null;
 }
 
 export const SOP_NOTES_FORBIDDEN_MESSAGE =
-  "Your notes mention visa content — please remove; SOPs must be academic only.";
+ "Your notes mention visa content — please remove; SOPs must be academic only.";

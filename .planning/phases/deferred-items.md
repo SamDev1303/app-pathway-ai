@@ -1,4 +1,4 @@
-# Deferred Items — atlas-ai Phase 4
+# Deferred Items — pathway-ai Phase 4
 
 Items discovered out of scope during wave execution. Not fixed to respect scope boundaries.
 

@@ -1,7 +1,7 @@
-# Brief — Atlas AI university data: verify + expand
+# Brief — Pathway-AI university data: verify + expand
 
 ## Background
-Atlas AI is a demo web app for UniMate Australia (a consultancy that advises international students on AU university applications). We are seeding a Supabase `universities` + `courses` table for the matcher engine. Current seed is 12 universities (8 Group of Eight + UTS, WSU, RMIT, UOW) with 4 courses each (48 total). PRD target is 40+ CRICOS-registered Australian universities.
+Pathway-AI is a demo web app for Pathway-AI Australia (a consultancy that advises international students on AU university applications). We are seeding a Supabase `universities` + `courses` table for the matcher engine. Current seed is 12 universities (8 Group of Eight + UTS, WSU, RMIT, UOW) with 4 courses each (48 total). PRD target is 40+ CRICOS-registered Australian universities.
 
 ## Current 12 unis seeded
 UNSW, USyd, Melbourne, Monash, UQ, ANU, UWA, Adelaide, UTS, WSU, RMIT, UOW.
@@ -21,7 +21,7 @@ Focus on: all 43 Australian public universities + 5 most-common private provider
 
 ### Task 2: VERIFY the 12 existing unis for data accuracy
 For each of the 12 listed above, CONFIRM or FLAG corrections on:
-- CRICOS provider code (must match MARA/Department of Education register)
+- CRICOS provider code (must match /Department of Education register)
 - 2025-2026 international student annual fee for Bachelor of IT/CS (approximate — ±$2000 acceptable)
 - Minimum IELTS overall score for undergraduate admission
 - QS World University Rankings 2025 position
@@ -29,6 +29,6 @@ For each of the 12 listed above, CONFIRM or FLAG corrections on:
 ## Output format
 Return a single markdown table per task. Keep it tight — no prose justification beyond what's in the table.
 
-## Hard rules (MARA compliance — P4.5 gate)
+## Hard rules ( compliance — P4.5 gate)
 - DO NOT advise on visas, migration, PR, subclasses, or post-study work. We only need university/course DATA. If you're tempted to caveat about visas, DON'T — stick to educational facts.
 - CRICOS codes are public record. If you can't verify one from an official source (uni website, .gov.au, CRICOS register cricos.education.gov.au), mark it "UNVERIFIED".

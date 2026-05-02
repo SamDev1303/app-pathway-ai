@@ -1,4 +1,4 @@
-# DEVIATIONS.md — Atlas AI
+# DEVIATIONS.md — Pathway-AI
 
 Audit trail of explicit deviations from PRD/PHASE plans, captured at decision time.
 
@@ -42,7 +42,7 @@ On verifying the project via the Supabase Management API, Koda detected the regi
 
 Koda pushed back with three options:
 1. Delete the 9-hour-old empty project + recreate in `ap-southeast-2` (recommended)
-2. Amend PRD §6 to accept Singapore (requires UniMate / client sign-off)
+2. Amend PRD §6 to accept Singapore (requires Pathway-AI / client sign-off)
 3. Proceed to Singapore with documented compliance obligation
 
 ### Sam's decision
@@ -52,22 +52,22 @@ Sam explicitly said "continue" after reading the push-back. Interpreted as optio
 ### Downstream obligations (MUST be addressed before production launch)
 
 1. **APP 8 (cross-border disclosure) — Collection Notice update REQUIRED**
-   - Current `web/src/components/LeadModal.tsx` APP 5 notice does NOT mention Singapore hosting.
-   - Before any real lead lands, the notice MUST include a line along these lines: *"Your information is stored on Supabase servers hosted in Singapore (ap-southeast-1). This is a cross-border disclosure under APP 8 of the Privacy Act 1988 (Cth). Supabase is contractually bound to Australian privacy standards, and UniMate ensures reasonable steps are taken to comply with APPs in relation to overseas disclosures."*
-   - **Owner:** P3 (Lead capture — Neo + Sam) — MUST lift notice wording before consent goes live.
-   - **Gate:** P4.5 compliance gate re-reviews this BEFORE any real user traffic.
+ - Current `web/src/components/LeadModal.tsx` APP 5 notice does NOT mention Singapore hosting.
+ - Before any real lead lands, the notice MUST include a line along these lines: *"Your information is stored on Supabase servers hosted in Singapore (ap-southeast-1). This is a cross-border disclosure under APP 8 of the Privacy Act 1988 (Cth). Supabase is contractually bound to Australian privacy standards, and Pathway-AI ensures reasonable steps are taken to comply with APPs in relation to overseas disclosures."*
+ - **Owner:** P3 (Lead capture — Neo + Sam) — MUST lift notice wording before consent goes live.
+ - **Gate:** P4.5 compliance gate re-reviews this BEFORE any real user traffic.
 
-2. **UniMate client disclosure** (business-level)
-   - UniMate's MARA/QEAC-facing privacy representations may need update if they previously told students data stayed in Australia.
-   - **Owner:** Sam (client conversation, not Koda).
+2. **Pathway-AI client disclosure** (business-level)
+ - Pathway-AI's /QEAC-facing privacy representations may need update if they previously told students data stayed in Australia.
+ - **Owner:** Sam (client conversation, not Koda).
 
-3. **MARA Code of Conduct interpretation**
-   - MARA Code does not explicitly prohibit overseas hosting but does require registered agents to "act professionally and with diligence." Failure to disclose cross-border hosting could be seen as non-disclosure.
-   - **Owner:** Sam / UniMate legal sign-off before launch.
+3. ** Code of Conduct interpretation**
+ - Code does not explicitly prohibit overseas hosting but does require registered agents to "act professionally and with diligence." Failure to disclose cross-border hosting could be seen as non-disclosure.
+ - **Owner:** Sam / Pathway-AI legal sign-off before launch.
 
 4. **Right-of-correction / deletion requests** (APP 13)
-   - The `privacy@unimate.com.au` contact in the LeadModal APP 5 notice is the process entry point. UniMate needs a documented SOP for handling these across the Supabase-Singapore boundary.
-   - **Owner:** Sam / UniMate operations — before launch.
+ - The `privacy@unimate.com.au` contact in the LeadModal APP 5 notice is the process entry point. Pathway-AI needs a documented SOP for handling these across the Supabase-Singapore boundary.
+ - **Owner:** Sam / Pathway-AI operations — before launch.
 
 ### What Koda will NOT do
 
@@ -77,7 +77,7 @@ Sam explicitly said "continue" after reading the push-back. Interpreted as optio
 
 ### Backout plan (if Sam reverses)
 
-If Sam / UniMate later decide Singapore is unacceptable:
+If Sam / Pathway-AI later decide Singapore is unacceptable:
 1. Stop any real-lead traffic
 2. Export current Supabase data via `pg_dump` (service_role)
 3. Create new project in `ap-southeast-2`

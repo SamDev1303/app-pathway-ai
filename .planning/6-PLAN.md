@@ -9,13 +9,13 @@
 
 ## Goal
 
-Replace demo SOP (`/api/sop/route.ts` — 4-field form, plain-text, no persistence) with a lead-gated, versioned, streaming, MARA-safe SOP generator with client-side react-pdf export.
+Replace demo SOP (`/api/sop/route.ts` — 4-field form, plain-text, no persistence) with a lead-gated, versioned, streaming, -safe SOP generator with client-side react-pdf export.
 
 ## Current-state facts
 
 - `/matches/[token]` already implements lead-token-gated server component (service-role + `leads.match_token` uuid + Zod parse of `leads.matches` jsonb). P6 mirrors exactly.
 - `leads.match_token uuid UNIQUE`, `leads.matches jsonb` exist (migration 003).
-- Current `/api/sop/route.ts`: `openai/gpt-oss-120b:free` + temp 0.7 + non-streaming `generateText` → `{ draft }`. System prompt is already MARA-safe → lift verbatim.
+- Current `/api/sop/route.ts`: `openai/gpt-oss-120b:free` + temp 0.7 + non-streaming `generateText` → `{ draft }`. System prompt is already -safe → lift verbatim.
 - `@react-pdf/renderer` NOT installed. No `web/public/fonts/`.
 - P5.1 reuse assets: `@/lib/chat-deflection` (`scanForDeflection`), `@/lib/ratelimit`, `@/lib/chat-system-prompt` (module shape), service-role client helper.
 - `.github/workflows/mara-grep-gate.yml:64` already allowlists `web/src/app/api/sop/route.ts`.
@@ -27,7 +27,7 @@ Replace demo SOP (`/api/sop/route.ts` — 4-field form, plain-text, no persisten
 - **D3** entry = `/sop/[leadToken]` only
 - **D4** client-side react-pdf, no server PDF endpoint
 
-Inherited: `SOP_MODEL` env (default `qwen/qwen3-next-80b-a3b-instruct:free`, temp 0.7); reuse `scanForDeflection`; `@/lib/ratelimit` key prefix `atlas:sop:*`; MARA post-filter identical to P5.1.
+Inherited: `SOP_MODEL` env (default `qwen/qwen3-next-80b-a3b-instruct:free`, temp 0.7); reuse `scanForDeflection`; `@/lib/ratelimit` key prefix `atlas:sop:*`; post-filter identical to P5.1.
 
 ---
 
@@ -39,15 +39,15 @@ Inherited: `SOP_MODEL` env (default `qwen/qwen3-next-80b-a3b-instruct:free`, tem
 
 ```sql
 CREATE TABLE IF NOT EXISTS sop_drafts (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  lead_id uuid NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
-  parent_draft_id uuid REFERENCES sop_drafts(id) ON DELETE SET NULL,
-  version_number int NOT NULL,
-  full_text text NOT NULL,
-  sections jsonb,
-  model text NOT NULL,
-  edited_from_section text,
-  created_at timestamptz NOT NULL DEFAULT now()
+ id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+ lead_id uuid NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+ parent_draft_id uuid REFERENCES sop_drafts(id) ON DELETE SET NULL,
+ version_number int NOT NULL,
+ full_text text NOT NULL,
+ sections jsonb,
+ model text NOT NULL,
+ edited_from_section text,
+ created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_sop_drafts_lead ON sop_drafts(lead_id, created_at DESC);
 ALTER TABLE sop_drafts ENABLE ROW LEVEL SECURITY;
@@ -65,7 +65,7 @@ Mirror migration 007 idempotent pattern.
 Exports:
 - `SOP_SYSTEM_PROMPT_VERSION = "2026-04-21.v1"`
 - `SOP_SYSTEM_PROMPT_V1` — lift inline prompt from `/api/sop/route.ts` verbatim
-- `SOP_PER_TURN_FOOTER = "Educational SOP draft — not migration advice. For binding advice consult a MARA-registered agent."`
+- `SOP_PER_TURN_FOOTER = "Educational SOP draft — not migration advice. For binding advice consult a registered agent."`
 
 Mirror `chat-system-prompt.ts` module shape.
 
@@ -95,7 +95,7 @@ Mirror `chat-system-prompt.ts` module shape.
 
 - **Context7 gate (plan-check fold-in):** run `mcp__context7__query-docs` on `/diegomura/react-pdf` (or equivalent) for current version + API surface BEFORE `pnpm add`. Required by universal Context7 enforcing hook.
 - `pnpm add @react-pdf/renderer` in `web/`
-- `web/src/components/sop/SopPdfDoc.tsx` (create, `"use client"`). `<Document>` → `<Page size="LETTER">` → 4 `<View>` paragraph blocks (split on `\n\n`). Built-in Times serif (Georgia bundle deferred to P6.1). Header: "Statement of Purpose — {student_full_name}" + "UniMate Pty Ltd · {date}". Footer: `SOP_PER_TURN_FOOTER` on every page.
+- `web/src/components/sop/SopPdfDoc.tsx` (create, `"use client"`). `<Document>` → `<Page size="LETTER">` → 4 `<View>` paragraph blocks (split on `\n\n`). Built-in Times serif (Georgia bundle deferred to P6.1). Header: "Statement of Purpose — {student_full_name}" + "Pathway-AI · {date}". Footer: `SOP_PER_TURN_FOOTER` on every page.
 
 **Commit:** `feat(phase-6): wave 3 — @react-pdf/renderer + SopPdfDoc template`
 
@@ -103,12 +103,12 @@ Mirror `chat-system-prompt.ts` module shape.
 
 - `web/src/app/sop/[leadToken]/page.tsx` (create). Server component mirroring `/matches/[token]/page.tsx`. Resolves lead via service-role + `match_token`. Loads latest `sop_drafts` row. Renders `<SopEditor lead={...} initialDraft={...} />` inside `<Suspense>` (Next 16 Cache Components requirement).
 - `web/src/app/sop/[leadToken]/SopEditor.tsx` (create, client). State: currentText, versionHistory, selectedMatch, streamingStatus.
-  - Match picker `<select>` from `lead.matches.strong[] + stretch[]`, defaults `strong[0]`.
-  - Generate/Regenerate → POST `/api/sop` with `{ leadToken, selectedUniId, selectedCourseName, parentDraftId }`. Fetch + `ReadableStream` reader (not `useChat`).
-  - Live streaming display.
-  - Version history sidebar: `v{N}` + timestamp. Click → read-only preview + "Restore as v(N+1)" (re-POST w/ old text as parent).
-  - Download PDF: dynamic-import `SopPdfDoc`, `pdf(<SopPdfDoc …/>).toBlob()` → `saveAs(blob, 'Student_SOP_v{N}.pdf')`.
-  - Banners: deflected / rate-limited (429 + `/consult`) / invalid-token.
+ - Match picker `<select>` from `lead.matches.strong[] + stretch[]`, defaults `strong[0]`.
+ - Generate/Regenerate → POST `/api/sop` with `{ leadToken, selectedUniId, selectedCourseName, parentDraftId }`. Fetch + `ReadableStream` reader (not `useChat`).
+ - Live streaming display.
+ - Version history sidebar: `v{N}` + timestamp. Click → read-only preview + "Restore as v(N+1)" (re-POST w/ old text as parent).
+ - Download PDF: dynamic-import `SopPdfDoc`, `pdf(<SopPdfDoc …/>).toBlob()` → `saveAs(blob, 'Student_SOP_v{N}.pdf')`.
+ - Banners: deflected / rate-limited (429 + `/consult`) / invalid-token.
 
 **Commit:** `feat(phase-6): wave 4 — /sop/[leadToken] entry + editor client + PDF download`
 
@@ -118,25 +118,25 @@ Mirror `chat-system-prompt.ts` module shape.
 
 **Commit:** `feat(phase-6): wave 5 — /matches → /sop cross-link`
 
-### Wave 6 — Verify + MARA gate + build
+### Wave 6 — Verify + gate + build
 
 - Add `web/src/lib/sop-prompt.ts` to `mara-grep-gate.yml:64` allowlist if needed (mirror `chat-system-prompt.ts`).
 - Smoke (Supabase + OPENROUTER keys required):
-  1. Seed test lead with `match_token` + realistic `matches` jsonb.
-  2. `/sop/[leadToken]` loads, picker shows strong[0].
-  3. Generate → 400-word SOP streams in.
-  4. `select * from sop_drafts where lead_id = X` → v1 row.
-  5. Regenerate → v2 row, `parent_draft_id = v1.id`.
-  6. Download → `Student_SOP_v2.pdf` opens clean.
-  7. Force migration phrase in notes → 422 pre-filter refusal.
-  8. 11 rapid regens → 429 + `/consult`.
-  9. `pnpm build` passes. `mara-grep-gate` passes.
+ 1. Seed test lead with `match_token` + realistic `matches` jsonb.
+ 2. `/sop/[leadToken]` loads, picker shows strong[0].
+ 3. Generate → 400-word SOP streams in.
+ 4. `select * from sop_drafts where lead_id = X` → v1 row.
+ 5. Regenerate → v2 row, `parent_draft_id = v1.id`.
+ 6. Download → `Student_SOP_v2.pdf` opens clean.
+ 7. Force migration phrase in notes → 422 pre-filter refusal.
+ 8. 11 rapid regens → 429 + `/consult`.
+ 9. `pnpm build` passes. `mara-grep-gate` passes.
 
-**Commit:** `feat(phase-6): wave 6 — verify + MARA gate clean`
+**Commit:** `feat(phase-6): wave 6 — verify + gate clean`
 
 ### Wave 7 — Phase-verify + STATE sync
 
-- Dispatch Gideon single-seat `gpt-5.4`, 4-persona contract (MARA Compliance / Security-Privacy / AI SDK Integrator / Production Readiness). Zero push-blockers required (Rule 11).
+- Dispatch Gideon single-seat `gpt-5.4`, 4-persona contract ( Compliance / Security-Privacy / AI SDK Integrator / Production Readiness). Zero push-blockers required (Rule 11).
 - Update `.planning/STATE.md` (P6 → done).
 
 **Commit:** `feat(phase-6): wave 7 — phase-verify sign-off + STATE.md sync`
@@ -190,4 +190,4 @@ Section-level regen; server-side PDF; anonymous `/sop`; multi-language; Georgia 
 
 - **Plan-check:** `gsd-plan-checker` BEFORE wave 0. Iterate to APPROVE / APPROVE-WITH-NOTES.
 - **Phase-verify:** after wave 6, Gideon single-seat `gpt-5.4`, 4 personas, zero push-blockers.
-- **Commit cadence:** one atomic commit per wave, `feat(phase-6):` prefix, pushed to atlas-ai.
+- **Commit cadence:** one atomic commit per wave, `feat(phase-6):` prefix, pushed to pathway-ai.

@@ -1,26 +1,26 @@
-# PRD — Atlas AI v1 (HARD-CUT)
+# PRD — Pathway-AI v1 (HARD-CUT)
 
-**Version:** 1.1 · **Locked:** 2026-04-16 (v1.0) → revised 2026-04-17 (v1.1) · **Owner:** Sam (Koda Labs) · **Client:** UniMate Pty Ltd
+**Version:** 1.1 · **Locked:** 2026-04-16 (v1.0) → revised 2026-04-17 (v1.1) · **Owner:** Sam (Koda Labs) · **Client:** Pathway-AI
 **Budget:** $3,000 AUD fixed (HARD-CUT) · **Optional add-ons:** §3 X.1.1 N8N lead-sync activation (+$200) · **Timeline:** 3 weeks from 50% deposit · **Target market:** Australia only
 
-> This PRD supersedes the client's original 22-page "Atlas AI" PRD (archived at `_reference/archive/OLD-PRD-2026-04-11.md`). Scope here is reduced to ship on budget. The 6 cut modules are quoted separately in v2 (§9).
+> This PRD supersedes the client's original 22-page "Pathway-AI" PRD (archived at `_reference/archive/OLD-PRD-2026-04-11.md`). Scope here is reduced to ship on budget. The 6 cut modules are quoted separately in v2 (§9).
 
 ### Changelog — v1.1 (2026-04-17)
 
 | Change | v1.0 | v1.1 | Reason |
 |---|---|---|---|
-| §5 Lead CRM row | "Google Sheet via Make.com" | "Email (Resend) to Sam + UniMate; DB = source of truth. Ready-to-deploy N8N → Sheet pipeline shipped dormant (see §3 X.1.1); activation is client-hosted on UniMate's Hostinger N8N instance." | Make.com added a third-party dependency with zero data-integrity gain (DB + email already give 100% capture + notification). N8N on UniMate-owned Hostinger replaces the vendor chain — UniMate pays their own ~$5–20/mo hosting, Atlas ships the workflow as a portable JSON, and Sam charges only for activation labour. |
-| §3 cut-module table | — | **New row X.1.1:** "N8N lead-sync activation (+$200)" — workflow pre-built at `ops/n8n/lead-sync-workflow.json`; UniMate provisions a Hostinger N8N VPS, Sam imports + configures on a PO sign-off. | Preserves client optionality without inflating the $3k fixed budget. Hosting cost + Google Workspace cred are UniMate-owned; the $200 covers Sam's import + cred setup + Supabase webhook registration + smoke test. |
+| §5 Lead CRM row | "Google Sheet via Make.com" | "Email (Resend) to Sam + Pathway-AI; DB = source of truth. Ready-to-deploy N8N → Sheet pipeline shipped dormant (see §3 X.1.1); activation is client-hosted on Pathway-AI's Hostinger N8N instance." | Make.com added a third-party dependency with zero data-integrity gain (DB + email already give 100% capture + notification). N8N on Pathway-AI-owned Hostinger replaces the vendor chain — Pathway-AI pays their own ~$5–20/mo hosting, Atlas ships the workflow as a portable JSON, and Sam charges only for activation labour. |
+| §3 cut-module table | — | **New row X.1.1:** "N8N lead-sync activation (+$200)" — workflow pre-built at `ops/n8n/lead-sync-workflow.json`; Pathway-AI provisions a Hostinger N8N VPS, Sam imports + configures on a PO sign-off. | Preserves client optionality without inflating the $3k fixed budget. Hosting cost + Google Workspace cred are Pathway-AI-owned; the $200 covers Sam's import + cred setup + Supabase webhook registration + smoke test. |
 | §2 V1.2 success metric | Unchanged wording; Sheet was never acceptance-blocking. | Clarified to "leads land in DB + email post-consent" (no Sheet dependency). | Matches actual shipped v1 behaviour; stops "live Sheet" being an implicit launch gate. |
 | `.env.example` | `MAKE_LEAD_WEBHOOK_URL` + `LEAD_NOTIFY_EMAILS` | `MAKE_LEAD_WEBHOOK_URL` removed; `N8N_WEBHOOK_URL` present but commented-out with activation instructions. | Config tracks code reality. |
 
-**Budget impact:** $0 on v1 price. ~2 hrs reclaimed for lead-capture UI polish. UniMate has a priced escape hatch ($200) if they later want the Sheet mirror live.
+**Budget impact:** $0 on v1 price. ~2 hrs reclaimed for lead-capture UI polish. Pathway-AI has a priced escape hatch ($200) if they later want the Sheet mirror live.
 
 ---
 
 ## 1. Product summary
 
-Atlas AI is a MARA-safe, QEAC-aligned AI advisor that helps international students pick an Australian university, capture their intent as a qualified lead for UniMate Pty Ltd, and export a draft Statement of Purpose. It runs on web (primary surface) with a companion Expo app. Legal advice and migration guidance are explicitly out of scope — all chat turns carry a MARA disclaimer.
+Pathway-AI is a -safe, QEAC-aligned AI advisor that helps international students pick an Australian university, capture their intent as a qualified lead for Pathway-AI, and export a draft Statement of Purpose. It runs on web (primary surface) with a companion Expo app. Legal advice and migration guidance are explicitly out of scope — all chat turns carry a disclaimer.
 
 ---
 
@@ -28,8 +28,8 @@ Atlas AI is a MARA-safe, QEAC-aligned AI advisor that helps international studen
 
 | # | Module | Outcome | Success metric |
 |---|---|---|---|
-| V1.1 | **AI Advisor Chat** | Student asks questions about CRICOS-registered Australian courses/unis; streamed answers grounded in the 43-uni seed. **Chat does NOT give visa or migration advice** — any such question is deflected to "Consult a registered MARA agent" + link to UniMate's MARA registration | Response time <3s to first token; MARA disclaimer on every turn; zero visa/migration advice strings in audit |
-| V1.2 | **Lead Capture** | 5-step progressive form. Each step persists **client-side only** (`localStorage`) so back-button doesn't lose data. PII hits Supabase in a single atomic write on step 5 AFTER consent tick, alongside `consent_given_at` + `consent_wording_version`. Lead emailed to Sam + UniMate via Resend | 100% leads land in DB + email post-consent; zero pre-consent PII rows in `leads` |
+| V1.1 | **AI Advisor Chat** | Student asks questions about CRICOS-registered Australian courses/unis; streamed answers grounded in the 43-uni seed. **Chat does NOT give visa or migration advice** — any such question is deflected to "Consult a registered advisor" + link to Pathway-AI's registration | Response time <3s to first token; disclaimer on every turn; zero visa/migration advice strings in audit |
+| V1.2 | **Lead Capture** | 5-step progressive form. Each step persists **client-side only** (`localStorage`) so back-button doesn't lose data. PII hits Supabase in a single atomic write on step 5 AFTER consent tick, alongside `consent_given_at` + `consent_wording_version`. Lead emailed to Sam + Pathway-AI via Resend | 100% leads land in DB + email post-consent; zero pre-consent PII rows in `leads` |
 | V1.3 | **UniMatch Engine** | `/api/match` returns ranked AU universities with match % and reason text | Top-3 results under 500ms from Supabase |
 | V1.4 | **SOP Generator** | Generate draft SOP from lead profile, export to PDF client-side via react-pdf | PDF downloads in <2s; edit + regenerate loop works |
 
@@ -47,7 +47,7 @@ These six modules are removed from v1. The v1 client-facing framing is **"v1 shi
 | X.4 | Analytics Dashboard | Vercel Analytics + Supabase logs suffice for v1 | $1–2k |
 | X.5 | Better Auth (magic link + multi-session) | Supabase Auth magic link has identical UX at zero integration cost | $1k |
 | X.6 | `internal_user_id` abstraction layer | Redundant when we're Supabase end-to-end; re-adds value only if client migrates off | $1k |
-| **X.1.1** | **N8N lead-sync activation** (optional v1 add-on, not a cut module) | Workflow ships dormant in the v1 repo at `ops/n8n/lead-sync-workflow.json`. Activation steps: (1) UniMate provisions N8N on Hostinger VPS (~$5–20/mo UniMate pays directly), (2) Sam imports the workflow JSON, (3) Sam configures Google Sheets credential against UniMate's Google Workspace, (4) Sam registers Supabase DB webhook → N8N webhook URL, (5) end-to-end smoke test with a seeded lead. Pipeline appends every new lead to UniMate's Google Sheet in real time. Not wired in v1 core because the Hostinger VPS + Google Workspace creds are UniMate-owned and provisioned post-launch. | **+$200** (Sam's labour only; hosting + creds are UniMate's cost) |
+| **X.1.1** | **N8N lead-sync activation** (optional v1 add-on, not a cut module) | Workflow ships dormant in the v1 repo at `ops/n8n/lead-sync-workflow.json`. Activation steps: (1) Pathway-AI provisions N8N on Hostinger VPS (~$5–20/mo Pathway-AI pays directly), (2) Sam imports the workflow JSON, (3) Sam configures Google Sheets credential against Pathway-AI's Google Workspace, (4) Sam registers Supabase DB webhook → N8N webhook URL, (5) end-to-end smoke test with a seeded lead. Pipeline appends every new lead to Pathway-AI's Google Sheet in real time. Not wired in v1 core because the Hostinger VPS + Google Workspace creds are Pathway-AI-owned and provisioned post-launch. | **+$200** (Sam's labour only; hosting + creds are Pathway-AI's cost) |
 
 Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversation. X.1.1 is a standalone +$200 add-on, not part of the v2 envelope.
 
@@ -56,19 +56,19 @@ Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversat
 ## 4. User stories (by module)
 
 ### V1.1 — AI Advisor Chat
-- As a prospective student, I ask "Which Australian unis teach AI?" and get a streamed, MARA-safe answer listing CRICOS-registered options with match reasoning.
-- As a student, every chat turn I see ends with "This is not migration advice. Consult a registered MARA agent." — no exceptions.
-- As UniMate, I can trust that the chatbot will **never** give migration advice. Visa subclass, PR pathway, MLTSSL/STSOL occupation list, post-study work visa, and points-test questions are deflected to "Consult a registered MARA agent" with link to UniMate's registration. No hedged answers, no summaries of visa rules, no gestures at the DoHA website beyond the MARA link.
+- As a prospective student, I ask "Which Australian unis teach AI?" and get a streamed, -safe answer listing CRICOS-registered options with match reasoning.
+- As a student, every chat turn I see ends with "This is not migration advice. Consult a registered advisor." — no exceptions.
+- As Pathway-AI, I can trust that the chatbot will **never** give migration advice. Visa subclass, PR pathway, MLTSSL/STSOL occupation list, post-study work visa, and points-test questions are deflected to "Consult a registered advisor" with link to Pathway-AI's registration. No hedged answers, no summaries of visa rules, no gestures at the DoHA website beyond the link.
 
 ### V1.2 — Lead Capture
-- As a prospective student, I fill a 5-step form (personal → academic → preferences → budget → contact). Each step saves to my browser (`localStorage`) so the back-button doesn't lose progress; nothing reaches Atlas AI's server until I tick the consent box on step 5.
-- As a prospective student, the consent wording on step 5 is split into two explicit ticks: (a) required — "I consent to Atlas AI storing this enquiry so UniMate's MARA agents can respond" (service consent); (b) optional — "I consent to marketing emails about Australian study options" (marketing consent). I can submit without the marketing tick.
-- As Sam, I get a Resend email with the lead the moment step 5 submits with BOTH consent flags ticked where applicable; UniMate gets a copy; both include a lead score.
+- As a prospective student, I fill a 5-step form (personal → academic → preferences → budget → contact). Each step saves to my browser (`localStorage`) so the back-button doesn't lose progress; nothing reaches Pathway-AI's server until I tick the consent box on step 5.
+- As a prospective student, the consent wording on step 5 is split into two explicit ticks: (a) required — "I consent to Pathway-AI storing this enquiry so Pathway-AI's advisors can respond" (service consent); (b) optional — "I consent to marketing emails about Australian study options" (marketing consent). I can submit without the marketing tick.
+- As Sam, I get a Resend email with the lead the moment step 5 submits with BOTH consent flags ticked where applicable; Pathway-AI gets a copy; both include a lead score.
 - As a compliance auditor, I can see `consent_given_at`, `consent_wording_version`, `consent_service` (true), and `consent_marketing` (bool) columns on every row of `leads`. There are zero rows where `consent_service = false`.
 
 ### V1.3 — UniMatch Engine
 - As a student, after step 3 of the lead form I see my top-3 AU unis with match % + one-line reason each.
-- As UniMate, the matcher uses real CRICOS data only — no invented courses.
+- As Pathway-AI, the matcher uses real CRICOS data only — no invented courses.
 
 ### V1.4 — SOP Generator
 - As a student, after matching I can generate a draft SOP from my profile and download it as PDF.
@@ -84,13 +84,13 @@ Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversat
 | Web framework | Next.js 16 (existing) | Already scaffolded; App Router + AI SDK v6 works cleanly |
 | Mobile | Expo SDK 54 (existing) | Don't rewrite; light rebrand in P7 |
 | Auth | Supabase Auth magic link | Replaces Better Auth — identical UX, zero integration cost |
-| Database | Supabase Postgres + pgvector (region `ap-southeast-1`, Singapore — deviation from PRD target `ap-southeast-2`; see §6 data residency row + `planning/atlas-ai/DEVIATIONS.md`) | Single vendor, RLS, cross-border disclosure disclosed per APP 8 |
+| Database | Supabase Postgres + pgvector (region `ap-southeast-1`, Singapore — deviation from PRD target `ap-southeast-2`; see §6 data residency row + `planning/pathway-ai/DEVIATIONS.md`) | Single vendor, RLS, cross-border disclosure disclosed per APP 8 |
 | LLM (chat) | OpenAI `gpt-4o-mini` | Production-grade replacement for OpenRouter free-tier |
 | LLM (embeddings) | OpenAI `text-embedding-3-small` (1536-dim) | Cheap, fits pgvector, fast |
 | PDF | react-pdf (client-side) | No server work; SOP exports in-browser |
 | Email | Resend | Already wired; works well with Next.js |
 | Hosting | Vercel (existing project) | Free hobby tier covers v1 traffic |
-| Lead CRM (v1) | **Resend email to Sam + UniMate.** DB (`leads` table) is source of truth; email is the live notification channel. **Optional add-on:** N8N → Google Sheet pipeline ships dormant at `ops/n8n/lead-sync-workflow.json` — UniMate hosts N8N on their own Hostinger VPS and activates via §3 X.1.1 (+$200 Sam labour; hosting + Google creds UniMate-owned) post-launch if desired. | Avoids third-party Make.com dependency for zero data-integrity gain (DB + email already cover capture + notification). UniMate-hosted N8N removes the Mac-uptime risk of a developer-hosted orchestrator while keeping Sheet-mirror optionality behind a clean priced activation. |
+| Lead CRM (v1) | **Resend email to Sam + Pathway-AI.** DB (`leads` table) is source of truth; email is the live notification channel. **Optional add-on:** N8N → Google Sheet pipeline ships dormant at `ops/n8n/lead-sync-workflow.json` — Pathway-AI hosts N8N on their own Hostinger VPS and activates via §3 X.1.1 (+$200 Sam labour; hosting + Google creds Pathway-AI-owned) post-launch if desired. | Avoids third-party Make.com dependency for zero data-integrity gain (DB + email already cover capture + notification). Pathway-AI-hosted N8N removes the Mac-uptime risk of a developer-hosted orchestrator while keeping Sheet-mirror optionality behind a clean priced activation. |
 
 ---
 
@@ -98,10 +98,10 @@ Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversat
 
 | Requirement | Implementation |
 |---|---|
-| **MARA Code of Conduct** — chat must NOT give migration advice | System prompt hard rule + per-turn footer: "This is not migration advice. Consult a registered MARA agent." UniMate's MARA number displayed in page footer with registration link. **Scaffold audit (P0.5):** existing demo strings in `web/src/lib/content.ts` + `web/src/app/api/chat/route.ts` mentioning PR pathways, subclass 500/485, MLTSSL/STSOL, or PR points are removed BEFORE P1 starts. Compliance gate (P4.5) re-verifies before P5 chat goes live. |
+| ** Code of Conduct** — chat must NOT give migration advice | System prompt hard rule + per-turn footer: "This is not migration advice. Consult a registered advisor." Pathway-AI's number displayed in page footer with registration link. **Scaffold audit (P0.5):** existing demo strings in `web/src/lib/content.ts` + `web/src/app/api/chat/route.ts` mentioning PR pathways, subclass 500/485, MLTSSL/STSOL, or PR points are removed BEFORE P1 starts. Compliance gate (P4.5) re-verifies before P5 chat goes live. |
 | **Privacy Act 1988** — explicit consent on lead capture | No PII is persisted to Supabase before step 5 consent. Steps 1–4 persist only to `localStorage` client-side. On step 5, a single atomic write stores `consent_given_at`, `consent_wording_version`, `consent_service` (required), and `consent_marketing` (optional). Wording reviewed by Neo + signed off by Atlas. |
 | **QEAC standards** — no misleading course claims | Only surface CRICOS-registered courses; show "CRICOS-registered" badge; no ranking claims beyond QS WUR public data |
-| **Data residency** (AU preference) | Supabase region `ap-southeast-2` (Sydney) — **DEVIATION 2026-04-17:** Sam provisioned the project in `ap-southeast-1` (Singapore) and explicitly directed Koda to proceed. Cross-border disclosure obligation per APP 8 now applies — UniMate MUST add Singapore data hosting to their collection notice BEFORE any real leads are captured. Audit trail: `planning/atlas-ai/DEVIATIONS.md`. Vercel Edge requests still route through Sydney POP. |
+| **Data residency** (AU preference) | Supabase region `ap-southeast-2` (Sydney) — **DEVIATION 2026-04-17:** Sam provisioned the project in `ap-southeast-1` (Singapore) and explicitly directed Koda to proceed. Cross-border disclosure obligation per APP 8 now applies — Pathway-AI MUST add Singapore data hosting to their collection notice BEFORE any real leads are captured. Audit trail: `planning/pathway-ai/DEVIATIONS.md`. Vercel Edge requests still route through Sydney POP. |
 | **No unauthorised scraping** | 43 AU unis seeded manually from CRICOS open data + public uni pages. Scraper module cut to v2. |
 
 ---
@@ -121,13 +121,13 @@ Total v2 quote envelope: **~$10–13k** — anchors the $15k follow-on conversat
 
 ## 8. Acceptance criteria (client sign-off)
 
-UniMate acceptance requires all of:
+Pathway-AI acceptance requires all of:
 1. Four v1 modules demo-able end-to-end against a seeded Supabase
-2. MARA disclaimer visible on every chat turn
-3. Lead captured in DB + emailed to UniMate + Sam with consent timestamp
+2. disclaimer visible on every chat turn
+3. Lead captured in DB + emailed to Pathway-AI + Sam with consent timestamp
 4. SOP downloads as PDF from draft
-5. Mobile app opens with new "Atlas AI" branding (P7 complete)
-6. `atlas-ai.vercel.app` live; `unimate-demo.vercel.app` redirects after 30 days
+5. Mobile app opens with new "Pathway-AI" branding (P7 complete)
+6. `pathway-ai.vercel.app` live; `unimate-demo.vercel.app` redirects after 30 days
 
 ---
 
@@ -144,7 +144,7 @@ UniMate acceptance requires all of:
 
 ## 10. Assumptions (tracked in SOW §10)
 
-1. UniMate provides MARA registration number + QEAC credentials
-2. UniMate provides `atlasai.com.au` (or approves `atlas-ai.vercel.app` as primary)
-3. UniMate provides logo + brand guidelines within 3 business days of PO
-4. Initial uni shortlist (max 10) for seed curation provided by UniMate; remaining 33 sourced from CRICOS open data
+1. Pathway-AI provides registration number + QEAC credentials
+2. Pathway-AI provides `atlasai.com.au` (or approves `pathway-ai.vercel.app` as primary)
+3. Pathway-AI provides logo + brand guidelines within 3 business days of PO
+4. Initial uni shortlist (max 10) for seed curation provided by Pathway-AI; remaining 33 sourced from CRICOS open data

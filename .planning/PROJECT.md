@@ -1,11 +1,11 @@
-# PROJECT.md — Atlas AI (GSD meta)
+# PROJECT.md — Pathway-AI (GSD meta)
 
 This file satisfies the GSD `.planning/` scaffold requirement. Canonical content lives at the project root; this is a pointer-only doc.
 
 | Meta | Value |
 |---|---|
-| Project | Atlas AI v1 |
-| Client | UniMate Pty Ltd (Sydney NSW, MARA/QEAC licensed) |
+| Project | Pathway-AI v1 |
+| Client | Pathway-AI (Sydney NSW, /QEAC licensed) |
 | Product type | No-code / low-code web + companion Expo app |
 | Budget | $3,000 AUD fixed (HARD-CUT — see PRD §3) |
 | Timeline | 3 weeks from 50% deposit |

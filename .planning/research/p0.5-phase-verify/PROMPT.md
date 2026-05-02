@@ -1,12 +1,12 @@
-# P0.5 Phase-Verify — MARA Scaffold Scrub Delivery Check
+# P0.5 Phase-Verify — Scaffold Scrub Delivery Check
 
-**Repo:** `~/Desktop/atlas-ai`
+**Repo:** `~/Desktop/pathway-ai`
 **Commits:** `f425837` + `2bedf83` (cumulative P0.5 delivery)
 **Plan-check sign-offs:** Gideon APPROVE-WITH-NOTES (round 2, 2026-04-17) | Specter APPROVE-WITH-NOTES (NIM Nemotron fallback, 2026-04-17)
 
 ## Phase-verify question (goal-backward)
 
-**Does P0.5 actually deliver what it promised?** Not "were tasks checked off" but "is the codebase now MARA-safe enough to unblock P1 Supabase commitment?"
+**Does P0.5 actually deliver what it promised?** Not "were tasks checked off" but "is the codebase now -safe enough to unblock P1 Supabase commitment?"
 
 ## 14-item checklist — verify each against the actual codebase
 
@@ -18,10 +18,10 @@ Check each item. Mark PASS / FAIL / PARTIAL with file:line citations.
 4. **MatcherForm wantsPR → prioritizeOutcomes rename complete.** Type flows through: Student interface, matcher.ts scoring, /api/match zod schema, MatcherForm state + JSX.
 5. **Course `pr_eligible` → `industry_placement` rename complete.** Course interface, universities.ts helper, universities-seed.ts (48 entries), matcher.ts scoring.
 6. **Consent split in LeadModal.** Required service consent + optional marketing consent, both submit-tracked as `consent_service` + `consent_marketing` + `consent_wording_version`.
-7. **APP 5 collection notice complete.** Identity (MARN 1798425), purpose, consequences of non-provision, who we share with (including processors), legal-disclosure caveat, access/correction/deletion contact, Privacy Policy reference, Privacy Act 1988 reference.
+7. **APP 5 collection notice complete.** Identity (), purpose, consequences of non-provision, who we share with (including processors), legal-disclosure caveat, access/correction/deletion contact, Privacy Policy reference, Privacy Act 1988 reference.
 8. **ChatDrawer suggestion chips scrubbed.** No "PR in Australia", no "subclass" references in `SUGGESTED[]`.
 9. **sop/route.ts system prompt has explicit negative constraint.** Must contain "NEVER include visa advice, migration pathway guidance, residency claims, or post-study work..."
-10. **chat + chat-simple route system prompts preserved as MARA-safe deflection.** Must contain "NEVER give" / "NOT a migration agent" language (these are REQUIRED, not violations).
+10. **chat + chat-simple route system prompts preserved as -safe deflection.** Must contain "NEVER give" / "NOT a migration agent" language (these are REQUIRED, not violations).
 11. **mobile/index.tsx hero copy scrubbed.** No "migration fit" / "PR intent" — currently "outcomes fit" / "graduate-outcomes focus".
 12. **mobile/profile.tsx field blurbs scrubbed.** No "PR-active pathway" / "MLTSSL" / "PR-eligible pathway".
 13. **mobile/mockData.ts advisor prompts scrubbed.** No "PR pathway courses" / "migration outcomes" / "migration-related questions".

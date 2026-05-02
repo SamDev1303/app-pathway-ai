@@ -192,8 +192,8 @@
 
 | Option | Description | Selected |
 |---|---|---|
-| Template strings built from match_result fields (Recommended) | Zero LLM cost, MARA-safe, deterministic. | |
-| LLM-generated prose with guardrails (gpt-4o-mini) | Adds latency + cost + MARA risk. | |
+| Template strings built from match_result fields (Recommended) | Zero LLM cost, -safe, deterministic. | |
+| LLM-generated prose with guardrails (gpt-4o-mini) | Adds latency + cost + risk. | |
 | Hybrid — template as base, optional LLM rewrite on request | V1 template only, LLM path for v2 hook. | ✓ |
 
 **User's choice:** Hybrid.
@@ -219,13 +219,13 @@
 
 **User's choice:** Smart top-3.
 
-### Q4 — MARA disclaimer placement
+### Q4 — disclaimer placement
 
 | Option | Description | Selected |
 |---|---|---|
 | Once on results page, not per-result (Recommended) | Single persistent banner. | ✓ |
 | Inline on every result card | Most defensive, cluttered UX. | |
-| Footer only, no banner | Risks MARA scrub fail. | |
+| Footer only, no banner | Risks scrub fail. | |
 
 **User's choice:** Once on results page.
 
@@ -264,7 +264,7 @@ During discussion, Koda probed two PRD/schema gaps Sam asked to be verified inst
 - **LLM-generated reason prose** — schema-compatible but not implemented in v1.
 - **Recompute endpoint / admin tooling** — v2 admin CRM territory.
 - **Match quality telemetry** — v2 analytics scope.
-- **"Apply with UniMate" live application flow** — CTA shows in v1, wired path is v2.
+- **"Apply with Pathway-AI" live application flow** — CTA shows in v1, wired path is v2.
 
 ---
 

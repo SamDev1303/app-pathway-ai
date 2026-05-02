@@ -1,10 +1,10 @@
-# SOURCECODE.md — Atlas AI Living Architecture
+# SOURCECODE.md — Pathway-AI Living Architecture
 
 **Last updated:** 2026-04-25 · phases 0 → 5.5 done; P6 SOP partial; P7 mobile rebrand pending; P8 dataset backfill pending; P9 handover pending.
 
 **Read this file first** if you are a new developer (human or LLM) opening this repo. It is the contract between code and docs. Every commit that adds, removes, renames a file or bumps a stack version updates this file in the same commit (CLAUDE.md §3).
 
-**TL;DR for an LLM agent:** Atlas AI is a Next.js 16 + Supabase + AI-SDK student-matching app for Australian universities, scoped under UniMate Pty Ltd's MARA registration. Matching is **deterministic SQL** (Postgres RPC). The LLM is **advisor-only** with belt-and-braces deflection on regulated migration topics. Logs are 3-layer redacted. Mobile (Expo SDK 54) exists but is not yet wired to the production API — see §Mobile.
+**TL;DR for an LLM agent:** Pathway-AI is a Next.js 16 + Supabase + AI-SDK student-matching app for Australian universities, scoped under Pathway-AI's registration. Matching is **deterministic SQL** (Postgres RPC). The LLM is **advisor-only** with belt-and-braces deflection on regulated migration topics. Logs are 3-layer redacted. Mobile (Expo SDK 54) exists but is not yet wired to the production API — see §Mobile.
 
 ---
 
@@ -12,26 +12,26 @@
 
 ```bash
 # clone & install
-git clone https://github.com/SamDev1303/unimate-demo.git atlas-ai
-cd atlas-ai/web && npm install
+git clone https://github.com/SamDev1303/unimate-demo.git pathway-ai
+cd pathway-ai/web && npm install
 
 # env (copy + fill from your provider keys)
 cp .env.example .env.local
-#  required: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY,
-#            CHAT_MODEL (e.g. "openai/gpt-4o-mini" or "anthropic/claude-sonnet-4-6"),
-#            OPENAI_API_KEY or OPENROUTER_API_KEY (depending on CHAT_MODEL provider),
-#            RESEND_API_KEY, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN
-#  optional: SENTRY_DSN, NEXT_PUBLIC_SENTRY_DSN
+# required: SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY,
+# CHAT_MODEL (e.g. "openai/gpt-4o-mini" or "anthropic/claude-sonnet-4-6"),
+# OPENAI_API_KEY or OPENROUTER_API_KEY (depending on CHAT_MODEL provider),
+# RESEND_API_KEY, UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN
+# optional: SENTRY_DSN, NEXT_PUBLIC_SENTRY_DSN
 
 # run
-npm run dev          # http://localhost:3000
+npm run dev # http://localhost:3000
 
 # typecheck + build
 npx tsc --noEmit
 npm run build
 
 # database migrations
-cd ../supabase && supabase db push   # applies 001..011 in order
+cd ../supabase && supabase db push # applies 001..011 in order
 ```
 
 Mobile dev (when needed):
@@ -84,38 +84,38 @@ Node engine: 20 LTS recommended. macOS Bash 3.2 — scripts must be POSIX-portab
 ## 2. Repo tree (top-level)
 
 ```
-atlas-ai/
-├── README.md                    Product pitch + quick run/deploy
-├── SOURCECODE.md                ← this file (read first)
-├── PRD.md                       Hard-cut v1 product spec
-├── PRD-CLIENT.md                Client-facing PRD (delta vs original 22-page)
-├── CLIENT-INTAKE.md             Client intake doc
-├── CLIENT-STATUS.md             Status snapshot for client
-├── PHASE.md                     Phase tracker — dual sign-off, rows = ground truth
-├── CLAUDE.md                    Governance rules for AI agents working here
-├── RESUME.md                    How to continue the build next session (older — STATE.md+HANDOFF.json supersede day-to-day)
-├── STATE.md                     Active session pause/resume state
-├── HANDOFF.json                 Machine-readable session handoff
-├── vercel.json                  Vercel project config (security headers, rewrites)
-├── .vercel/project.json         Linked project ID (atlas-ai)
+pathway-ai/
+├── README.md Product pitch + quick run/deploy
+├── SOURCECODE.md ← this file (read first)
+├── PRD.md Hard-cut v1 product spec
+├── PRD-CLIENT.md Client-facing PRD (delta vs original 22-page)
+├── CLIENT-INTAKE.md Client intake doc
+├── CLIENT-STATUS.md Status snapshot for client
+├── PHASE.md Phase tracker — dual sign-off, rows = ground truth
+├── CLAUDE.md Governance rules for AI agents working here
+├── RESUME.md How to continue the build next session (older — STATE.md+HANDOFF.json supersede day-to-day)
+├── STATE.md Active session pause/resume state
+├── HANDOFF.json Machine-readable session handoff
+├── vercel.json Vercel project config (security headers, rewrites)
+├── .vercel/project.json Linked project ID (pathway-ai)
 ├── .gitignore
-├── .github/                     CI workflows (mara-grep-gate)
-├── .planning/                   GSD planning artifacts (research, plan-checks, deviations)
-│   ├── PROJECT.md, STATE.md, config.json
-│   └── research/                Per-phase plan-check + verify outputs (Gideon/Neo/Specter)
-├── planning/atlas-ai/           Active phase work (CONTEXT, PLAN, APPROVAL, DEVIATIONS)
-├── docs/                        Long-lived docs
-│   ├── compliance-attestation-v1.md       MARA + APP attestation
-│   └── client/                            Pre-meeting briefs, status messages, screenshare notes
-├── ops/n8n/                     Optional: lead-sync n8n workflow JSON + README
-├── org/reviews/                 Cross-agent review artifacts (e.g. uni-data-verify-expand)
-├── supabase/migrations/         001..011 SQL — schema, match RPC, RLS, embeddings, chat audit, SOP drafts
-├── web/                         Next.js 16 app (production surface)
-└── mobile/                      Expo SDK 54 app (NOT wired to prod API yet — P7 rebrand pending)
+├── .github/ CI workflows (mara-grep-gate)
+├── .planning/ GSD planning artifacts (research, plan-checks, deviations)
+│ ├── PROJECT.md, STATE.md, config.json
+│ └── research/ Per-phase plan-check + verify outputs (Gideon/Neo/Specter)
+├── planning/pathway-ai/ Active phase work (CONTEXT, PLAN, APPROVAL, DEVIATIONS)
+├── docs/ Long-lived docs
+│ ├── compliance-attestation-v1.md + APP attestation
+│ └── client/ Pre-meeting briefs, status messages, screenshare notes
+├── ops/n8n/ Optional: lead-sync n8n workflow JSON + README
+├── org/reviews/ Cross-agent review artifacts (e.g. uni-data-verify-expand)
+├── supabase/migrations/ 001..011 SQL — schema, match RPC, RLS, embeddings, chat audit, SOP drafts
+├── web/ Next.js 16 app (production surface)
+└── mobile/ Expo SDK 54 app (NOT wired to prod API yet — P7 rebrand pending)
 └── _reference/
-    ├── archive/                 Pre-rename artifacts (old PRD, scaffold snapshot, demo QR)
-    ├── client-handover/         SOW + meeting notes
-    └── au-imagery-sources.md    AU university imagery reference
+ ├── archive/ Pre-rename artifacts (old PRD, scaffold snapshot, demo QR)
+ ├── client-handover/ SOW + meeting notes
+ └── au-imagery-sources.md AU university imagery reference
 ```
 
 ---
@@ -124,83 +124,83 @@ atlas-ai/
 
 ```
 src/
-├── app/                                   App Router (Next.js 16)
-│   ├── layout.tsx                         Root layout + Atlas AI metadata + Sentry boot
-│   ├── page.tsx                           Landing page (Hero + MatcherSection + TrustStrip + Footer)
-│   ├── globals.css                        Tailwind v4 base + CSS custom properties (colors)
-│   ├── consult/page.tsx                   ★ MARA consultation landing (target of all chat/SOP deflection links)
-│   ├── chat/page.tsx                      Advisor chat surface (RAG + deflection)
-│   ├── login/page.tsx                     Magic-link sign-in (Supabase Auth)
-│   ├── matches/[token]/page.tsx           Server Component — renders ranked matches for match_token
-│   ├── sop/[leadToken]/                   SOP generator (P6 partial)
-│   │   ├── page.tsx                       Server-side draft loader
-│   │   └── SopEditor.tsx                  Client-side section editor + react-pdf export
-│   ├── auth/
-│   │   ├── callback/route.ts              Supabase Auth code-exchange callback
-│   │   └── auth-code-error/page.tsx       Error UI for failed callback
-│   └── api/
-│       ├── chat/route.ts                  Streaming advisor chat (AI SDK v6) — RAG + 3-layer deflection
-│       ├── chat-simple/route.ts           Non-streaming fallback chat
-│       ├── leads/route.ts                 5-step lead capture POST → invokes match_unis_for_lead RPC → returns match_token + email via Resend
-│       └── sop/route.ts                   SOP draft generator (LLM → react-pdf)
+├── app/ App Router (Next.js 16)
+│ ├── layout.tsx Root layout + Pathway-AI metadata + Sentry boot
+│ ├── page.tsx Landing page (Hero + MatcherSection + TrustStrip + Footer)
+│ ├── globals.css Tailwind v4 base + CSS custom properties (colors)
+│ ├── consult/page.tsx ★ consultation landing (target of all chat/SOP deflection links)
+│ ├── chat/page.tsx Advisor chat surface (RAG + deflection)
+│ ├── login/page.tsx Magic-link sign-in (Supabase Auth)
+│ ├── matches/[token]/page.tsx Server Component — renders ranked matches for match_token
+│ ├── sop/[leadToken]/ SOP generator (P6 partial)
+│ │ ├── page.tsx Server-side draft loader
+│ │ └── SopEditor.tsx Client-side section editor + react-pdf export
+│ ├── auth/
+│ │ ├── callback/route.ts Supabase Auth code-exchange callback
+│ │ └── auth-code-error/page.tsx Error UI for failed callback
+│ └── api/
+│ ├── chat/route.ts Streaming advisor chat (AI SDK v6) — RAG + 3-layer deflection
+│ ├── chat-simple/route.ts Non-streaming fallback chat
+│ ├── leads/route.ts 5-step lead capture POST → invokes match_unis_for_lead RPC → returns match_token + email via Resend
+│ └── sop/route.ts SOP draft generator (LLM → react-pdf)
 │
-├── components/                            UI components
-│   ├── Hero.tsx                           Landing hero
-│   ├── MatcherSection.tsx                 "Three questions" CTA section
-│   ├── MatcherForm.tsx                    Inline matcher (legacy demo — Step3 still uses stub)
-│   ├── UniCard.tsx                        University card (used on landing TrustStrip preview)
-│   ├── TrustStrip.tsx                     MARA / QEAC / CRICOS trust row
-│   ├── LeadModal.tsx                      Modal wrapper for the 5-step lead form
-│   ├── Footer.tsx                         Site footer (MARA card → portal.mara.gov.au public register link)
-│   ├── ChatDrawer.tsx                     Chat slide-out launcher
-│   ├── chat/
-│   │   ├── ChatClient.tsx                 useChat() client — streams, renders deflection CTA chips → /consult
-│   │   └── SourcesPill.tsx                Citation pill for RAG hits
-│   ├── lead/                              5-step lead form (Step1Personal..Step5Contact + Field)
-│   │   ├── Step1Personal.tsx              Name/email + APP 5 collection notice
-│   │   ├── Step2Academic.tsx              GPA + IELTS
-│   │   ├── Step3Preferences.tsx           Field + region + outcomes (uses stubTopMatches preview)
-│   │   ├── Step4Budget.tsx                Tuition budget + start year
-│   │   ├── Step5Contact.tsx               Phone + consent_service + consent_marketing (split)
-│   │   └── Field.tsx                      Form field primitive
-│   ├── matches/                           Renders /matches/[token]
-│   │   ├── MatchesHero.tsx, MatchList.tsx, MatchCard.tsx
-│   │   ├── StretchSection.tsx, StretchCard.tsx
-│   │   ├── ConsultCTA.tsx, MaraBanner.tsx
-│   │   ├── PendingMatches.tsx, NotFoundFallback.tsx, ExpiredTokenFallback.tsx
-│   └── sop/
-│       └── SopPdfDoc.tsx                  @react-pdf/renderer document
+├── components/ UI components
+│ ├── Hero.tsx Landing hero
+│ ├── MatcherSection.tsx "Three questions" CTA section
+│ ├── MatcherForm.tsx Inline matcher (legacy demo — Step3 still uses stub)
+│ ├── UniCard.tsx University card (used on landing TrustStrip preview)
+│ ├── TrustStrip.tsx / QEAC / CRICOS trust row
+│ ├── LeadModal.tsx Modal wrapper for the 5-step lead form
+│ ├── Footer.tsx Site footer ( card → portal.mara.gov.au public register link)
+│ ├── ChatDrawer.tsx Chat slide-out launcher
+│ ├── chat/
+│ │ ├── ChatClient.tsx useChat() client — streams, renders deflection CTA chips → /consult
+│ │ └── SourcesPill.tsx Citation pill for RAG hits
+│ ├── lead/ 5-step lead form (Step1Personal..Step5Contact + Field)
+│ │ ├── Step1Personal.tsx Name/email + APP 5 collection notice
+│ │ ├── Step2Academic.tsx GPA + IELTS
+│ │ ├── Step3Preferences.tsx Field + region + outcomes (uses stubTopMatches preview)
+│ │ ├── Step4Budget.tsx Tuition budget + start year
+│ │ ├── Step5Contact.tsx Phone + consent_service + consent_marketing (split)
+│ │ └── Field.tsx Form field primitive
+│ ├── matches/ Renders /matches/[token]
+│ │ ├── MatchesHero.tsx, MatchList.tsx, MatchCard.tsx
+│ │ ├── StretchSection.tsx, StretchCard.tsx
+│ │ ├── ConsultCTA.tsx, MaraBanner.tsx
+│ │ ├── PendingMatches.tsx, NotFoundFallback.tsx, ExpiredTokenFallback.tsx
+│ └── sop/
+│ └── SopPdfDoc.tsx @react-pdf/renderer document
 │
-└── lib/                                   Pure logic + integrations (no UI)
-    ├── content.ts                         All landing copy + brand strings — single edit point for non-eng to tweak
-    ├── types.ts                           Shared types (Student, Course, LeadInput, MatchRow)
-    ├── utils.ts                           cn() etc.
-    ├── matcher.ts                         Legacy in-memory matcher (kept for Step3 preview)
-    ├── match-weights.ts                   Weights for the SQL RPC (so backend + preview agree)
-    ├── match-reason.ts                    Human-readable match reason builder
-    ├── match-schema.ts                    Zod schema for match RPC return shape
-    ├── match-stub.ts                      stubTopMatches() preview (client-side teaser only)
-    ├── universities.ts                    Helper accessors
-    ├── universities-seed.ts               17 seeded AU universities × 68 courses (P8 expands to 43)
-    ├── lead-schema.ts                     Zod LeadInput schema (incl. consent_service / consent_marketing / wording_version)
-    ├── lead-score.ts                      Lead scoring used in /api/leads
-    ├── ratelimit.ts                       Upstash Redis sliding-window limiters (chat, leads)
-    ├── chat-system-prompt.ts              MARA-safe system prompt (NEVER clauses + per-turn footer)
-    ├── chat-deflection.ts                 Pre-check + post-filter regex/classifier deflection
-    ├── chat-session.ts                    Chat session persistence (Supabase chat_sessions + chat_messages)
-    ├── sop-prompt.ts                      SOP generator system prompt
-    ├── mara-disclaimer.ts                 MARA wording version + portal.mara.gov.au public register URL constant
-    ├── logger.ts                          pino logger entrypoint (browser + edge + node aware)
-    ├── logger-redact.ts                   3-layer redaction: path-list + censor + recursive walker
-    └── supabase/
-        ├── client.ts                      Browser client (anon key, RLS-bound)
-        ├── server.ts                      RSC server client (cookie-aware)
-        ├── service-role.ts                Server-only service-role client (RLS-bypass, admin ops)
-        └── middleware.ts                  Auth middleware (refresh sessions on every request)
+└── lib/ Pure logic + integrations (no UI)
+ ├── content.ts All landing copy + brand strings — single edit point for non-eng to tweak
+ ├── types.ts Shared types (Student, Course, LeadInput, MatchRow)
+ ├── utils.ts cn() etc.
+ ├── matcher.ts Legacy in-memory matcher (kept for Step3 preview)
+ ├── match-weights.ts Weights for the SQL RPC (so backend + preview agree)
+ ├── match-reason.ts Human-readable match reason builder
+ ├── match-schema.ts Zod schema for match RPC return shape
+ ├── match-stub.ts stubTopMatches() preview (client-side teaser only)
+ ├── universities.ts Helper accessors
+ ├── universities-seed.ts 17 seeded AU universities × 68 courses (P8 expands to 43)
+ ├── lead-schema.ts Zod LeadInput schema (incl. consent_service / consent_marketing / wording_version)
+ ├── lead-score.ts Lead scoring used in /api/leads
+ ├── ratelimit.ts Upstash Redis sliding-window limiters (chat, leads)
+ ├── chat-system-prompt.ts -safe system prompt (NEVER clauses + per-turn footer)
+ ├── chat-deflection.ts Pre-check + post-filter regex/classifier deflection
+ ├── chat-session.ts Chat session persistence (Supabase chat_sessions + chat_messages)
+ ├── sop-prompt.ts SOP generator system prompt
+ ├── mara-disclaimer.ts wording version + portal.mara.gov.au public register URL constant
+ ├── logger.ts pino logger entrypoint (browser + edge + node aware)
+ ├── logger-redact.ts 3-layer redaction: path-list + censor + recursive walker
+ └── supabase/
+ ├── client.ts Browser client (anon key, RLS-bound)
+ ├── server.ts RSC server client (cookie-aware)
+ ├── service-role.ts Server-only service-role client (RLS-bypass, admin ops)
+ └── middleware.ts Auth middleware (refresh sessions on every request)
 
-middleware.ts (root of /web)               Next.js middleware — invokes supabase/middleware.ts
-instrumentation.ts (root of /web)          Sentry instrumentation hook (P5.5)
-sentry.{client,server,edge}.config.ts      Sentry configs per runtime
+middleware.ts (root of /web) Next.js middleware — invokes supabase/middleware.ts
+instrumentation.ts (root of /web) Sentry instrumentation hook (P5.5)
+sentry.{client,server,edge}.config.ts Sentry configs per runtime
 ```
 
 ---
@@ -209,14 +209,14 @@ sentry.{client,server,edge}.config.ts      Sentry configs per runtime
 
 | Method | Path | Auth | Purpose | Key files |
 |---|---|---|---|---|
-| GET  | `/` | public | Landing page | `app/page.tsx` |
-| GET  | `/consult` | public | MARA consultation CTA (deflection target) | `app/consult/page.tsx` |
-| GET  | `/chat` | public | Advisor chat surface | `app/chat/page.tsx`, `components/chat/*` |
-| GET  | `/login` | public | Magic-link sign-in | `app/login/page.tsx` |
-| GET  | `/matches/[token]` | public (token-scoped) | Server Component — ranked matches | `app/matches/[token]/page.tsx`, `components/matches/*` |
-| GET  | `/sop/[leadToken]` | public (token-scoped) | SOP editor + export | `app/sop/[leadToken]/page.tsx` + `SopEditor.tsx` |
-| GET  | `/auth/callback` | public | Supabase magic-link exchange | `app/auth/callback/route.ts` |
-| GET  | `/auth/auth-code-error` | public | Auth failure UI | `app/auth/auth-code-error/page.tsx` |
+| GET | `/` | public | Landing page | `app/page.tsx` |
+| GET | `/consult` | public | consultation CTA (deflection target) | `app/consult/page.tsx` |
+| GET | `/chat` | public | Advisor chat surface | `app/chat/page.tsx`, `components/chat/*` |
+| GET | `/login` | public | Magic-link sign-in | `app/login/page.tsx` |
+| GET | `/matches/[token]` | public (token-scoped) | Server Component — ranked matches | `app/matches/[token]/page.tsx`, `components/matches/*` |
+| GET | `/sop/[leadToken]` | public (token-scoped) | SOP editor + export | `app/sop/[leadToken]/page.tsx` + `SopEditor.tsx` |
+| GET | `/auth/callback` | public | Supabase magic-link exchange | `app/auth/callback/route.ts` |
+| GET | `/auth/auth-code-error` | public | Auth failure UI | `app/auth/auth-code-error/page.tsx` |
 | POST | `/api/chat` | rate-limited | Streaming RAG chat — pre-check → model → post-filter → audit row | `app/api/chat/route.ts`, `lib/chat-*.ts` |
 | POST | `/api/chat-simple` | rate-limited | Non-streaming fallback chat | `app/api/chat-simple/route.ts` |
 | POST | `/api/leads` | rate-limited | Lead capture → match RPC → match_token + email | `app/api/leads/route.ts`, `lib/lead-*.ts` |
@@ -253,10 +253,10 @@ Key RPCs:
 ## 6. Architectural patterns (read these before changing anything)
 
 ### 6.1 Hybrid SQL + LLM
-- **Recommendation = SQL** (`match_unis_for_lead`). Auditable, deterministic, costs $0, MARA-defensible.
+- **Recommendation = SQL** (`match_unis_for_lead`). Auditable, deterministic, costs $0, -defensible.
 - **LLM = advisor only** (`/api/chat`, `/api/sop`). Never the primary decision-maker for regulated outputs.
 
-### 6.2 Belt-and-braces MARA deflection
+### 6.2 Belt-and-braces deflection
 1. **Pre-check** (`lib/chat-deflection.ts`) — input classifier rejects regulated-advice prompts.
 2. **System prompt** (`lib/chat-system-prompt.ts`) — explicit NEVER clause + per-turn disclaimer footer.
 3. **Post-filter** — regex/classifier on streamed output; replace + log violations.
@@ -304,16 +304,16 @@ Production: managed via `vercel env`. Never commit `.env.local`.
 **Built:** Expo SDK 54, expo-router tabs (5 tabs: index, match, profile, chat, sop), Sentry wired, theme + haptics + icons primitives.
 
 **NOT yet wired:**
-- Bundle ID still `cloud.claudeking.unimate` and display name `UniMate Australia` (P7 rebrand pending).
-- `mobile/lib/api.ts` hardcodes `https://unimate-demo.vercel.app` — needs to point at `atlas-ai.vercel.app` (or env-gated).
+- Bundle ID still `cloud.claudeking.unimate` and display name `Pathway-AI Australia` (P7 rebrand pending).
+- `mobile/lib/api.ts` hardcodes `https://unimate-demo.vercel.app` — needs to point at `pathway-ai.vercel.app` (or env-gated).
 - Mobile uses `mockData.ts`, not the live `match_unis_for_lead` RPC.
-- Chat tab placeholder still mentions "visas" — needs MARA-safe rewrite to match web side.
+- Chat tab placeholder still mentions "visas" — needs -safe rewrite to match web side.
 - `mobile/tunnel-demo.sh` references stale path `~/Desktop/Unimate-demo/mobile`.
 
 **Planned in P7 (mobile rebrand) + parallelizable with P6:**
-1. Rename bundle / app.json / package name → atlas-ai.
+1. Rename bundle / app.json / package name → pathway-ai.
 2. Point `lib/api.ts` at the real `/api/leads` + `/api/chat` endpoints (env-gated).
-3. Apply same MARA-safe deflection on chat tab.
+3. Apply same -safe deflection on chat tab.
 4. Apply same APP 5 collection notice on lead capture.
 5. Sentry DSN swap.
 
@@ -324,12 +324,12 @@ Production: managed via `vercel env`. Never commit `.env.local`.
 | # | Phase | Status |
 |---|---|---|
 | 0 | Repo restructure + governance | ✅ done |
-| 0.5 | Scaffold scrub (MARA copy audit) | ✅ done |
+| 0.5 | Scaffold scrub ( copy audit) | ✅ done |
 | 1 | Supabase + AU universities seed | ✅ done |
 | 2 | Supabase Auth (magic-link) | ✅ done |
 | 3 | 5-step lead capture + APP 5 consent | ✅ done |
 | 4 | UniMatch engine via SQL RPC | ✅ done |
-| 4.5 | MARA compliance gate | ✅ done |
+| 4.5 | compliance gate | ✅ done |
 | 5 | AI Advisor Chat + RAG + deflection | ✅ done |
 | 5.5 | Observability (pino + Sentry + redaction) | ✅ done |
 | 6 | SOP Generator | 🟡 partial (route + UI + migrations 010/011 + react-pdf shipped; tracker row stale) |
@@ -347,7 +347,7 @@ Production: managed via `vercel env`. Never commit `.env.local`.
 | Change matching logic | `supabase/migrations/004_match_function.sql` + `web/src/lib/match-weights.ts` |
 | Change chat behavior or deflection | `web/src/lib/chat-system-prompt.ts` + `chat-deflection.ts` |
 | Change lead form fields/consent | `web/src/lib/lead-schema.ts` + `web/src/components/lead/Step*.tsx` |
-| Change MARA wording | `web/src/lib/mara-disclaimer.ts` |
+| Change wording | `web/src/lib/mara-disclaimer.ts` |
 | Add a new university | INSERT into `universities` + `courses`, run `scripts/backfill-course-embeddings.ts` |
 | Swap AI provider | Set `CHAT_MODEL` env var; no code change |
 | Add a new API route | `web/src/app/api/<name>/route.ts` + add row to §4 of this file (CLAUDE.md §3a will fail CI otherwise) |

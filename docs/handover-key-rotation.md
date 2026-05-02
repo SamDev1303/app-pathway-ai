@@ -16,7 +16,7 @@
 | `RESEND_API_KEY` | `~/Desktop/api/KEYS.md` (Sam's Resend account, claudeking.org domain) | Sam | Client opens Resend account, verifies their domain, generates key | Lead notification emails fail; admin gets nothing on new lead |
 | `RESEND_FROM_EMAIL` | `noreply@claudeking.org` (likely) | Sam | Replace with client's verified sending address (e.g. `noreply@<client>.com.au`) | Emails sent with sender mismatch — Resend may bounce or send via shared pool |
 | `ADMIN_NOTIFICATION_EMAIL` | likely Sam's address | Sam | Swap to client's intake address | Sam keeps receiving client's leads after handover |
-| `SUPABASE_SERVICE_KEY` | atlas-ai project (Sam's Supabase org) | Sam | Either transfer Supabase project ownership OR provision a fresh project for client and re-run all migrations | Auth bypass to Sam's project — privacy + billing violation |
+| `SUPABASE_SERVICE_KEY` | pathway-ai project (Sam's Supabase org) | Sam | Either transfer Supabase project ownership OR provision a fresh project for client and re-run all migrations | Auth bypass to Sam's project — privacy + billing violation |
 | `SUPABASE_SECRET_KEY` | same | Sam | same | same |
 | `SUPABASE_PUBLISHABLE_KEY` | same | Sam | same | same |
 | `SUPABASE_SERVICE_ROLE_KEY` | same | Sam | same | same |

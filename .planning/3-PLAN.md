@@ -1,7 +1,7 @@
 # Phase 3 — PLAN.md (Lead capture — 5-step + progressive save + scoring)
 
 **Created:** 2026-04-17 · session 4
-**Upstream:** `.planning/3-CONTEXT.md` · `PRD.md` v1.1 · `PHASE.md` §Phase 3 · `planning/atlas-ai/DEVIATIONS.md` §DEV-001
+**Upstream:** `.planning/3-CONTEXT.md` · `PRD.md` v1.1 · `PHASE.md` §Phase 3 · `planning/pathway-ai/DEVIATIONS.md` §DEV-001
 **Review protocol:** single-seat Gideon on `-m gpt-5.4` (supersedes dual-seat — see `feedback_agent-model-calibration.md`)
 **Budget position:** within $3,000 fixed. N8N pipeline ships dormant per PRD §3 X.1.1 (+$200 activation add-on).
 
@@ -10,9 +10,9 @@
 ## Delta from CONTEXT.md (refinements after pre-plan scouting)
 
 1. **Email env var:** CONTEXT D9 proposed `UNIMATE_LEAD_EMAIL`. Actual repo has `LEAD_NOTIFY_EMAILS=<comma-sep>` already in `.env.example`. Plan uses the existing var (no churn).
-2. **No Make.com, no N8N call from app code:** CONTEXT D10 had a webhook POST step inside `/api/leads/route.ts`. PRD v1.1 removed Make.com; N8N is now a UniMate-hosted dormant add-on (X.1.1). `/api/leads` will NOT call any webhook. Supabase DB Webhooks handle the N8N hand-off entirely outside Next.js.
+2. **No Make.com, no N8N call from app code:** CONTEXT D10 had a webhook POST step inside `/api/leads/route.ts`. PRD v1.1 removed Make.com; N8N is now a Pathway-AI-hosted dormant add-on (X.1.1). `/api/leads` will NOT call any webhook. Supabase DB Webhooks handle the N8N hand-off entirely outside Next.js.
 3. **Budget anchor for scoring:** CONTEXT D6 used $38k/yr median. The actual 12-uni seed is G8-heavy (UNSW/USyd undergrad IT ≈ $53–56k). Revised anchors:
-   - ≥ $45k = 25 · $35–44.9k = 18 · $25–34.9k = 10 · <$25k = 0 · null = 5
+ - ≥ $45k = 25 · $35–44.9k = 18 · $25–34.9k = 10 · <$25k = 0 · null = 5
 4. **Consent wording version bump:** `2026-04-17.v1` → `2026-04-17.v2` because the APP 5 notice gains a new "Where we store it" APP 8 paragraph (DEV-001 requirement).
 
 ---
@@ -51,59 +51,59 @@
 - **T-B4** `web/src/components/lead/Step4Budget.tsx` — `tuition_budget_aud` (number, step 1000), `living_budget_aud` (number). All optional; Skip link visible.
 - **T-B5** `web/src/components/lead/Step5Contact.tsx` — `preferred_contact_channel` (email / phone / either), `notes` (textarea), APP 5 + APP 8 notice block, required service-consent checkbox, optional marketing checkbox, submit button gated on service consent.
 
-  **Notice block composition (mandatory — Gideon plan-check #1 compliance):**
-  1. Lift paragraphs 1–4 of the existing APP 5 notice from `web/src/components/LeadModal.tsx:192–208` verbatim (Collection notice, Why we need it, Who we share it with, Your rights).
-  2. Insert a **new paragraph** titled "Where we store it" between the existing "Who we share it with" paragraph and the "Your rights" paragraph. The body text **MUST USE VERBATIM** the sentence from `planning/atlas-ai/DEVIATIONS.md:42` (DEV-001 "Downstream obligations #1"):
+ **Notice block composition (mandatory — Gideon plan-check #1 compliance):**
+ 1. Lift paragraphs 1–4 of the existing APP 5 notice from `web/src/components/LeadModal.tsx:192–208` verbatim (Collection notice, Why we need it, Who we share it with, Your rights).
+ 2. Insert a **new paragraph** titled "Where we store it" between the existing "Who we share it with" paragraph and the "Your rights" paragraph. The body text **MUST USE VERBATIM** the sentence from `planning/pathway-ai/DEVIATIONS.md:42` (DEV-001 "Downstream obligations #1"):
 
-     > *Your information is stored on Supabase servers hosted in Singapore (ap-southeast-1). This is a cross-border disclosure under APP 8 of the Privacy Act 1988 (Cth). Supabase is contractually bound to Australian privacy standards, and UniMate ensures reasonable steps are taken to comply with APPs in relation to overseas disclosures.*
+ > *Your information is stored on Supabase servers hosted in Singapore (ap-southeast-1). This is a cross-border disclosure under APP 8 of the Privacy Act 1988 (Cth). Supabase is contractually bound to Australian privacy standards, and Pathway-AI ensures reasonable steps are taken to comply with APPs in relation to overseas disclosures.*
 
-     No paraphrasing. No word substitutions. No added qualifiers. Markdown/JSX semantic formatting (`<code>` around `ap-southeast-1`, `<em>` around `Privacy Act 1988 (Cth)`) is permitted; the **words** must be byte-identical to DEVIATIONS.md:42.
-  3. Keep paragraph 5 ("We handle your data under the *Privacy Act 1988 (Cth)*.") from the existing notice unchanged.
-  4. This notice block is rendered BEFORE the two consent checkboxes, so APP 8 disclosure is visible BEFORE the service-consent tick (PRD §6 compliance + MARA Code of Conduct).
+ No paraphrasing. No word substitutions. No added qualifiers. Markdown/JSX semantic formatting (`<code>` around `ap-southeast-1`, `<em>` around `Privacy Act 1988 (Cth)`) is permitted; the **words** must be byte-identical to DEVIATIONS.md:42.
+ 3. Keep paragraph 5 ("We handle your data under the *Privacy Act 1988 (Cth)*.") from the existing notice unchanged.
+ 4. This notice block is rendered BEFORE the two consent checkboxes, so APP 8 disclosure is visible BEFORE the service-consent tick (PRD §6 compliance + Code of Conduct).
 
 ### Wave C — Orchestrator
 *Depends on all of Wave B.*
 
 - **T-C1** Refactor `web/src/components/LeadModal.tsx`:
-  - Replace single-form body with step state machine (`const [step, setStep] = useState(1)`, range 1–5)
-  - Navigation: Back button (visible on steps 2–5), Next button (steps 1–4), Submit button (step 5, disabled until `consent_service`)
-  - Skip link on steps 2–4 (advances to next step with current values preserved)
-  - Progress indicator: mobile `• • • ○ ○ Step 3 of 5` dots; md+ `Personal · Academic · Preferences · Budget · Contact` with the active step bolded
-  - Framer Motion horizontal slide between steps (key the wrapper on step number; `x: +30 → 0` on forward, `x: -30 → 0` on back)
-  - `max-w-2xl` container (widened from current `max-w-lg`)
-  - Draft persistence (CONTEXT D7): load from `localStorage['atlas-ai.lead-draft.v1']` on mount if `saved_at > now-30d` AND `schema_version === 'v1'`; save (debounced 300ms) on field blur + every Next click; clear on successful submit
-  - Draft-recovery banner when hydrated: `"Picking up where you left off — saved on this device only."` (dismissible)
-  - Submit handler: POST to `/api/leads` with merged values + `consent_wording_version: "2026-04-17.v2"`
-  - Success state: existing styled success card preserved; add a reset CTA "Submit another enquiry" that clears state
+ - Replace single-form body with step state machine (`const [step, setStep] = useState(1)`, range 1–5)
+ - Navigation: Back button (visible on steps 2–5), Next button (steps 1–4), Submit button (step 5, disabled until `consent_service`)
+ - Skip link on steps 2–4 (advances to next step with current values preserved)
+ - Progress indicator: mobile `• • • ○ ○ Step 3 of 5` dots; md+ `Personal · Academic · Preferences · Budget · Contact` with the active step bolded
+ - Framer Motion horizontal slide between steps (key the wrapper on step number; `x: +30 → 0` on forward, `x: -30 → 0` on back)
+ - `max-w-2xl` container (widened from current `max-w-lg`)
+ - Draft persistence (CONTEXT D7): load from `localStorage['pathway-ai.lead-draft.v1']` on mount if `saved_at > now-30d` AND `schema_version === 'v1'`; save (debounced 300ms) on field blur + every Next click; clear on successful submit
+ - Draft-recovery banner when hydrated: `"Picking up where you left off — saved on this device only."` (dismissible)
+ - Submit handler: POST to `/api/leads` with merged values + `consent_wording_version: "2026-04-17.v2"`
+ - Success state: existing styled success card preserved; add a reset CTA "Submit another enquiry" that clears state
 
 ### Wave D — API route
 *Depends on T-A1 + T-A2. Runs concurrently with Wave C.*
 
 - **T-D1** Extend `web/src/app/api/leads/route.ts`:
-  - Import `LeadInputSchema` from `lib/lead-schema.ts` (replaces the inline Zod)
-  - Import `computeScore` from `lib/lead-score.ts`
-  - After Zod parse: compute `{ score, tier }`
-  - Stamp `consent_given_at = new Date().toISOString()` server-side (NOT trusted from client)
-  - Create a Supabase client with `SUPABASE_SERVICE_ROLE_KEY` (server-only import path — not from `NEXT_PUBLIC_*`)
-  - **INSERT row — mandatory fields pinned server-side (Gideon plan-check #2):**
-    - `full_name, email, phone, country` (Step 1)
-    - `highest_qualification, gpa, ielts_overall` (Step 2, nullable)
-    - `preferred_fields, preferred_levels, preferred_intake_month` (Step 3, nullable)
-    - `tuition_budget_aud, living_budget_aud` (Step 4, nullable)
-    - `preferred_contact_channel, notes` (Step 5, nullable)
-    - `consent_service: true` (DB CHECK rejects false)
-    - `consent_marketing` (client-provided boolean)
-    - **`consent_wording_version: "2026-04-17.v2"` — server pins this constant; do NOT accept from client payload.** This is the canonical wording hash for the APP 5 + APP 8 block shipped in T-B5.
-    - `consent_given_at` (server-stamped above, never client-trusted)
-    - `lead_score` (from computeScore)
-    - `user_agent` (from request headers), `locale` (from request Accept-Language or client payload)
-  - If INSERT fails → return 500, NOT send email
-  - If INSERT succeeds → send Resend email to recipients from `LEAD_NOTIFY_EMAILS.split(',').map(s => s.trim()).filter(Boolean)` (fallback `['sam@claudeking.org']` if env unset)
-  - Email body adds `Lead score: {score} (tier {tier})` line + `Consent wording version: 2026-04-17.v2` line
-  - If email fails AFTER successful INSERT → log + return 200 (lead is captured)
-  - Response contract unchanged: `{ ok: boolean, error?: string }`
+ - Import `LeadInputSchema` from `lib/lead-schema.ts` (replaces the inline Zod)
+ - Import `computeScore` from `lib/lead-score.ts`
+ - After Zod parse: compute `{ score, tier }`
+ - Stamp `consent_given_at = new Date().toISOString()` server-side (NOT trusted from client)
+ - Create a Supabase client with `SUPABASE_SERVICE_ROLE_KEY` (server-only import path — not from `NEXT_PUBLIC_*`)
+ - **INSERT row — mandatory fields pinned server-side (Gideon plan-check #2):**
+ - `full_name, email, phone, country` (Step 1)
+ - `highest_qualification, gpa, ielts_overall` (Step 2, nullable)
+ - `preferred_fields, preferred_levels, preferred_intake_month` (Step 3, nullable)
+ - `tuition_budget_aud, living_budget_aud` (Step 4, nullable)
+ - `preferred_contact_channel, notes` (Step 5, nullable)
+ - `consent_service: true` (DB CHECK rejects false)
+ - `consent_marketing` (client-provided boolean)
+ - **`consent_wording_version: "2026-04-17.v2"` — server pins this constant; do NOT accept from client payload.** This is the canonical wording hash for the APP 5 + APP 8 block shipped in T-B5.
+ - `consent_given_at` (server-stamped above, never client-trusted)
+ - `lead_score` (from computeScore)
+ - `user_agent` (from request headers), `locale` (from request Accept-Language or client payload)
+ - If INSERT fails → return 500, NOT send email
+ - If INSERT succeeds → send Resend email to recipients from `LEAD_NOTIFY_EMAILS.split(',').map(s => s.trim()).filter(Boolean)` (fallback `['sam@claudeking.org']` if env unset)
+ - Email body adds `Lead score: {score} (tier {tier})` line + `Consent wording version: 2026-04-17.v2` line
+ - If email fails AFTER successful INSERT → log + return 200 (lead is captured)
+ - Response contract unchanged: `{ ok: boolean, error?: string }`
 
-  **Note on constant pinning:** `consent_wording_version` MUST be defined once as a module-level constant (`const CONSENT_WORDING_VERSION = "2026-04-17.v2"`) in `lib/lead-schema.ts` and imported by both the client submit path (T-C1) and the server INSERT (T-D1). No string-literal duplication — a single source of truth for wording-version-to-notice-block mapping.
+ **Note on constant pinning:** `consent_wording_version` MUST be defined once as a module-level constant (`const CONSENT_WORDING_VERSION = "2026-04-17.v2"`) in `lib/lead-schema.ts` and imported by both the client submit path (T-C1) and the server INSERT (T-D1). No string-literal duplication — a single source of truth for wording-version-to-notice-block mapping.
 
 ### Wave E — Ops artifacts
 *Independent. Can ship in any wave; grouped here for commit atomicity.*
@@ -126,38 +126,38 @@
 *Blocks commit-to-main.*
 
 - **T-G1** Local UAT (Sam driving, Koda instrumenting):
-  1. `cd web && pnpm dev` (or existing dev script)
-  2. Open landing page, click Hero CTA → modal opens
-  3. Fill Step 1 (required), Next → Step 2 fills OR skips → Step 3 fills OR skips → see top-3 teaser render → Step 4 fills OR skips → Step 5 tick service consent (not marketing), submit
-  4. Verify: success card renders
-  5. Refresh page + re-open modal → confirm draft cleared (because we submitted)
-  6. Repeat, but close browser mid-step-3 → reopen → confirm draft-recovery banner appears + form rehydrates at step 3
-  7. Verify Resend email landed in Sam's inbox with `Lead score: X (tier Y)` line
+ 1. `cd web && pnpm dev` (or existing dev script)
+ 2. Open landing page, click Hero CTA → modal opens
+ 3. Fill Step 1 (required), Next → Step 2 fills OR skips → Step 3 fills OR skips → see top-3 teaser render → Step 4 fills OR skips → Step 5 tick service consent (not marketing), submit
+ 4. Verify: success card renders
+ 5. Refresh page + re-open modal → confirm draft cleared (because we submitted)
+ 6. Repeat, but close browser mid-step-3 → reopen → confirm draft-recovery banner appears + form rehydrates at step 3
+ 7. Verify Resend email landed in Sam's inbox with `Lead score: X (tier Y)` line
 - **T-G2** DB audit:
-  ```sql
-  SELECT count(*) FROM leads WHERE consent_service = false;  -- MUST be 0
-  SELECT full_name, email, lead_score, consent_wording_version, consent_given_at FROM leads ORDER BY created_at DESC LIMIT 5;
-  ```
-  Manually via `supabase` CLI or Studio SQL editor.
+ ```sql
+ SELECT count(*) FROM leads WHERE consent_service = false; -- MUST be 0
+ SELECT full_name, email, lead_score, consent_wording_version, consent_given_at FROM leads ORDER BY created_at DESC LIMIT 5;
+ ```
+ Manually via `supabase` CLI or Studio SQL editor.
 - **T-G3** Gideon phase-verify:
-  - `cd ~/Desktop/Gideon/ && codex exec -m gpt-5.4 --full-auto < prompt.md`
-  - Prompt checks: CONTEXT D1–D10 + Delta 1–4 → actual code, APP 8 notice present, `consent_wording_version = "2026-04-17.v2"`, atomic INSERT-then-email ordering, no webhook call from app code, LEAD_NOTIFY_EMAILS honoured, scoring matches anchors
-  - PASS = Wave G clears. FAIL = iterate per Gideon findings before commit to main.
+ - `cd ~/Desktop/Gideon/ && codex exec -m gpt-5.4 --full-auto < prompt.md`
+ - Prompt checks: CONTEXT D1–D10 + Delta 1–4 → actual code, APP 8 notice present, `consent_wording_version = "2026-04-17.v2"`, atomic INSERT-then-email ordering, no webhook call from app code, LEAD_NOTIFY_EMAILS honoured, scoring matches anchors
+ - PASS = Wave G clears. FAIL = iterate per Gideon findings before commit to main.
 
 ### Wave H — Release gate
 *Final gate.*
 
 - **T-H1** Atomic commits per wave, pushed to `main`:
-  - Commit 1 (after Wave A): `feat(phase-3): shared lead schema + scoring + match-stub foundations`
-  - Commit 2 (after Wave B): `feat(phase-3): per-step lead components (Step1–Step5)`
-  - Commit 3 (after Wave C): `feat(phase-3): LeadModal 5-step wizard + localStorage draft`
-  - Commit 4 (after Wave D): `feat(phase-3): /api/leads atomic INSERT + score + dual-recipient email`
-  - Commit 5 (after Wave E): `feat(phase-3): dormant N8N add-on pipeline + env cleanup` *(includes the artifacts already staged this session)*
-  - Commit 6 (after Wave F + G): `feat(phase-3): PRD v1.1 + PHASE/STATE sign-off + Gideon PASS`
-  - Final commit message template ends with: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
+ - Commit 1 (after Wave A): `feat(phase-3): shared lead schema + scoring + match-stub foundations`
+ - Commit 2 (after Wave B): `feat(phase-3): per-step lead components (Step1–Step5)`
+ - Commit 3 (after Wave C): `feat(phase-3): LeadModal 5-step wizard + localStorage draft`
+ - Commit 4 (after Wave D): `feat(phase-3): /api/leads atomic INSERT + score + dual-recipient email`
+ - Commit 5 (after Wave E): `feat(phase-3): dormant N8N add-on pipeline + env cleanup` *(includes the artifacts already staged this session)*
+ - Commit 6 (after Wave F + G): `feat(phase-3): PRD v1.1 + PHASE/STATE sign-off + Gideon PASS`
+ - Final commit message template ends with: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
 - **T-H2** **Telegram approval gate** (CLAUDE.md HARD RULE):
-  - Before any commit to `main` in this plan lands, write `planning/atlas-ai/APPROVAL.md` with Sam's "proceed" timestamp received via Telegram or direct CLI reply
-  - Dispatch: summary of plan + link to `.planning/3-PLAN.md` + link to key changed files preview → Sam approves → commit chain starts
+ - Before any commit to `main` in this plan lands, write `planning/pathway-ai/APPROVAL.md` with Sam's "proceed" timestamp received via Telegram or direct CLI reply
+ - Dispatch: summary of plan + link to `.planning/3-PLAN.md` + link to key changed files preview → Sam approves → commit chain starts
 
 ---
 
@@ -202,7 +202,7 @@
 | Steps 1–4 localStorage only, zero server writes | T-C1 only submits on step 5; T-D1 only INSERTs on POST to `/api/leads` | T-G1 step 6 + T-G2 |
 | Step 5 atomic INSERT with consent fields | T-D1 INSERT includes all 5 consent fields (service, marketing, wording_version, given_at, score-derived tier in email) | T-G2 |
 | Consent UX required/optional | T-B5 renders both checkboxes; submit gated on service | T-G1 step 3 |
-| Submission emails Sam + UniMate | T-D1 LEAD_NOTIFY_EMAILS split + Resend `to: []` | T-G1 step 7 |
+| Submission emails Sam + Pathway-AI | T-D1 LEAD_NOTIFY_EMAILS split + Resend `to: []` | T-G1 step 7 |
 | Lead score computed server-side | T-A2 + T-D1 computes server-side inside the atomic flow | T-G2, T-G3 |
 | DB audit: zero consent_service=false rows | T-G2 SQL query (CHECK constraint enforces; audit confirms) | T-G2 |
 | Commit `feat(phase-3): lead capture — ...` | T-H1 commit chain; final commit message matches template | T-H1 |
@@ -217,10 +217,10 @@ If Gideon phase-verify FAILS or T-G1 UAT surfaces a blocker:
 2. **Wave already committed but broken:** revert the offending commit(s) via `git revert <sha>` (never `git reset --hard` on main — MEMORY rule `feedback_hitl-for-deletes.md`); fix forward on a new commit
 3. **Draft pollution:** localStorage bug could leave stale drafts in the wild post-launch. Mitigation: `schema_version` key in D7 lets us silently invalidate all stale drafts by bumping to `v2` in a hotfix
 4. **Lead CHECK constraint reject:** any lead insert failing the `consent_service=true` CHECK means we shipped a client-side bug. Rollback = re-enable the consent checkbox gating + hotfix deploy; the DB rejection prevents bad data from landing — no audit exposure
-5. **Schema drift between `lead-schema.ts`, `leads` table, and dormant ops/n8n artifacts:** if a future migration adds/renames/drops a column on `leads`, three surfaces must stay in lock-step — (a) `web/src/lib/lead-schema.ts` Zod types, (b) the `CREATE TABLE leads` migration, (c) the `ops/n8n/lead-sync-workflow.json` "Normalise Fields + Tier" node mapping + the Google Sheet header row documented in `ops/n8n/README.md`. **Rollback protocol:** bump the migration to an additive-only change (never destructive); update `lead-schema.ts` in the same commit as the migration; update `ops/n8n/lead-sync-workflow.json` + README in the same commit if touched; if the N8N pipeline is already activated (post-X.1.1), Sam must re-import the updated JSON into UniMate's N8N instance AND add matching columns to UniMate's Google Sheet BEFORE the migration deploys. If any of the three surfaces drifts, the fix is to roll the migration forward on a new commit that realigns all three — never roll the DB schema back destructively on a table holding real consent records
+5. **Schema drift between `lead-schema.ts`, `leads` table, and dormant ops/n8n artifacts:** if a future migration adds/renames/drops a column on `leads`, three surfaces must stay in lock-step — (a) `web/src/lib/lead-schema.ts` Zod types, (b) the `CREATE TABLE leads` migration, (c) the `ops/n8n/lead-sync-workflow.json` "Normalise Fields + Tier" node mapping + the Google Sheet header row documented in `ops/n8n/README.md`. **Rollback protocol:** bump the migration to an additive-only change (never destructive); update `lead-schema.ts` in the same commit as the migration; update `ops/n8n/lead-sync-workflow.json` + README in the same commit if touched; if the N8N pipeline is already activated (post-X.1.1), Sam must re-import the updated JSON into Pathway-AI's N8N instance AND add matching columns to Pathway-AI's Google Sheet BEFORE the migration deploys. If any of the three surfaces drifts, the fix is to roll the migration forward on a new commit that realigns all three — never roll the DB schema back destructively on a table holding real consent records
 6. **Consent wording version mismatch:** if `lead-schema.ts` `CONSENT_WORDING_VERSION` constant and the rendered notice block in `Step5Contact.tsx` fall out of sync (e.g. someone edits the notice copy without bumping the constant), any future compliance audit will see `consent_wording_version=v2` on rows whose actual rendered wording no longer matches the v2 canonical text. **Mitigation:** add a comment in both files cross-referencing the other; any edit to the notice block MUST bump the constant (e.g. to `v3`) in the same commit. No hotfix path — this is a forward-only discipline.
 
-Atlas AI has **no live traffic yet** (per HANDOFF.json human-action note — magic link untested with real email; no real leads in `leads` table). Rollbacks are code-only — zero PII at risk.
+Pathway-AI has **no live traffic yet** (per HANDOFF.json human-action note — magic link untested with real email; no real leads in `leads` table). Rollbacks are code-only — zero PII at risk.
 
 ---
 
@@ -229,17 +229,17 @@ Atlas AI has **no live traffic yet** (per HANDOFF.json human-action note — mag
 ```bash
 cd ~/Desktop/Gideon
 cat > /tmp/atlas-p3-plancheck.md << 'EOF'
-You are Gideon, single-seat code reviewer for atlas-ai Phase 3.
+You are Gideon, single-seat code reviewer for pathway-ai Phase 3.
 
 Read:
-- /Users/shamalkrishna/Desktop/atlas-ai/.planning/3-CONTEXT.md
-- /Users/shamalkrishna/Desktop/atlas-ai/.planning/3-PLAN.md
-- /Users/shamalkrishna/Desktop/atlas-ai/PRD.md (focus on v1.1 changelog + §3 X.1.1 + §5)
-- /Users/shamalkrishna/Desktop/atlas-ai/PHASE.md (§Phase 3)
-- /Users/shamalkrishna/Desktop/atlas-ai/planning/atlas-ai/DEVIATIONS.md
-- /Users/shamalkrishna/Desktop/atlas-ai/web/src/components/LeadModal.tsx (current state being refactored)
-- /Users/shamalkrishna/Desktop/atlas-ai/web/src/app/api/leads/route.ts (current state being extended)
-- /Users/shamalkrishna/Desktop/atlas-ai/supabase/migrations/001_initial_schema.sql (leads table lines 62–98)
+- /Users/shamalkrishna/Desktop/pathway-ai/.planning/3-CONTEXT.md
+- /Users/shamalkrishna/Desktop/pathway-ai/.planning/3-PLAN.md
+- /Users/shamalkrishna/Desktop/pathway-ai/PRD.md (focus on v1.1 changelog + §3 X.1.1 + §5)
+- /Users/shamalkrishna/Desktop/pathway-ai/PHASE.md (§Phase 3)
+- /Users/shamalkrishna/Desktop/pathway-ai/planning/pathway-ai/DEVIATIONS.md
+- /Users/shamalkrishna/Desktop/pathway-ai/web/src/components/LeadModal.tsx (current state being refactored)
+- /Users/shamalkrishna/Desktop/pathway-ai/web/src/app/api/leads/route.ts (current state being extended)
+- /Users/shamalkrishna/Desktop/pathway-ai/supabase/migrations/001_initial_schema.sql (leads table lines 62–98)
 
 Issue a plan-check verdict: APPROVE / APPROVE-WITH-NOTES / BLOCK.
 
@@ -274,18 +274,18 @@ codex exec -m gpt-5.4 --full-auto < /tmp/atlas-p3-plancheck.md
 Before any commit lands on `main`:
 
 1. Post to Telegram:
-   > "Phase 3 plan ready. `.planning/3-PLAN.md` written. Gideon: APPROVE (or APPROVE-WITH-NOTES / BLOCK). PRD v1.1 + N8N dormant pipeline included. Budget: within $3k; $200 add-on priced separately (X.1.1). Proceed to Wave A?"
+ > "Phase 3 plan ready. `.planning/3-PLAN.md` written. Gideon: APPROVE (or APPROVE-WITH-NOTES / BLOCK). PRD v1.1 + N8N dormant pipeline included. Budget: within $3k; $200 add-on priced separately (X.1.1). Proceed to Wave A?"
 2. Wait for Sam's "proceed" (or equivalent).
-3. Write `planning/atlas-ai/APPROVAL.md`:
-   ```
-   ## Phase 3 approval
-   Plan: .planning/3-PLAN.md
-   Approved at: {ISO timestamp}
-   Approved via: Telegram (chat 6223934300) / CLI
-   Approver: Sam
-   Scope: Waves A–H as enumerated in PLAN.md
-   Budget position: within $3,000 fixed; X.1.1 add-on (+$200) priced separately
-   ```
+3. Write `planning/pathway-ai/APPROVAL.md`:
+ ```
+ ## Phase 3 approval
+ Plan: .planning/3-PLAN.md
+ Approved at: {ISO timestamp}
+ Approved via: Telegram (chat 6223934300) / CLI
+ Approver: Sam
+ Scope: Waves A–H as enumerated in PLAN.md
+ Budget position: within $3,000 fixed; X.1.1 add-on (+$200) priced separately
+ ```
 4. Begin Wave A.
 
 ---

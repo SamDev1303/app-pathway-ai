@@ -1,6 +1,6 @@
 # P0.5 Plan-Check Review — ROUND 2 (After Gideon round-1 BLOCK fixes)
 
-**Repo:** `~/Desktop/atlas-ai`
+**Repo:** `~/Desktop/pathway-ai`
 **Commit under review:** `2bedf83` — `fix(phase-0.5): absorb Gideon round-1 BLOCK`
 **Previous review:** `.planning/research/p0.5-plan-check/gideon-v1.md` (round 1 = BLOCK)
 **Phase:** P0.5 (HARD BLOCK on P1)
@@ -22,9 +22,9 @@ Write ONE markdown file to `.planning/research/p0.5-plan-check/{AGENT_NAME}-v2.m
 
 - **Verdict:** `APPROVE` / `APPROVE-WITH-NOTES` / `BLOCK`
 - **Round-1 blocker status:**
-  - Blocker 1 (mobile index.tsx copy) — CLOSED / STILL OPEN
-  - Blocker 2 (mobile mockData advisor chip) — CLOSED / STILL OPEN
-  - Blocker 3 (LeadModal APP 5 notice) — CLOSED / STILL OPEN
+ - Blocker 1 (mobile index.tsx copy) — CLOSED / STILL OPEN
+ - Blocker 2 (mobile mockData advisor chip) — CLOSED / STILL OPEN
+ - Blocker 3 (LeadModal APP 5 notice) — CLOSED / STILL OPEN
 - **New issues?** — Did the fixes introduce anything new (type break, broken layout, deceptive language)?
 - **Ready for phase-verify?** — yes/no + why
 
@@ -34,7 +34,7 @@ Write ONE markdown file to `.planning/research/p0.5-plan-check/{AGENT_NAME}-v2.m
 grep -riE "(migration fit|PR intent|migration-related|PR-aware|PR-eligible|pr_eligible|wants_pr|wantsPR|prIntent|visaUpdate|Study migration|subclass|MLTSSL|STSOL|PR points|PR pathway|visa success|DoHA|points test|Permanent Residency|visa pathway|post-study work|migration outcomes)" web/src/ mobile/lib/ mobile/app/ --include="*.ts" --include="*.tsx"
 ```
 
-6 hits remaining (same as before), all in MARA-REQUIRED system-prompt negative constraints + 1 code comment.
+6 hits remaining (same as before), all in -REQUIRED system-prompt negative constraints + 1 code comment.
 
 ## DO NOT
 

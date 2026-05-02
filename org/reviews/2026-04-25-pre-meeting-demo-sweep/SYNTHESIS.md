@@ -17,8 +17,8 @@ The chat 503 is fixed. Live site loads cleanly with **zero console errors**. But
 - **Source:** Gideon (`web/src/components/Hero.tsx:72`) + Sonnet (live: "anchor scroll to inline matcher, no modal")
 - **Symptom:** Demo script step 2 says "CTA opens lead form modal → submits → /matches/[token]". Reality: CTA is `<a href="#match">` → scrolls to inline widget. No modal, no lead form, no `/matches/[token]` route in this flow.
 - **Two paths to fix:**
-  - **Script fix (5 min, ZERO deploy risk):** Sam updates verbal walkthrough — "I'll click through to the matcher widget here, then later we capture the lead via the consult form." Skip the modal narration entirely.
-  - **Code fix (30-60 min + deploy):** Convert hero CTA to a client button that opens `LeadModal`; wire LeadModal success path to `window.location.assign('/matches/' + match_token)`. Adds a redeploy under time pressure with a fragile build pipeline.
+ - **Script fix (5 min, ZERO deploy risk):** Sam updates verbal walkthrough — "I'll click through to the matcher widget here, then later we capture the lead via the consult form." Skip the modal narration entirely.
+ - **Code fix (30-60 min + deploy):** Convert hero CTA to a client button that opens `LeadModal`; wire LeadModal success path to `window.location.assign('/matches/' + match_token)`. Adds a redeploy under time pressure with a fragile build pipeline.
 - **Recommendation:** Script fix. The matcher widget IS impressive on its own and the lead capture can flow through `/consult`.
 
 ### B2 — Demo question "good IT course in Sydney?" returns dataset-miss deflection
@@ -26,9 +26,9 @@ The chat 503 is fixed. Live site loads cleanly with **zero console errors**. But
 - **Symptom:** Chat answers honestly: "The dataset doesn't cover specific courses in IT at universities in Sydney." That's a correct answer, not a bug — but it's not a *showcase*.
 - **Note:** The match widget on landing DOES return WSU (Sydney) as a strong match for IT. The data exists in the matcher database but is not surfaced through chat RAG.
 - **Fix:** Sam swaps the demo question for one that hits the dataset:
-  - "What IELTS score do I need for a Master of IT?"
-  - "What does a Master of IT cost at Federation University?"
-  - "Which Group of Eight universities offer postgraduate computing?"
+ - "What IELTS score do I need for a Master of IT?"
+ - "What does a Master of IT cost at Federation University?"
+ - "Which Group of Eight universities offer postgraduate computing?"
 - **Recommendation:** Sam picks one of the above as the new step-5 question.
 
 ### B3 — DO NOT trigger a CLI redeploy before the meeting
@@ -53,7 +53,7 @@ The chat 503 is fixed. Live site loads cleanly with **zero console errors**. But
 ## NOTE (backlog)
 
 - N1: Optional env aliases referenced but unset (`CHAT_PROVIDER`, `GEMINI_API_KEY`, `GOOGLE_GENERATIVE_AI_API_KEY`, `SOP_MODEL`, `LOG_LEVEL`, `SENTRY_ENVIRONMENT`). Safe today; normalize naming after meeting.
-- N2: Public brand copy uses placeholder MARN/QEAC/contact — `web/src/lib/content.ts:3-16`. Client may ask for real numbers in the meeting.
+- N2: Public brand copy uses placeholder /QEAC/contact — `web/src/lib/content.ts:3-16`. Client may ask for real numbers in the meeting.
 - N3: Hero credential strip hidden on mobile (375px) — minor.
 - N4: Streaming animation smoothness not verifiable via Playwright snapshot — Sam should finger-test `/chat` once before going live.
 
@@ -72,4 +72,4 @@ After meeting → triage HIGH list (~2 hours of work, all post-meeting safe).
 
 ## Confidence
 
-High. Cross-agent agreement on every BLOCK. Sonnet verified live behaviour with Playwright (snapshot + console messages). Gideon verified source from inside `~/Desktop/atlas-ai/` without sandbox issues. The only unverified claim is whether the H6 chat catch-path actually fires under any realistic demo input — likely safe because the model is now pinned to gpt-4o-mini (paid + reliable), but worth a 1-line proof curl post-meeting.
+High. Cross-agent agreement on every BLOCK. Sonnet verified live behaviour with Playwright (snapshot + console messages). Gideon verified source from inside `~/Desktop/pathway-ai/` without sandbox issues. The only unverified claim is whether the H6 chat catch-path actually fires under any realistic demo input — likely safe because the model is now pinned to gpt-4o-mini (paid + reliable), but worth a 1-line proof curl post-meeting.

@@ -1,4 +1,4 @@
-You are Specter — stateless adjudicator. Gideon (Codex gpt-5.4-mini) is running parallel phase-verify on Atlas AI P0.5 MARA scrub. You're the independent dual-seat reviewer. Return a concrete verdict.
+You are Specter — stateless adjudicator. Gideon (Codex gpt-5.4-mini) is running parallel phase-verify on Pathway-AI P0.5 scrub. You're the independent dual-seat reviewer. Return a concrete verdict.
 
 ## Context
 P0.5 shipped as 2 commits: f425837 (round-0 scrub, 14 files) + 2bedf83 (round-1 fix, 3 files absorbing Gideon's BLOCK on residual migration copy + expanded APP 5 notice). Dual plan-check passed: Gideon APPROVE-WITH-NOTES + Specter APPROVE-WITH-NOTES.
@@ -6,7 +6,7 @@ P0.5 shipped as 2 commits: f425837 (round-0 scrub, 14 files) + 2bedf83 (round-1 
 ## What was delivered (cumulative across 17 file-level changes)
 
 ### Web
-- `web/src/components/ChatDrawer.tsx`: SUGGESTED chips → non-MARA questions; placeholder "Ask about courses, IELTS, fees…"
+- `web/src/components/ChatDrawer.tsx`: SUGGESTED chips → non- questions; placeholder "Ask about courses, IELTS, fees…"
 - `web/src/components/MatcherForm.tsx`: wantsPR state → prioritizeOutcomes; "Permanent Residency" checkbox → "strong graduate outcomes (industry placement + regional)"; indicative-only disclaimer rewrite
 - `web/src/components/LeadModal.tsx`: consent split (required service + optional marketing), APP 5 notice with identity/purpose/consequences/sharing/legal/rights/policy-ref
 - `web/src/components/Footer.tsx`: "PR fit" → "outcomes fit"
@@ -16,7 +16,7 @@ P0.5 shipped as 2 commits: f425837 (round-0 scrub, 14 files) + 2bedf83 (round-1 
 - `web/src/lib/universities-seed.ts`: 48 course entries renamed
 - `web/src/app/api/match/route.ts`: zod schema rename
 - `web/src/app/api/sop/route.ts`: system prompt — added NEVER clause for visa/migration/residency
-- `web/src/app/api/chat/route.ts` + `chat-simple/route.ts`: pre-existing NEVER-give-visa-advice system prompts (MARA-required, kept)
+- `web/src/app/api/chat/route.ts` + `chat-simple/route.ts`: pre-existing NEVER-give-visa-advice system prompts (-required, kept)
 - `web/src/lib/content.ts`: pre-existing disclaimer text "not migration advice"
 
 ### Mobile
@@ -25,12 +25,12 @@ P0.5 shipped as 2 commits: f425837 (round-0 scrub, 14 files) + 2bedf83 (round-1 
 - `mobile/app/(tabs)/index.tsx`: "migration fit" → "outcomes fit"; "PR intent" → "graduate-outcomes focus"; tagline "Study migration" → "Study abroad"; import rename visaUpdate → admissionsUpdate
 
 ### Gates
-- Widened grep: 6 hits remaining, ALL in system-prompt negative constraints (`NEVER give visa advice...`) + 1 code comment (`// MARA-safe: NO migration/visa advice claims`). ZERO user-facing violations.
+- Widened grep: 6 hits remaining, ALL in system-prompt negative constraints (`NEVER give visa advice...`) + 1 code comment (`// -safe: NO migration/visa advice claims`). ZERO user-facing violations.
 - Typecheck: web + mobile both pass `tsc --noEmit` with zero errors.
-- APPROVAL.md written: `planning/atlas-ai/APPROVAL.md` timestamped 2026-04-17 12:08 AEDT with Sam's verbal "finish the gsd phases" captured.
+- APPROVAL.md written: `planning/pathway-ai/APPROVAL.md` timestamped 2026-04-17 12:08 AEDT with Sam's verbal "finish the gsd phases" captured.
 
 ## Phase-verify question (goal-backward)
-Does P0.5 actually deliver the promise? Is the codebase MARA-safe enough to commit to P1 Supabase schema without risking UniMate's MARN 1798425?
+Does P0.5 actually deliver the promise? Is the codebase -safe enough to commit to P1 Supabase schema without risking Pathway-AI's ?
 
 ## Your output (150-250 words, markdown only)
 
@@ -47,7 +47,7 @@ Does P0.5 actually deliver the promise? Is the codebase MARA-safe enough to comm
 7. APP 5 collection notice covers: identity + purpose + consequences + sharing + legal + rights + policy ref + Privacy Act.
 8. ChatDrawer suggestions scrubbed.
 9. sop/route.ts system prompt has explicit NEVER-clause for visa/migration/residency.
-10. chat + chat-simple route system prompts preserve required MARA deflection.
+10. chat + chat-simple route system prompts preserve required deflection.
 11. mobile/index.tsx hero scrubbed.
 12. mobile/profile.tsx field blurbs scrubbed.
 13. mobile/mockData.ts advisor prompts scrubbed.

@@ -14,11 +14,11 @@ Already locked in earlier phases — do not re-ask downstream.
 ### From PRD + P0.5
 - **Consent split:** `consent_service` required + `consent_marketing` optional. Enforced by DB CHECK constraint `consent_service = true`.
 - **Consent wording version string:** `"2026-04-17.v1"` — bump when wording changes.
-- **MARA Code compliance:** no migration / visa / PR strings anywhere in form copy. Re-verified in P4.5.
+- ** Code compliance:** no migration / visa / PR strings anywhere in form copy. Re-verified in P4.5.
 - **Field rename:** `wants_pr → prioritize_outcomes` and `pr_eligible → industry_placement` (DB + types already aligned).
 
 ### From P1 (DB + DEV-001)
-- **Supabase region:** `ap-southeast-1` (Singapore) — accepted deviation. **APP 8 cross-border disclosure is P3's obligation** per `planning/atlas-ai/DEVIATIONS.md` §"Downstream obligations #1".
+- **Supabase region:** `ap-southeast-1` (Singapore) — accepted deviation. **APP 8 cross-border disclosure is P3's obligation** per `planning/pathway-ai/DEVIATIONS.md` §"Downstream obligations #1".
 - **`leads` table:** schema at `supabase/migrations/001_initial_schema.sql` lines 62–98. All 5-step columns + consent columns already present. RLS: anon has INSERT-only.
 - **`consent_wording_version`** is TEXT NOT NULL — every INSERT must set it.
 
@@ -78,13 +78,13 @@ Tier mapping: **A ≥ 80 · B 60–79 · C 40–59 · D < 40**.
 
 Surfacing:
 - Stored as `lead_score` int (0–100) in DB.
-- Shown in Sam+UniMate email: `Lead score: 78 (tier B)`.
+- Shown in Sam+Pathway-AI email: `Lead score: 78 (tier B)`.
 - **Never shown to the student.**
 
 Implementation: `web/src/lib/lead-score.ts`, pure function `computeScore(lead: LeadInput): { score: number; tier: 'A'|'B'|'C'|'D' }`.
 
 ### D7 — localStorage draft
-**Key:** `atlas-ai.lead-draft.v1` (namespaced so future schema bumps can invalidate cleanly).
+**Key:** `pathway-ai.lead-draft.v1` (namespaced so future schema bumps can invalidate cleanly).
 
 **Shape:** `{ values: Partial<LeadInput>, currentStep: number, saved_at: ISO8601, schema_version: "v1" }`.
 
@@ -101,12 +101,12 @@ Implementation: `web/src/lib/lead-score.ts`, pure function `computeScore(lead: L
 ### D8 — APP 5 + APP 8 notice block
 Replace the existing APP 5 block in `LeadModal.tsx` lines 192–208. Keep all current paragraphs. **Insert new paragraph** between "Who we share it with" and "Your rights":
 
-> **Where we store it.** Your information is stored on Supabase servers hosted in Singapore (`ap-southeast-1`). This is a cross-border disclosure under APP 8 of the *Privacy Act 1988 (Cth)*. Supabase is contractually bound to Australian privacy standards, and UniMate ensures reasonable steps are taken to comply with APPs in relation to overseas disclosures.
+> **Where we store it.** Your information is stored on Supabase servers hosted in Singapore (`ap-southeast-1`). This is a cross-border disclosure under APP 8 of the *Privacy Act 1988 (Cth)*. Supabase is contractually bound to Australian privacy standards, and Pathway-AI ensures reasonable steps are taken to comply with APPs in relation to overseas disclosures.
 
-Wording source: `planning/atlas-ai/DEVIATIONS.md` §"Downstream obligations #1". Bump `consent_wording_version` to **`"2026-04-17.v2"`** on this change (v1 → v2 because wording materially changed).
+Wording source: `planning/pathway-ai/DEVIATIONS.md` §"Downstream obligations #1". Bump `consent_wording_version` to **`"2026-04-17.v2"`** on this change (v1 → v2 because wording materially changed).
 
 ### D9 — Email recipients
-**Both Sam and UniMate.** Recipient list assembled in `web/src/app/api/leads/route.ts`:
+**Both Sam and Pathway-AI.** Recipient list assembled in `web/src/app/api/leads/route.ts`:
 - `adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL ?? 'sam@claudeking.org'`
 - `unimateEmail = process.env.UNIMATE_LEAD_EMAIL ?? 'sam@claudeking.org'` *(fallback to Sam pre-launch so no lead ever bounces)*
 - `to: [adminEmail, unimateEmail]` — Resend de-duplicates if both equal.
@@ -115,7 +115,7 @@ Wording source: `planning/atlas-ai/DEVIATIONS.md` §"Downstream obligations #1".
 
 Email body adds `Lead score: {score} (tier {tier})` line.
 
-**Sam client-side task (not code):** Ask UniMate for their real lead-notification address before P4.5 launch.
+**Sam client-side task (not code):** Ask Pathway-AI for their real lead-notification address before P4.5 launch.
 
 ### D10 — Atomic INSERT + email on step-5 submit
 Current `/api/leads/route.ts` emails but does **not** INSERT. Close that gap:
@@ -151,8 +151,8 @@ Every ref below has a full relative path. Planner + researcher **must read these
 
 - `PRD.md` §2 V1.2 (scope) · §4 V1.2 user stories · §5 tech stack · §6 AU compliance
 - `PHASE.md` §"Phase 3: Lead capture" (lines 155–172) — 9 tasks
-- `planning/atlas-ai/DEVIATIONS.md` §DEV-001 (Singapore APP 8 obligations assigned to P3)
-- `planning/atlas-ai/APPROVAL.md` — prior-phase sign-offs (pattern to follow)
+- `planning/pathway-ai/DEVIATIONS.md` §DEV-001 (Singapore APP 8 obligations assigned to P3)
+- `planning/pathway-ai/APPROVAL.md` — prior-phase sign-offs (pattern to follow)
 - `.planning/HANDOFF.json` — session 3 close state (P3 entry conditions)
 - `supabase/migrations/001_initial_schema.sql` — leads table shape of record
 - `web/src/components/LeadModal.tsx` — component being refactored

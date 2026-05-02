@@ -1,6 +1,6 @@
-# Atlas AI
+# Pathway-AI
 
-AI-powered study-abroad advisor for Australia — built for **UniMate Pty Ltd** (Sydney NSW), a MARA-registered and QEAC-certified migration consultancy.
+AI-powered study-abroad advisor for Australia.
 
 v1 ships four conversion-critical modules: AI Advisor Chat, 5-step Lead Capture, UniMatch Engine (43 AU universities seeded), and SOP Generator with PDF export.
 
@@ -25,7 +25,7 @@ Full rationale and v2 roadmap in [`PRD.md`](./PRD.md).
 
 ```bash
 # Web
-cd web && npm install && npm run dev         # http://localhost:3000
+cd web && npm install && npm run dev # http://localhost:3000
 
 # Mobile
 cd mobile && npm install && npx expo start --tunnel
@@ -42,10 +42,10 @@ Required env (see `.env.example` per subdir):
 
 | Env | URL | Status |
 |---|---|---|
-| Production | `atlas-ai.vercel.app` | pending P9 |
-| Legacy demo | `unimate-demo.vercel.app` | kept live until 2026-05-16, then 301 → atlas-ai |
+| Production | `pathway-ai.vercel.app` | pending P9 |
+| Legacy demo | `unimate-demo.vercel.app` | kept live until 2026-05-16, then 301 → pathway-ai |
 
-Vercel project: `prj_A6cObazFvum7qN49jOm8UiDFIBbH` (renamed display → `atlas-ai`). Committer email must be `krishnashamal143@gmail.com`.
+Vercel project: `prj_A6cObazFvum7qN49jOm8UiDFIBbH` (renamed display → `pathway-ai`). Committer email must be `krishnashamal143@gmail.com`.
 
 ---
 
@@ -59,6 +59,5 @@ Demo / pre-rename history archived in [`_reference/archive/`](./_reference/archi
 
 ## Contact
 
-- **Client:** UniMate Pty Ltd — Sydney NSW, Australia (MARA/QEAC licensed)
-- **Build:** Koda Labs — `sam@claudeking.org`
-- **Repo:** https://github.com/SamDev1303/unimate-demo (rename to `atlas-ai` pending)
+- **Owner:** Koda Labs — `sam@claudeking.org`
+- **Repo:** https://github.com/SamDev1303/Pathway-AI

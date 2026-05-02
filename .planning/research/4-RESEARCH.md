@@ -2,7 +2,7 @@
 
 **Researched:** 2026-04-19 · session 50 (Koda, Opus 4.7 1M)
 **Domain:** Structured SQL matching (Supabase plpgsql RPC) — top-3 AU uni matches + ≤2 stretch rows, computed during atomic /api/leads INSERT, served via magic-link-gated /matches/{token}
-**Confidence:** HIGH on weights+stretch math+RPC shape+MARA wording; MEDIUM on the exact TTL placement (two viable paths documented); HIGH on migration ordering.
+**Confidence:** HIGH on weights+stretch math+RPC shape+ wording; MEDIUM on the exact TTL placement (two viable paths documented); HIGH on migration ordering.
 
 ---
 
@@ -40,22 +40,22 @@ The 4 personas were simulated against my proposed weights — Persona A (G8-chas
 For each `(lead, course)` pair:
 
 ```
-field_score     = (lead.preferred_fields ∋ course.field) ? 30 : 0
-level_score     = (lead.preferred_levels ∋ course.level OR lead.preferred_levels IS EMPTY) ? 12 : 0
-budget_score    = budget_tier(lead.tuition_budget_aud, course.indicative_fee)   -- see Stretch Math
-ielts_score     = ielts_tier(lead.ielts_overall, course.ielts_overall)          -- see Stretch Math
-qs_score        = GREATEST(0, 10 * (1 - uni.qs_ranking_2025::numeric / 200))
-g8_score        = uni.is_group_of_eight ? 5 : 0
+field_score = (lead.preferred_fields ∋ course.field) ? 30 : 0
+level_score = (lead.preferred_levels ∋ course.level OR lead.preferred_levels IS EMPTY) ? 12 : 0
+budget_score = budget_tier(lead.tuition_budget_aud, course.indicative_fee) -- see Stretch Math
+ielts_score = ielts_tier(lead.ielts_overall, course.ielts_overall) -- see Stretch Math
+qs_score = GREATEST(0, 10 * (1 - uni.qs_ranking_2025::numeric / 200))
+g8_score = uni.is_group_of_eight ? 5 : 0
 placement_score = (lead_prioritizes_outcomes AND course.industry_placement) ? 5 : 0
-regional_score  = (lead_regional_preference AND uni.is_regional) ? 5 : 0
-                  -- See NOTE below: v1 has no preferred_state column so we infer
-                  -- regional_preference as (preferred_fields ∋ 'Health' OR 'Education')
-                  -- This is the "regional mostly makes sense for these fields" heuristic.
-                  -- If too hand-wavy, set regional_score = 0 in v1; weight freed up goes to QS (bump to 15).
-intake_score    = intake_tier(lead.preferred_intake_month, course.intake_months)
+regional_score = (lead_regional_preference AND uni.is_regional) ? 5 : 0
+ -- See NOTE below: v1 has no preferred_state column so we infer
+ -- regional_preference as (preferred_fields ∋ 'Health' OR 'Education')
+ -- This is the "regional mostly makes sense for these fields" heuristic.
+ -- If too hand-wavy, set regional_score = 0 in v1; weight freed up goes to QS (bump to 15).
+intake_score = intake_tier(lead.preferred_intake_month, course.intake_months)
 
-course_total    = field_score + level_score + budget_score + ielts_score
-                + qs_score + g8_score + placement_score + regional_score + intake_score
+course_total = field_score + level_score + budget_score + ielts_score
+ + qs_score + g8_score + placement_score + regional_score + intake_score
 ```
 
 Then per-uni: `uni_score = max(course_total for course in uni.courses)`. Matches ordered by `uni_score` desc, tiebroken by `qs_ranking_2025` asc, then `is_group_of_eight` desc, then `name` asc (R-3).
@@ -167,27 +167,27 @@ Budget stretch window to $38.4k (20%): WSU in; UOW in; Adelaide out (39% over); 
 ```typescript
 // web/src/lib/match-weights.ts
 export const MATCH_WEIGHTS = {
-  field: 30,          // core
-  level: 12,          // core
-  budget: 18,         // core
-  ielts: 12,          // core
-  qs_rank: 10,        // tiebreaker (scaled 0–10 via max(0, 10 * (1 - rank/200)))
-  g8: 5,              // tiebreaker
-  industry_placement: 5,  // tiebreaker (only if lead-flagged)
-  regional: 5,        // tiebreaker (only if field ∈ Health/Education in v1)
-  intake: 3,          // tiebreaker
-  // sum: 100
+ field: 30, // core
+ level: 12, // core
+ budget: 18, // core
+ ielts: 12, // core
+ qs_rank: 10, // tiebreaker (scaled 0–10 via max(0, 10 * (1 - rank/200)))
+ g8: 5, // tiebreaker
+ industry_placement: 5, // tiebreaker (only if lead-flagged)
+ regional: 5, // tiebreaker (only if field ∈ Health/Education in v1)
+ intake: 3, // tiebreaker
+ // sum: 100
 } as const;
 
 export const STRETCH = {
-  budget_pct: 0.20,       // 20% over budget = stretch zone
-  far_stretch_pct: 0.50,  // 20-50% = shown only if <3 strong matches
-  ielts_band: 0.5,        // 0.5 below course req = stretch
-  weight_penalty: 0.50,   // stretch gets 50% of the signal's weight (see Stretch Math)
+ budget_pct: 0.20, // 20% over budget = stretch zone
+ far_stretch_pct: 0.50, // 20-50% = shown only if <3 strong matches
+ ielts_band: 0.5, // 0.5 below course req = stretch
+ weight_penalty: 0.50, // stretch gets 50% of the signal's weight (see Stretch Math)
 } as const;
 
 export const NORMALIZATION = {
-  qs_rank_max: 200,   // unis worse than QS 200 get qs_score = 0
+ qs_rank_max: 200, // unis worse than QS 200 get qs_score = 0
 } as const;
 ```
 
@@ -204,29 +204,29 @@ export const NORMALIZATION = {
 ```sql
 -- Budget scoring (plpgsql inside match_unis_for_lead)
 CASE
-  -- Within budget: full 18pt
-  WHEN p_tuition_budget IS NULL THEN 9  -- half-score if no budget stated
-  WHEN c.indicative_fee <= p_tuition_budget THEN 18
-  -- Stretch zone 0-20% over: 50% weight = 9pt
-  WHEN c.indicative_fee <= p_tuition_budget * 1.20 THEN 9
-  -- Far stretch 20-50% over: shown only in far-stretch rollup; base score 0 in course_total
-  WHEN c.indicative_fee <= p_tuition_budget * 1.50 THEN 0
-  -- Beyond 50% over: excluded
-  ELSE NULL  -- signals "hard cut"; course excluded from matches
+ -- Within budget: full 18pt
+ WHEN p_tuition_budget IS NULL THEN 9 -- half-score if no budget stated
+ WHEN c.indicative_fee <= p_tuition_budget THEN 18
+ -- Stretch zone 0-20% over: 50% weight = 9pt
+ WHEN c.indicative_fee <= p_tuition_budget * 1.20 THEN 9
+ -- Far stretch 20-50% over: shown only in far-stretch rollup; base score 0 in course_total
+ WHEN c.indicative_fee <= p_tuition_budget * 1.50 THEN 0
+ -- Beyond 50% over: excluded
+ ELSE NULL -- signals "hard cut"; course excluded from matches
 END AS budget_score
 ```
 
 ```sql
 -- IELTS scoring
 CASE
-  -- No IELTS stated: half-score (can't tell)
-  WHEN p_ielts IS NULL THEN 6
-  -- Meets or exceeds: full 12pt
-  WHEN p_ielts >= c.ielts_overall THEN 12
-  -- Within 0.5 below: stretch, 50% = 6pt
-  WHEN p_ielts >= c.ielts_overall - 0.5 THEN 6
-  -- More than 0.5 below: excluded
-  ELSE NULL  -- hard cut
+ -- No IELTS stated: half-score (can't tell)
+ WHEN p_ielts IS NULL THEN 6
+ -- Meets or exceeds: full 12pt
+ WHEN p_ielts >= c.ielts_overall THEN 12
+ -- Within 0.5 below: stretch, 50% = 6pt
+ WHEN p_ielts >= c.ielts_overall - 0.5 THEN 6
+ -- More than 0.5 below: excluded
+ ELSE NULL -- hard cut
 END AS ielts_score
 ```
 
@@ -261,51 +261,51 @@ Flat 50% is also what the existing client-side `matcher.ts` does in spirit — i
 ```typescript
 // web/src/app/api/leads/route.ts (extended)
 export async function POST(req: Request) {
-  // ... existing Zod + score + consentGivenAt logic unchanged ...
+ // ... existing Zod + score + consentGivenAt logic unchanged ...
 
-  const supabase = createServiceRoleClient();
+ const supabase = createServiceRoleClient();
 
-  // Step 1: INSERT lead (unchanged from P3)
-  const { data: leadRow, error: insertError } = await supabase
-    .from("leads")
-    .insert(row)
-    .select("id, match_token")  // match_token defaults to uuid_generate_v4()
-    .single();
+ // Step 1: INSERT lead (unchanged from P3)
+ const { data: leadRow, error: insertError } = await supabase
+ .from("leads")
+ .insert(row)
+ .select("id, match_token") // match_token defaults to uuid_generate_v4()
+ .single();
 
-  if (insertError) {
-    console.error("[atlas-ai.leads] INSERT failed", insertError);
-    return Response.json({ ok: false, error: "..." }, { status: 500 });
-  }
+ if (insertError) {
+ console.error("[pathway-ai.leads] INSERT failed", insertError);
+ return Response.json({ ok: false, error: "..." }, { status: 500 });
+ }
 
-  // Step 2: Compute matches via RPC (new in P4)
-  let matchesComputed = false;
-  try {
-    const { error: rpcError } = await supabase.rpc("match_unis_for_lead", {
-      p_lead_id: leadRow.id,
-      p_weights: MATCH_WEIGHTS_JSON,  // imported from lib/match-weights.ts
-    });
+ // Step 2: Compute matches via RPC (new in P4)
+ let matchesComputed = false;
+ try {
+ const { error: rpcError } = await supabase.rpc("match_unis_for_lead", {
+ p_lead_id: leadRow.id,
+ p_weights: MATCH_WEIGHTS_JSON, // imported from lib/match-weights.ts
+ });
 
-    if (rpcError) {
-      console.error("[atlas-ai.leads] match RPC failed — lead saved, matches null",
-        { lead_id: leadRow.id, err: rpcError });
-      // Do NOT throw. Lead is captured; matches can be lazily recomputed.
-    } else {
-      matchesComputed = true;
-    }
-  } catch (err) {
-    console.error("[atlas-ai.leads] match RPC threw", { lead_id: leadRow.id, err });
-  }
+ if (rpcError) {
+ console.error("[pathway-ai.leads] match RPC failed — lead saved, matches null",
+ { lead_id: leadRow.id, err: rpcError });
+ // Do NOT throw. Lead is captured; matches can be lazily recomputed.
+ } else {
+ matchesComputed = true;
+ }
+ } catch (err) {
+ console.error("[pathway-ai.leads] match RPC threw", { lead_id: leadRow.id, err });
+ }
 
-  // Step 3: Send notification email (unchanged from P3 — just extend body)
-  await sendNotificationEmails({ lead, score, tier, consentGivenAt,
-    matchToken: leadRow.match_token, matchesComputed });
+ // Step 3: Send notification email (unchanged from P3 — just extend body)
+ await sendNotificationEmails({ lead, score, tier, consentGivenAt,
+ matchToken: leadRow.match_token, matchesComputed });
 
-  // Always return 200 with token — client redirects to /matches/{token}
-  return Response.json({
-    ok: true,
-    match_token: leadRow.match_token,
-    matches_ready: matchesComputed,
-  });
+ // Always return 200 with token — client redirects to /matches/{token}
+ return Response.json({
+ ok: true,
+ match_token: leadRow.match_token,
+ matches_ready: matchesComputed,
+ });
 }
 ```
 
@@ -321,31 +321,31 @@ This is a deliberate design pick: the RPC writes `leads.matches` + `leads.matche
 
 ```sql
 CREATE OR REPLACE FUNCTION public.match_unis_for_lead(
-  p_lead_id uuid,
-  p_weights jsonb
+ p_lead_id uuid,
+ p_weights jsonb
 )
-RETURNS jsonb  -- the computed matches payload, also written to leads.matches
+RETURNS jsonb -- the computed matches payload, also written to leads.matches
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = ''
 AS $$
 DECLARE
-  v_matches jsonb;
+ v_matches jsonb;
 BEGIN
-  -- Build matches JSONB using the scoring CTE (detailed in Validation Architecture below)
-  WITH scored AS ( /* ... scoring cte ... */ )
-  SELECT jsonb_build_object(
-    'strong', (SELECT jsonb_agg(s) FROM scored s WHERE s.tier = 'strong' LIMIT 3),
-    'stretch', (SELECT jsonb_agg(s) FROM scored s WHERE s.tier = 'stretch' LIMIT 2),
-    'computed_at', now()
-  ) INTO v_matches;
+ -- Build matches JSONB using the scoring CTE (detailed in Validation Architecture below)
+ WITH scored AS ( /* ... scoring cte ... */ )
+ SELECT jsonb_build_object(
+ 'strong', (SELECT jsonb_agg(s) FROM scored s WHERE s.tier = 'strong' LIMIT 3),
+ 'stretch', (SELECT jsonb_agg(s) FROM scored s WHERE s.tier = 'stretch' LIMIT 2),
+ 'computed_at', now()
+ ) INTO v_matches;
 
-  UPDATE public.leads
-    SET matches = v_matches,
-        matches_computed_at = now()
-    WHERE id = p_lead_id;
+ UPDATE public.leads
+ SET matches = v_matches,
+ matches_computed_at = now()
+ WHERE id = p_lead_id;
 
-  RETURN v_matches;
+ RETURN v_matches;
 END;
 $$;
 
@@ -363,7 +363,7 @@ Three states the page must handle:
 | `leads.matches` | `matches_computed_at` | What the page shows |
 |---|---|---|
 | **null** | null | "We're still finding your matches — check back in 30 seconds." + manual refresh button + explanation: "Your enquiry is saved and our counsellors have been notified; this is just the uni ranking." |
-| **jsonb** | recent (<30 min) | Full results page: 3 strong + up to 2 stretch + MARA banner |
+| **jsonb** | recent (<30 min) | Full results page: 3 strong + up to 2 stretch + banner |
 | **jsonb** | old (>30 min) | Magic-link flow: "Your results are ready but this preview has expired. Enter your email to get a fresh link." |
 
 The "null" state should NOT show a spinner forever — that implies the computation is in-flight. Instead: **explicit copy** + **button to retry** (which calls a `POST /api/match/retry` endpoint — actually, see next section, we don't build that endpoint in v1; the retry is "paste your email and we'll re-notify you with a magic link to the computed result"). Retry is server-side recompute via a Pulse cron in v2.
@@ -376,35 +376,35 @@ This is a deliberately minimal MVP failure mode. In practice RPC failures should
 
 ---
 
-## MARA Banner Wording (open item 4)
+## Banner Wording (open item 4)
 
 **Decision: Lock this text, referenced from P0.5 scrub patterns.**
 
 ### Existing disclaimer strings in codebase (P0.5 verified)
 
 From grep 2026-04-19:
-- `/api/chat/route.ts:45`: *"This is not migration advice. Consult a UniMate MARA-registered agent for binding guidance."*
-- `lib/content.ts:81`: *"Atlas AI is an information and matching service. It is not migration advice. Consult a registered MARA agent for binding advice."*
-- `components/lead/Step5Contact.tsx:108`: *"...contacting me so a MARA-registered counsellor can follow up."*
+- `/api/chat/route.ts:45`: *"This is not migration advice. Consult a Pathway-AI registered agent for binding guidance."*
+- `lib/content.ts:81`: *"Pathway-AI is an information and matching service. It is not migration advice. Consult a registered advisor for binding advice."*
+- `components/lead/Step5Contact.tsx:108`: *"...contacting me so a registered counsellor can follow up."*
 
 ### Proposed /matches/{token} banner (single persistent line at page top + footer)
 
-> **Atlas AI matches are educational information only, not migration advice.** For visa, migration, or PR guidance, consult UniMate's registered MARA agents — [Book a free consultation →](https://atlas-ai.vercel.app/consult)
+> **Pathway-AI matches are educational information only, not migration advice.** For visa, migration, or PR guidance, consult Pathway-AI's registered advisors — [Book a free consultation →](https://pathway-ai.vercel.app/consult)
 
 **Rationale for the exact wording:**
-1. **"Educational information only"** matches MARA Code of Conduct §2.17 (migration agents must not give legal/migration advice outside scope; Atlas AI's disclaimer must assert it is NOT that service).
+1. **"Educational information only"** matches Code of Conduct §2.17 (migration agents must not give legal/migration advice outside scope; Pathway-AI's disclaimer must assert it is NOT that service).
 2. **"Not migration advice"** is the exact verbatim phrase used in /api/chat/route.ts and content.ts — consistency across surfaces.
 3. **"visa, migration, or PR"** explicitly covers the three words the P0.5 scrub banned from AI-generated output. Using them in the DISCLAIMER (not the matching logic) is correct — we name what we don't do.
-4. **"UniMate's registered MARA agents"** — UniMate owns the MARA registration; Atlas AI is the tool. MARA number will replace `{PENDING_FROM_UNIMATE}` in content.ts once client provides it.
+4. **"Pathway-AI's registered advisors"** — Pathway-AI owns the registration; Pathway-AI is the tool. number will replace `{PENDING_FROM_UNIMATE}` in content.ts once client provides it.
 5. **CTA link** — routes to the consult booking page which exists in the scaffold. No new route required.
 
 ### Placement on /matches/{token}
 
 - **Top of page**, below the hero "Your top 3 matches for <first_name>" headline, above the match cards. Rendered with `rail-gold` border top+bottom, cream background, Georgia serif eyebrow label "Disclaimer". **Persistent** — user cannot dismiss.
-- **Page footer** as well (duplicates the global Footer.tsx MARA disclaimer).
+- **Page footer** as well (duplicates the global Footer.tsx disclaimer).
 - **NOT per-match-card** — CONTEXT RT-4 locked single-banner behavior. Per-card would be noisy and imply the disclaimer is about each specific uni (it's not — it's about the service).
 
-**Confidence: HIGH** — verified against existing disclaimer pattern in codebase, matches MARA Code of Conduct guidance.
+**Confidence: HIGH** — verified against existing disclaimer pattern in codebase, matches Code of Conduct guidance.
 
 ---
 
@@ -432,46 +432,46 @@ import { MaraBanner } from "@/components/matches/MaraBanner";
 import { PendingMatches } from "@/components/matches/PendingMatches";
 import { ExpiredTokenFallback } from "@/components/matches/ExpiredTokenFallback";
 
-export const dynamic = "force-dynamic";  // never cache this route
+export const dynamic = "force-dynamic"; // never cache this route
 
 const TOKEN_TTL_MINUTES = 30;
 
 export default async function MatchesPage({ params }: { params: { token: string } }) {
-  const supabase = createServiceRoleClient();
+ const supabase = createServiceRoleClient();
 
-  const { data: lead, error } = await supabase
-    .from("leads")
-    .select("id, full_name, email, matches, matches_computed_at, match_token")
-    .eq("match_token", params.token)
-    .maybeSingle();
+ const { data: lead, error } = await supabase
+ .from("leads")
+ .select("id, full_name, email, matches, matches_computed_at, match_token")
+ .eq("match_token", params.token)
+ .maybeSingle();
 
-  if (error || !lead) {
-    // Invalid token — don't leak existence; 404
-    return <NotFoundFallback />;
-  }
+ if (error || !lead) {
+ // Invalid token — don't leak existence; 404
+ return <NotFoundFallback />;
+ }
 
-  // Case 1: RPC failed or hasn't run yet — show pending state
-  if (!lead.matches || !lead.matches_computed_at) {
-    return <PendingMatches leadId={lead.id} email={lead.email} />;
-  }
+ // Case 1: RPC failed or hasn't run yet — show pending state
+ if (!lead.matches || !lead.matches_computed_at) {
+ return <PendingMatches leadId={lead.id} email={lead.email} />;
+ }
 
-  // Case 2: Fresh — serve results directly (anonymous path)
-  const ageMs = Date.now() - new Date(lead.matches_computed_at).getTime();
-  const ttlMs = TOKEN_TTL_MINUTES * 60 * 1000;
+ // Case 2: Fresh — serve results directly (anonymous path)
+ const ageMs = Date.now() - new Date(lead.matches_computed_at).getTime();
+ const ttlMs = TOKEN_TTL_MINUTES * 60 * 1000;
 
-  if (ageMs <= ttlMs) {
-    return (
-      <>
-        <MaraBanner />
-        <MatchesHero firstName={lead.full_name.split(" ")[0]} />
-        <MatchList matches={lead.matches} />
-        <MaraBanner variant="footer" />
-      </>
-    );
-  }
+ if (ageMs <= ttlMs) {
+ return (
+ <>
+ <MaraBanner />
+ <MatchesHero firstName={lead.full_name.split(" ")[0]} />
+ <MatchList matches={lead.matches} />
+ <MaraBanner variant="footer" />
+ </>
+ );
+ }
 
-  // Case 3: Expired — require auth (magic-link flow from P2)
-  return <ExpiredTokenFallback email={lead.email} token={params.token} />;
+ // Case 3: Expired — require auth (magic-link flow from P2)
+ return <ExpiredTokenFallback email={lead.email} token={params.token} />;
 }
 ```
 
@@ -479,48 +479,48 @@ export default async function MatchesPage({ params }: { params: { token: string 
 
 ```
 Step 5 submit ─► POST /api/leads ─► INSERT + RPC ─► 200 { match_token }
-                                                         │
-                                                         ▼
-                                  client redirect: /matches/{token}
-                                                         │
-                                                         ▼
-                         ┌─────────── Server Component ────────────┐
-                         │ SELECT leads WHERE match_token = $1      │
-                         │ Branch on (matches, matches_computed_at) │
-                         └───────┬────────────┬────────────────────┘
-                                 │            │
-                    NULL or      │            │     matches jsonb +
-                     no row      │            │     computed_at set
-                                 ▼            ▼
-                       <PendingMatches>   age < 30min?
-                       or 404              │    │
-                                           │    │
-                                     yes ──┘    └── no
-                                      │             │
-                                      ▼             ▼
-                         Render full results     <ExpiredTokenFallback>
-                            + MARA banner           │
-                                                    ▼
-                                       "Enter your email for a new link"
-                                                    │
-                                                    ▼
-                                       supabase.auth.signInWithOtp({
-                                         email: lead.email,
-                                         options: {
-                                           emailRedirectTo:
-                                             '/auth/callback?next=/matches/{token}'
-                                         }
-                                       })
-                                                    │
-                                                    ▼
-                                       Magic-link email → click → /auth/callback
-                                       → session set → redirect to /matches/{token}
-                                                    │
-                                                    ▼
-                                       Server component re-runs;
-                                       this time it reads `session` cookie
-                                       → bypass TTL check if session present
-                                       → serve full results
+ │
+ ▼
+ client redirect: /matches/{token}
+ │
+ ▼
+ ┌─────────── Server Component ────────────┐
+ │ SELECT leads WHERE match_token = $1 │
+ │ Branch on (matches, matches_computed_at) │
+ └───────┬────────────┬────────────────────┘
+ │ │
+ NULL or │ │ matches jsonb +
+ no row │ │ computed_at set
+ ▼ ▼
+ <PendingMatches> age < 30min?
+ or 404 │ │
+ │ │
+ yes ──┘ └── no
+ │ │
+ ▼ ▼
+ Render full results <ExpiredTokenFallback>
+ + banner │
+ ▼
+ "Enter your email for a new link"
+ │
+ ▼
+ supabase.auth.signInWithOtp({
+ email: lead.email,
+ options: {
+ emailRedirectTo:
+ '/auth/callback?next=/matches/{token}'
+ }
+ })
+ │
+ ▼
+ Magic-link email → click → /auth/callback
+ → session set → redirect to /matches/{token}
+ │
+ ▼
+ Server component re-runs;
+ this time it reads `session` cookie
+ → bypass TTL check if session present
+ → serve full results
 ```
 
 ### Key implementation notes
@@ -543,11 +543,11 @@ Step 5 submit ─► POST /api/leads ─► INSERT + RPC ─► 200 { match_toke
 
 1. **No caller needs it.** The Step-3 teaser uses `match-stub.ts` client-side (kept, per 3-PLAN.md). The /matches page reads `leads.matches` directly via Server Component. There is no UI surface that posts a lead profile and wants matches without persisting.
 
-2. **MARA compliance benefit.** A standalone `POST /api/match` endpoint would be publicly callable (unauth, per v1 anonymous design). That invites abuse — someone scrapes it to build a competitor matcher. Without the endpoint, the matching logic only runs after a consent-gated lead INSERT, which rate-limits abuse via the email+phone capture requirement.
+2. ** compliance benefit.** A standalone `POST /api/match` endpoint would be publicly callable (unauth, per v1 anonymous design). That invites abuse — someone scrapes it to build a competitor matcher. Without the endpoint, the matching logic only runs after a consent-gated lead INSERT, which rate-limits abuse via the email+phone capture requirement.
 
 3. **Existing scaffold route to REMOVE.** `web/src/app/api/match/route.ts` currently exists (it was scaffolded in P0; uses the old client-side matcher.ts and `universities.ts` 43-uni dataset). **Action: delete this route in P4**, since it returns data from a 43-uni in-memory dataset that diverges from the 12-uni DB and contradicts R-2 ("single Postgres RPC"). Keeping it creates two matchers with different results — exactly the doc-drift Gideon caught in P0.
 
-4. **Deferred to v2:** The recompute endpoint for UniMate admin tooling is already called out in CONTEXT `<deferred>`. When v2 brings admin CRM, we add `POST /api/match/recompute` gated by authenticated UniMate role.
+4. **Deferred to v2:** The recompute endpoint for Pathway-AI admin tooling is already called out in CONTEXT `<deferred>`. When v2 brings admin CRM, we add `POST /api/match/recompute` gated by authenticated Pathway-AI role.
 
 ### Files to modify
 
@@ -581,21 +581,21 @@ Worse case: --wipe would blow away the 12 unis, hit the CHECK constraints (none 
 
 ```bash
 # Step 1 — Apply migration 003: adds columns, drops matched_university_ids, adds index
-cd ~/Desktop/atlas-ai
+cd ~/Desktop/pathway-ai
 # Use the Management API (same pattern P1 used) OR Supabase CLI:
-supabase db push --linked  # applies supabase/migrations/003_match_prep.sql
+supabase db push --linked # applies supabase/migrations/003_match_prep.sql
 # Verify:
 # psql "<conn>" -c "\d courses" → should show industry_placement column
-# psql "<conn>" -c "\d leads"   → should show matches, matches_computed_at, match_token columns, and NOT matched_university_ids
+# psql "<conn>" -c "\d leads" → should show matches, matches_computed_at, match_token columns, and NOT matched_university_ids
 
 # Step 2 — Apply migration 004: creates the RPC + permissions
-supabase db push --linked  # applies supabase/migrations/004_match_function.sql
+supabase db push --linked # applies supabase/migrations/004_match_function.sql
 # Verify:
 # psql "<conn>" -c "\df match_unis_for_lead" → function present
 # psql "<conn>" -c "SELECT has_function_privilege('service_role', 'public.match_unis_for_lead(uuid, jsonb)', 'execute');" → true
 
 # Step 3 — Re-seed the 12 unis in UPSERT mode to refresh industry_placement + default intake_months
-cd ~/Desktop/atlas-ai/web
+cd ~/Desktop/pathway-ai/web
 npx tsx scripts/seed-universities.ts --upsert --apply
 # This is a NEW mode — the current script has --apply (fresh insert) and --wipe (delete+insert).
 # P4 adds a --upsert mode that uses `.upsert({ onConflict: 'slug' })` for universities and
@@ -618,7 +618,7 @@ npx tsx scripts/seed-universities.ts --upsert --apply
 
 ```sql
 -- supabase/migrations/003_match_prep.sql
--- Atlas AI — P4 UniMatch prep: add industry_placement, match storage, token
+-- Pathway-AI — P4 UniMatch prep: add industry_placement, match storage, token
 -- Region: ap-southeast-1 (Singapore)
 -- Applied via: Supabase Management API /v1/projects/{ref}/database/query
 
@@ -626,19 +626,19 @@ npx tsx scripts/seed-universities.ts --upsert --apply
 -- courses.industry_placement — was in TS type, missing in DB (seed header flagged as P4 work)
 -- ================================================================
 ALTER TABLE public.courses
-  ADD COLUMN IF NOT EXISTS industry_placement boolean NOT NULL DEFAULT false;
+ ADD COLUMN IF NOT EXISTS industry_placement boolean NOT NULL DEFAULT false;
 
 -- ================================================================
 -- leads match result storage
 -- ================================================================
 ALTER TABLE public.leads
-  ADD COLUMN IF NOT EXISTS matches jsonb,
-  ADD COLUMN IF NOT EXISTS matches_computed_at timestamptz,
-  ADD COLUMN IF NOT EXISTS match_token uuid DEFAULT uuid_generate_v4();
+ ADD COLUMN IF NOT EXISTS matches jsonb,
+ ADD COLUMN IF NOT EXISTS matches_computed_at timestamptz,
+ ADD COLUMN IF NOT EXISTS match_token uuid DEFAULT uuid_generate_v4();
 
 -- Drop the array column (was scaffolded in P1, never populated)
 ALTER TABLE public.leads
-  DROP COLUMN IF EXISTS matched_university_ids;
+ DROP COLUMN IF EXISTS matched_university_ids;
 
 -- ================================================================
 -- Token lookup index — /matches/{token} server component uses this
@@ -656,165 +656,165 @@ UPDATE public.leads SET match_token = uuid_generate_v4() WHERE match_token IS NU
 
 ```sql
 -- supabase/migrations/004_match_function.sql
--- Atlas AI — P4 UniMatch engine RPC
+-- Pathway-AI — P4 UniMatch engine RPC
 -- Applied via: same as 003
 
 CREATE OR REPLACE FUNCTION public.match_unis_for_lead(
-  p_lead_id uuid,
-  p_weights jsonb
+ p_lead_id uuid,
+ p_weights jsonb
 )
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = ''  -- MANDATORY per Supabase security best practices (Context7 verified)
+SET search_path = '' -- MANDATORY per Supabase security best practices (Context7 verified)
 AS $$
 DECLARE
-  v_lead record;
-  v_matches jsonb;
-  -- weights unpacked
-  v_w_field numeric;
-  v_w_level numeric;
-  v_w_budget numeric;
-  v_w_ielts numeric;
-  v_w_qs numeric;
-  v_w_g8 numeric;
-  v_w_placement numeric;
-  v_w_regional numeric;
-  v_w_intake numeric;
+ v_lead record;
+ v_matches jsonb;
+ -- weights unpacked
+ v_w_field numeric;
+ v_w_level numeric;
+ v_w_budget numeric;
+ v_w_ielts numeric;
+ v_w_qs numeric;
+ v_w_g8 numeric;
+ v_w_placement numeric;
+ v_w_regional numeric;
+ v_w_intake numeric;
 BEGIN
-  -- Load lead profile
-  SELECT id, preferred_fields, preferred_levels, preferred_intake_month,
-         tuition_budget_aud, ielts_overall
-  INTO v_lead
-  FROM public.leads
-  WHERE id = p_lead_id;
+ -- Load lead profile
+ SELECT id, preferred_fields, preferred_levels, preferred_intake_month,
+ tuition_budget_aud, ielts_overall
+ INTO v_lead
+ FROM public.leads
+ WHERE id = p_lead_id;
 
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'lead % not found', p_lead_id;
-  END IF;
+ IF NOT FOUND THEN
+ RAISE EXCEPTION 'lead % not found', p_lead_id;
+ END IF;
 
-  -- Unpack weights
-  v_w_field := (p_weights->>'field')::numeric;
-  v_w_level := (p_weights->>'level')::numeric;
-  -- ... etc ...
+ -- Unpack weights
+ v_w_field := (p_weights->>'field')::numeric;
+ v_w_level := (p_weights->>'level')::numeric;
+ -- ... etc ...
 
-  -- Score all courses via CTE
-  WITH course_scores AS (
-    SELECT
-      c.id AS course_id,
-      c.university_id,
-      c.name AS course_name,
-      c.field,
-      c.level,
-      c.indicative_fee,
-      c.ielts_overall AS course_ielts,
-      c.industry_placement,
-      u.name AS uni_name,
-      u.short_name,
-      u.qs_ranking_2025,
-      u.is_group_of_eight,
-      u.is_regional,
-      -- field_score
-      CASE WHEN c.field = ANY(v_lead.preferred_fields) THEN v_w_field ELSE 0 END AS field_score,
-      -- level_score
-      CASE WHEN v_lead.preferred_levels IS NULL OR array_length(v_lead.preferred_levels, 1) = 0
-           OR c.level = ANY(v_lead.preferred_levels)
-           THEN v_w_level ELSE 0 END AS level_score,
-      -- budget_score (stretch math — see Stretch Math section)
-      CASE
-        WHEN v_lead.tuition_budget_aud IS NULL THEN v_w_budget / 2
-        WHEN c.indicative_fee <= v_lead.tuition_budget_aud THEN v_w_budget
-        WHEN c.indicative_fee <= v_lead.tuition_budget_aud * 1.20 THEN v_w_budget / 2
-        WHEN c.indicative_fee <= v_lead.tuition_budget_aud * 1.50 THEN 0
-        ELSE -1  -- sentinel for "hard cut" — filter out downstream
-      END AS budget_score,
-      -- ielts_score (stretch math)
-      CASE
-        WHEN v_lead.ielts_overall IS NULL THEN v_w_ielts / 2
-        WHEN v_lead.ielts_overall >= c.ielts_overall THEN v_w_ielts
-        WHEN v_lead.ielts_overall >= c.ielts_overall - 0.5 THEN v_w_ielts / 2
-        ELSE -1
-      END AS ielts_score,
-      -- qs_score (scaled)
-      GREATEST(0, v_w_qs * (1 - COALESCE(u.qs_ranking_2025, 999)::numeric / 200)) AS qs_score,
-      -- g8_score
-      CASE WHEN u.is_group_of_eight THEN v_w_g8 ELSE 0 END AS g8_score,
-      -- placement_score (only if field matches — placement is about career outcomes in that field)
-      CASE WHEN c.field = ANY(v_lead.preferred_fields) AND c.industry_placement THEN v_w_placement ELSE 0 END AS placement_score,
-      -- regional_score (v1 heuristic: Health or Education student + regional uni)
-      CASE WHEN (v_lead.preferred_fields && ARRAY['Health', 'Education']::text[]) AND u.is_regional THEN v_w_regional ELSE 0 END AS regional_score,
-      -- intake_score
-      CASE WHEN v_lead.preferred_intake_month IS NULL THEN v_w_intake / 2
-           WHEN v_lead.preferred_intake_month = ANY(c.intake_months) THEN v_w_intake
-           ELSE 0 END AS intake_score
-    FROM public.courses c
-    JOIN public.universities u ON c.university_id = u.id
-  ),
-  course_totals AS (
-    SELECT *,
-      field_score + level_score
-      + CASE WHEN budget_score < 0 THEN 0 ELSE budget_score END
-      + CASE WHEN ielts_score < 0 THEN 0 ELSE ielts_score END
-      + qs_score + g8_score + placement_score + regional_score + intake_score AS total,
-      (budget_score < 0 OR ielts_score < 0 OR field_score = 0) AS hard_cut
-    FROM course_scores
-  ),
-  uni_best AS (
-    SELECT DISTINCT ON (university_id) *
-    FROM course_totals
-    WHERE NOT hard_cut
-    ORDER BY university_id, total DESC
-  ),
-  ranked AS (
-    SELECT *,
-      ROW_NUMBER() OVER (ORDER BY total DESC,
-                         qs_ranking_2025 ASC NULLS LAST,
-                         is_group_of_eight DESC,
-                         uni_name ASC) AS rn
-    FROM uni_best
-  ),
-  top_score AS (
-    SELECT total AS max_score FROM ranked WHERE rn = 1
-  )
-  SELECT jsonb_build_object(
-    'strong', (
-      SELECT jsonb_agg(
-        jsonb_build_object(
-          'uni_id', r.university_id,
-          'uni_name', r.uni_name,
-          'short_name', r.short_name,
-          'course_name', r.course_name,
-          'match_pct', ROUND(100.0 * r.total / NULLIF((SELECT max_score FROM top_score), 0)),
-          'reason_parts', jsonb_build_object(
-            'matched_fields', ARRAY[r.field],
-            'budget_verdict', CASE WHEN r.budget_score = v_w_budget THEN 'within' ELSE 'stretch' END,
-            'ielts_verdict', CASE WHEN r.ielts_score = v_w_ielts THEN 'meets'
-                                  WHEN r.ielts_score = v_w_ielts/2 THEN 'stretch' ELSE 'below' END,
-            'qs_rank', r.qs_ranking_2025,
-            'g8', r.is_group_of_eight,
-            'industry_placement', r.industry_placement,
-            'regional', r.is_regional,
-            'intake_hit', r.intake_score = v_w_intake,
-            'best_course_name', r.course_name
-          )
-        )
-      )
-      FROM ranked r WHERE r.rn <= 3
-    ),
-    'stretch', (
-      SELECT jsonb_agg( /* same shape */ )
-      FROM ranked r WHERE r.rn BETWEEN 4 AND 5
-    ),
-    'computed_at', now()
-  ) INTO v_matches;
+ -- Score all courses via CTE
+ WITH course_scores AS (
+ SELECT
+ c.id AS course_id,
+ c.university_id,
+ c.name AS course_name,
+ c.field,
+ c.level,
+ c.indicative_fee,
+ c.ielts_overall AS course_ielts,
+ c.industry_placement,
+ u.name AS uni_name,
+ u.short_name,
+ u.qs_ranking_2025,
+ u.is_group_of_eight,
+ u.is_regional,
+ -- field_score
+ CASE WHEN c.field = ANY(v_lead.preferred_fields) THEN v_w_field ELSE 0 END AS field_score,
+ -- level_score
+ CASE WHEN v_lead.preferred_levels IS NULL OR array_length(v_lead.preferred_levels, 1) = 0
+ OR c.level = ANY(v_lead.preferred_levels)
+ THEN v_w_level ELSE 0 END AS level_score,
+ -- budget_score (stretch math — see Stretch Math section)
+ CASE
+ WHEN v_lead.tuition_budget_aud IS NULL THEN v_w_budget / 2
+ WHEN c.indicative_fee <= v_lead.tuition_budget_aud THEN v_w_budget
+ WHEN c.indicative_fee <= v_lead.tuition_budget_aud * 1.20 THEN v_w_budget / 2
+ WHEN c.indicative_fee <= v_lead.tuition_budget_aud * 1.50 THEN 0
+ ELSE -1 -- sentinel for "hard cut" — filter out downstream
+ END AS budget_score,
+ -- ielts_score (stretch math)
+ CASE
+ WHEN v_lead.ielts_overall IS NULL THEN v_w_ielts / 2
+ WHEN v_lead.ielts_overall >= c.ielts_overall THEN v_w_ielts
+ WHEN v_lead.ielts_overall >= c.ielts_overall - 0.5 THEN v_w_ielts / 2
+ ELSE -1
+ END AS ielts_score,
+ -- qs_score (scaled)
+ GREATEST(0, v_w_qs * (1 - COALESCE(u.qs_ranking_2025, 999)::numeric / 200)) AS qs_score,
+ -- g8_score
+ CASE WHEN u.is_group_of_eight THEN v_w_g8 ELSE 0 END AS g8_score,
+ -- placement_score (only if field matches — placement is about career outcomes in that field)
+ CASE WHEN c.field = ANY(v_lead.preferred_fields) AND c.industry_placement THEN v_w_placement ELSE 0 END AS placement_score,
+ -- regional_score (v1 heuristic: Health or Education student + regional uni)
+ CASE WHEN (v_lead.preferred_fields && ARRAY['Health', 'Education']::text[]) AND u.is_regional THEN v_w_regional ELSE 0 END AS regional_score,
+ -- intake_score
+ CASE WHEN v_lead.preferred_intake_month IS NULL THEN v_w_intake / 2
+ WHEN v_lead.preferred_intake_month = ANY(c.intake_months) THEN v_w_intake
+ ELSE 0 END AS intake_score
+ FROM public.courses c
+ JOIN public.universities u ON c.university_id = u.id
+ ),
+ course_totals AS (
+ SELECT *,
+ field_score + level_score
+ + CASE WHEN budget_score < 0 THEN 0 ELSE budget_score END
+ + CASE WHEN ielts_score < 0 THEN 0 ELSE ielts_score END
+ + qs_score + g8_score + placement_score + regional_score + intake_score AS total,
+ (budget_score < 0 OR ielts_score < 0 OR field_score = 0) AS hard_cut
+ FROM course_scores
+ ),
+ uni_best AS (
+ SELECT DISTINCT ON (university_id) *
+ FROM course_totals
+ WHERE NOT hard_cut
+ ORDER BY university_id, total DESC
+ ),
+ ranked AS (
+ SELECT *,
+ ROW_NUMBER() OVER (ORDER BY total DESC,
+ qs_ranking_2025 ASC NULLS LAST,
+ is_group_of_eight DESC,
+ uni_name ASC) AS rn
+ FROM uni_best
+ ),
+ top_score AS (
+ SELECT total AS max_score FROM ranked WHERE rn = 1
+ )
+ SELECT jsonb_build_object(
+ 'strong', (
+ SELECT jsonb_agg(
+ jsonb_build_object(
+ 'uni_id', r.university_id,
+ 'uni_name', r.uni_name,
+ 'short_name', r.short_name,
+ 'course_name', r.course_name,
+ 'match_pct', ROUND(100.0 * r.total / NULLIF((SELECT max_score FROM top_score), 0)),
+ 'reason_parts', jsonb_build_object(
+ 'matched_fields', ARRAY[r.field],
+ 'budget_verdict', CASE WHEN r.budget_score = v_w_budget THEN 'within' ELSE 'stretch' END,
+ 'ielts_verdict', CASE WHEN r.ielts_score = v_w_ielts THEN 'meets'
+ WHEN r.ielts_score = v_w_ielts/2 THEN 'stretch' ELSE 'below' END,
+ 'qs_rank', r.qs_ranking_2025,
+ 'g8', r.is_group_of_eight,
+ 'industry_placement', r.industry_placement,
+ 'regional', r.is_regional,
+ 'intake_hit', r.intake_score = v_w_intake,
+ 'best_course_name', r.course_name
+ )
+ )
+ )
+ FROM ranked r WHERE r.rn <= 3
+ ),
+ 'stretch', (
+ SELECT jsonb_agg( /* same shape */ )
+ FROM ranked r WHERE r.rn BETWEEN 4 AND 5
+ ),
+ 'computed_at', now()
+ ) INTO v_matches;
 
-  -- Persist to the lead row
-  UPDATE public.leads
-    SET matches = v_matches,
-        matches_computed_at = now()
-    WHERE id = p_lead_id;
+ -- Persist to the lead row
+ UPDATE public.leads
+ SET matches = v_matches,
+ matches_computed_at = now()
+ WHERE id = p_lead_id;
 
-  RETURN v_matches;
+ RETURN v_matches;
 END;
 $$;
 
@@ -841,97 +841,97 @@ GRANT EXECUTE ON FUNCTION public.match_unis_for_lead(uuid, jsonb) TO service_rol
 
 ```
 ╔══════════════════════════════════════════════════════════════════════╗
-║  [Atlas AI logo]                                    [MARA badge]    ║  ← header (existing layout.tsx)
+║ [Pathway-AI logo] [ badge] ║ ← header (existing layout.tsx)
 ╠══════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
-║  ┌──────────────────────────────────────────────────────────────┐   ║
-║  │ ⚠ Disclaimer                                                 │   ║  ← MaraBanner (top), rail-gold borders
-║  │ Atlas AI matches are educational information only, not       │   ║
-║  │ migration advice. For visa, migration, or PR guidance,       │   ║
-║  │ consult UniMate's registered MARA agents.                    │   ║
-║  │                                    [Book consultation →]     │   ║
-║  └──────────────────────────────────────────────────────────────┘   ║
-║                                                                      ║
-║  YOUR SHORTLIST · ATLAS AI                                           ║  ← eyebrow, Georgia serif uppercase tracking
-║                                                                      ║
-║  Your top 3 matches                                                  ║  ← h1 font-display navy-950
-║  Shraddha, here are the Australian unis that best match              ║  ← body, navy-950/70
-║  your profile.                                                       ║
-║                                                                      ║
-║  ┌──────────────────────────────────────────────────────────────┐   ║
-║  │ ┌───┐                                                         │   ║  ← MatchCard 1 — paper-grain bg
-║  │ │ U │  UNSW SYDNEY                                    89%    │   ║
-║  │ └───┘  #19 QS · Group of Eight · Sydney NSW                  │   ║
-║  │                                                               │   ║
-║  │ Best match: Master of Commerce                                │   ║
-║  │ Matches Business · Within budget · IELTS 7.0 met · QS #19    │   ║  ← reason line (dot-separated)
-║  │ · Group of Eight                                              │   ║
-║  │                                             [Learn more ›]    │   ║
-║  └──────────────────────────────────────────────────────────────┘   ║
-║                                                                      ║
-║  ┌──────────────────────────────────────────────────────────────┐   ║
-║  │ ┌───┐  UWA                                             86%    │   ║  ← MatchCard 2
-║  │ │ W │  #77 QS · Group of Eight · Perth WA                    │   ║
-║  │ └───┘  ...                                                    │   ║
-║  │ Master of Business Analytics                                  │   ║
-║  │ ...                                                           │   ║
-║  └──────────────────────────────────────────────────────────────┘   ║
-║                                                                      ║
-║  ┌──────────────────────────────────────────────────────────────┐   ║
-║  │ ┌───┐  ADELAIDE                                       86%    │   ║  ← MatchCard 3
-║  │ │ A │  #82 QS · Group of Eight · Regional · Adelaide SA      │   ║
-║  │ └───┘  ...                                                    │   ║
-║  └──────────────────────────────────────────────────────────────┘   ║
-║                                                                      ║
-║  ─────────────────────────── stretch ─────────────────────────       ║  ← gold hairline divider + eyebrow
-║                                                                      ║
-║  ALSO CONSIDER                                                       ║  ← eyebrow
-║  Within reach if your budget or IELTS shifts                         ║  ← h3
-║                                                                      ║
-║  ┌──────────────────────────────────────────────────────────────┐   ║
-║  │ ┌───┐  UTS                                            72%    │   ║  ← StretchCard 1 — slightly dimmer
-║  │ │ T │  #88 QS · Sydney NSW                                    │   ║     bg-cream/50 + border dashed
-║  │ └───┘  Stretch: $60.5k tuition is 10% above your $55k budget │   ║
-║  └──────────────────────────────────────────────────────────────┘   ║
-║                                                                      ║
-║                                                                      ║
-║  Next step                                                           ║  ← h2
-║  ┌──────────────────────────────────────────────────────────────┐   ║
-║  │ Walk into our Liverpool office with your shortlist. Our       │   ║
-║  │ MARA-registered counsellors will audit fees, scholarships,   │   ║
-║  │ IELTS gaps, and next steps in a free 30-minute session.      │   ║
-║  │                                                               │   ║
-║  │         [Book your consultation →]                            │   ║  ← gold CTA button
-║  └──────────────────────────────────────────────────────────────┘   ║
-║                                                                      ║
+║ ║
+║ ┌──────────────────────────────────────────────────────────────┐ ║
+║ │ ⚠ Disclaimer │ ║ ← MaraBanner (top), rail-gold borders
+║ │ Pathway-AI matches are educational information only, not │ ║
+║ │ migration advice. For visa, migration, or PR guidance, │ ║
+║ │ consult Pathway-AI's registered advisors. │ ║
+║ │ [Book consultation →] │ ║
+║ └──────────────────────────────────────────────────────────────┘ ║
+║ ║
+║ YOUR SHORTLIST · ATLAS AI ║ ← eyebrow, Georgia serif uppercase tracking
+║ ║
+║ Your top 3 matches ║ ← h1 font-display navy-950
+║ Shraddha, here are the Australian unis that best match ║ ← body, navy-950/70
+║ your profile. ║
+║ ║
+║ ┌──────────────────────────────────────────────────────────────┐ ║
+║ │ ┌───┐ │ ║ ← MatchCard 1 — paper-grain bg
+║ │ │ U │ UNSW SYDNEY 89% │ ║
+║ │ └───┘ #19 QS · Group of Eight · Sydney NSW │ ║
+║ │ │ ║
+║ │ Best match: Master of Commerce │ ║
+║ │ Matches Business · Within budget · IELTS 7.0 met · QS #19 │ ║ ← reason line (dot-separated)
+║ │ · Group of Eight │ ║
+║ │ [Learn more ›] │ ║
+║ └──────────────────────────────────────────────────────────────┘ ║
+║ ║
+║ ┌──────────────────────────────────────────────────────────────┐ ║
+║ │ ┌───┐ UWA 86% │ ║ ← MatchCard 2
+║ │ │ W │ #77 QS · Group of Eight · Perth WA │ ║
+║ │ └───┘ ... │ ║
+║ │ Master of Business Analytics │ ║
+║ │ ... │ ║
+║ └──────────────────────────────────────────────────────────────┘ ║
+║ ║
+║ ┌──────────────────────────────────────────────────────────────┐ ║
+║ │ ┌───┐ ADELAIDE 86% │ ║ ← MatchCard 3
+║ │ │ A │ #82 QS · Group of Eight · Regional · Adelaide SA │ ║
+║ │ └───┘ ... │ ║
+║ └──────────────────────────────────────────────────────────────┘ ║
+║ ║
+║ ─────────────────────────── stretch ───────────────────────── ║ ← gold hairline divider + eyebrow
+║ ║
+║ ALSO CONSIDER ║ ← eyebrow
+║ Within reach if your budget or IELTS shifts ║ ← h3
+║ ║
+║ ┌──────────────────────────────────────────────────────────────┐ ║
+║ │ ┌───┐ UTS 72% │ ║ ← StretchCard 1 — slightly dimmer
+║ │ │ T │ #88 QS · Sydney NSW │ ║ bg-cream/50 + border dashed
+║ │ └───┘ Stretch: $60.5k tuition is 10% above your $55k budget │ ║
+║ └──────────────────────────────────────────────────────────────┘ ║
+║ ║
+║ ║
+║ Next step ║ ← h2
+║ ┌──────────────────────────────────────────────────────────────┐ ║
+║ │ Walk into our office with your shortlist. Our │ ║
+║ │ registered counsellors will audit fees, scholarships, │ ║
+║ │ IELTS gaps, and next steps in a free 30-minute session. │ ║
+║ │ │ ║
+║ │ [Book your consultation →] │ ║ ← gold CTA button
+║ └──────────────────────────────────────────────────────────────┘ ║
+║ ║
 ╠══════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
-║  [MaraBanner — footer variant]                                       ║
-║  [Standard Footer.tsx with MARA cred + privacy link]                 ║
+║ ║
+║ [MaraBanner — footer variant] ║
+║ [Standard Footer.tsx with cred + privacy link] ║
 ╚══════════════════════════════════════════════════════════════════════╝
 ```
 
 ### Component tree
 
 ```
-/matches/[token]/page.tsx                    (Server Component — fetches, branches)
-├── <MaraBanner variant="top" />             (sticky until user scrolls past)
+/matches/[token]/page.tsx (Server Component — fetches, branches)
+├── <MaraBanner variant="top" /> (sticky until user scrolls past)
 ├── <MatchesHero firstName={lead.first} />
 ├── <MatchList matches={lead.matches.strong}>
-│   ├── <MatchCard match={...} />            (× 3; same card shape as MatcherSection result cards)
-│   │   ├── <UniLogoBadge />                 (reuse UniCard.tsx logo pattern)
-│   │   ├── Score ring (89%)                 (small circular gauge, gold stroke)
-│   │   ├── Eyebrow line (QS + G8 + city)
-│   │   ├── Course name (font-display)
-│   │   ├── Reason line (dot-separated, from reason_parts → match-reason.ts template)
-│   │   └── "Learn more" → uni.website (target _blank rel noopener)
-├── <StretchSection matches={lead.matches.stretch}>  (skip entirely if empty)
-│   ├── <hairline divider + eyebrow label>
-│   ├── <StretchCard match={...} />          (× 0-2; dashed border, slightly dimmer)
-│   │   └── stretch_reason text explicit
-├── <ConsultCTA />                           (existing consult flow)
+│ ├── <MatchCard match={...} /> (× 3; same card shape as MatcherSection result cards)
+│ │ ├── <UniLogoBadge /> (reuse UniCard.tsx logo pattern)
+│ │ ├── Score ring (89%) (small circular gauge, gold stroke)
+│ │ ├── Eyebrow line (QS + G8 + city)
+│ │ ├── Course name (font-display)
+│ │ ├── Reason line (dot-separated, from reason_parts → match-reason.ts template)
+│ │ └── "Learn more" → uni.website (target _blank rel noopener)
+├── <StretchSection matches={lead.matches.stretch}> (skip entirely if empty)
+│ ├── <hairline divider + eyebrow label>
+│ ├── <StretchCard match={...} /> (× 0-2; dashed border, slightly dimmer)
+│ │ └── stretch_reason text explicit
+├── <ConsultCTA /> (existing consult flow)
 ├── <MaraBanner variant="footer" />
-└── <Footer />                               (existing global footer)
+└── <Footer /> (existing global footer)
 ```
 
 ### Design tokens reused from scaffold
@@ -985,10 +985,10 @@ Repo has **no test framework** installed today (`package.json` grep verified P1)
 | REQ-P4-S2 | IELTS 0.5 below course req = stretch, not excluded | SQL smoke | Insert lead with IELTS 6.5 against a 7.0-required Health course, assert it's in stretch list |
 | REQ-P4-R1 | RPC runs under 500ms against 12 unis × 48 courses | perf smoke | `EXPLAIN ANALYZE SELECT match_unis_for_lead(...)` from psql — target <500ms total |
 | REQ-P4-R2 | RPC failure doesn't roll back lead INSERT | integration | Force RPC error (invalid weights jsonb), POST /api/leads, verify lead row exists in DB with matches=null |
-| REQ-P4-T1 | /matches/{token} renders for fresh match | browser manual | Submit lead, follow redirect, visually confirm 3 match cards + MARA banner |
+| REQ-P4-T1 | /matches/{token} renders for fresh match | browser manual | Submit lead, follow redirect, visually confirm 3 match cards + banner |
 | REQ-P4-T2 | /matches/{token} shows expired state after 30min | browser manual | Hand-tick DB `matches_computed_at = now() - interval '31 minutes'`, reload page, assert fallback component renders |
 | REQ-P4-T3 | Magic-link auth flow bypasses TTL | browser manual | Follow expired state CTA → email arrives → click link → redirected back to /matches/{token} → full results render |
-| REQ-P4-M1 | MARA banner copy is verbatim the locked string | grep | `grep -F "Atlas AI matches are educational information only" web/src/components/matches/MaraBanner.tsx` returns exactly the expected line |
+| REQ-P4-M1 | banner copy is verbatim the locked string | grep | `grep -F "Pathway-AI matches are educational information only" web/src/components/matches/MaraBanner.tsx` returns exactly the expected line |
 | REQ-P4-M2 | No visa/migration/PR strings in reason text | grep | `grep -riE "(visa\|migration\|PR\|MLTSSL\|subclass)" web/src/components/matches/` returns only the MaraBanner disclaimer (which explicitly names them in the negative) |
 | REQ-P4-C1 | /api/match endpoint is removed | grep | `ls web/src/app/api/match/route.ts` returns "No such file" |
 | REQ-P4-C2 | universities.ts (43-uni in-memory) is removed | grep | `ls web/src/lib/universities.ts` returns "No such file" |
@@ -1007,7 +1007,7 @@ Repo has **no test framework** installed today (`package.json` grep verified P1)
 None — no test framework to install. All validations run via:
 1. Supabase SQL editor (persona smoke + perf check via EXPLAIN ANALYZE)
 2. Browser manual UAT (/matches/{token} render states)
-3. Grep (negative string checks for MARA + endpoint removal)
+3. Grep (negative string checks for + endpoint removal)
 
 ---
 
@@ -1035,11 +1035,11 @@ None — no test framework to install. All validations run via:
 | SQL injection via p_weights jsonb | Tampering | jsonb keys are typed/cast via `(p_weights->>'field')::numeric` — numeric parse throws on non-numeric input; also weights are server-TS-controlled constants, not user-controlled |
 | Stored XSS via reason_parts (if ever LLM-rendered in v2) | Tampering | v1 renders from typed JSONB via TS template fn; v2 LLM output must pass through React sanitization |
 
-### MARA compliance checks
+### compliance checks
 
 - **No visa/migration/PR output.** Verified by grep in REQ-P4-M2.
-- **MARA banner placement.** Verified in REQ-P4-M1.
-- **QS WUR data licensing.** Integer ranks from public QS 2025 rankings — LOW risk per CONTEXT specifics. Flagged to P4.5 for legal pass if UniMate escalates.
+- ** banner placement.** Verified in REQ-P4-M1.
+- **QS WUR data licensing.** Integer ranks from public QS 2025 rankings — LOW risk per CONTEXT specifics. Flagged to P4.5 for legal pass if Pathway-AI escalates.
 
 ---
 
@@ -1076,9 +1076,9 @@ None — no test framework to install. All validations run via:
 **Trap:** `ALTER TABLE leads DROP COLUMN matched_university_ids` — if any RLS policy references the dropped column, policy creation fails. P1 added no such policy, but double-check.
 **Prevention:** `pg_policies` query pre-flight: `SELECT * FROM pg_policies WHERE tablename = 'leads'` — confirm no policy references `matched_university_ids`. Then drop is safe.
 
-### 8. MARA banner copy drift
-**Trap:** Over time, developers edit the banner text in MaraBanner.tsx without updating the canonical string in RESEARCH.md / PHASE.md. Post-launch, UniMate's legal team audits and finds inconsistency.
-**Prevention:** Store the banner string as a named constant in `web/src/lib/mara-disclaimer.ts` (new file, ~10 LoC): `export const MARA_DISCLAIMER_V1 = "Atlas AI matches are educational information only, not migration advice. For visa, migration, or PR guidance, consult UniMate's registered MARA agents.";`. MaraBanner.tsx imports it. Same pattern as `CONSENT_WORDING_VERSION`. Bump to V2 on any wording change, log in DEVIATIONS.md.
+### 8. banner copy drift
+**Trap:** Over time, developers edit the banner text in MaraBanner.tsx without updating the canonical string in RESEARCH.md / PHASE.md. Post-launch, Pathway-AI's legal team audits and finds inconsistency.
+**Prevention:** Store the banner string as a named constant in `web/src/lib/mara-disclaimer.ts` (new file, ~10 LoC): `export const MARA_DISCLAIMER_V1 = "Pathway-AI matches are educational information only, not migration advice. For visa, migration, or PR guidance, consult Pathway-AI's registered advisors.";`. MaraBanner.tsx imports it. Same pattern as `CONSENT_WORDING_VERSION`. Bump to V2 on any wording change, log in DEVIATIONS.md.
 
 ### 9. Vercel Edge vs Node runtime
 **Trap:** `/api/leads` has `export const runtime = "nodejs"` (Supabase service-role client requires Node). Adding match RPC inside this route is fine. But /matches/[token]/page.tsx should NOT be an Edge runtime page if it uses the service-role client — stays Node default.
@@ -1089,25 +1089,25 @@ None — no test framework to install. All validations run via:
 **Prevention:** Define a Zod schema for the matches JSONB in `web/src/lib/match-schema.ts`:
 ```ts
 export const MatchResultSchema = z.object({
-  uni_id: z.string().uuid(),
-  uni_name: z.string(),
-  match_pct: z.number().int().min(0).max(100),
-  reason_parts: z.object({
-    matched_fields: z.array(z.string()),
-    budget_verdict: z.enum(["within", "stretch", "far_stretch"]),
-    ielts_verdict: z.enum(["meets", "stretch", "below"]),
-    qs_rank: z.number().int().nullable(),
-    g8: z.boolean(),
-    industry_placement: z.boolean(),
-    regional: z.boolean(),
-    intake_hit: z.boolean(),
-    best_course_name: z.string(),
-  }),
+ uni_id: z.string().uuid(),
+ uni_name: z.string(),
+ match_pct: z.number().int().min(0).max(100),
+ reason_parts: z.object({
+ matched_fields: z.array(z.string()),
+ budget_verdict: z.enum(["within", "stretch", "far_stretch"]),
+ ielts_verdict: z.enum(["meets", "stretch", "below"]),
+ qs_rank: z.number().int().nullable(),
+ g8: z.boolean(),
+ industry_placement: z.boolean(),
+ regional: z.boolean(),
+ intake_hit: z.boolean(),
+ best_course_name: z.string(),
+ }),
 });
 export const MatchesJsonbSchema = z.object({
-  strong: z.array(MatchResultSchema).max(3),
-  stretch: z.array(MatchResultSchema).max(2),
-  computed_at: z.string().datetime(),
+ strong: z.array(MatchResultSchema).max(3),
+ stretch: z.array(MatchResultSchema).max(2),
+ computed_at: z.string().datetime(),
 });
 ```
 Parse on read in /matches/[token]/page.tsx. Throws loud on drift.
@@ -1152,7 +1152,7 @@ All claims in this research are either verified in-repo (grep/Read) or cited via
 ## Sources
 
 ### Primary (HIGH confidence)
-- `[VERIFIED: ./PRD.md §2 V1.3 + §5 tech stack + §6 AU compliance]` — UniMate scope + MARA + QEAC + data residency
+- `[VERIFIED: ./PRD.md §2 V1.3 + §5 tech stack + §6 AU compliance]` — Pathway-AI scope + + QEAC + data residency
 - `[VERIFIED: ./PHASE.md §"Phase 4: UniMatch engine" + §"Phase 4.5: Compliance gate"]` — task scope + compliance gate items
 - `[VERIFIED: ./CLAUDE.md §3a route table accuracy rule + §8 AU compliance]` — governance constraints
 - `[VERIFIED: ./.planning/4-CONTEXT.md]` — 19 locked decisions
@@ -1162,8 +1162,8 @@ All claims in this research are either verified in-repo (grep/Read) or cited via
 - `[VERIFIED: ./web/src/lib/universities-seed.ts]` — 12-uni fee/IELTS/QS/G8/regional/industry_placement data used in persona simulation
 - `[VERIFIED: ./web/src/lib/match-stub.ts + matcher.ts + lead-score.ts]` — existing scoring patterns to mirror
 - `[VERIFIED: ./web/src/app/api/leads/route.ts]` — route to extend with RPC call
-- `[VERIFIED: ./web/src/components/lead/Step5Contact.tsx + ./web/src/lib/content.ts]` — existing MARA disclaimer strings (P0.5 scrub)
-- `[VERIFIED: ./planning/atlas-ai/DEVIATIONS.md §DEV-001]` — APP 8 Singapore obligations already covered in P3
+- `[VERIFIED: ./web/src/components/lead/Step5Contact.tsx + ./web/src/lib/content.ts]` — existing disclaimer strings (P0.5 scrub)
+- `[VERIFIED: ./planning/pathway-ai/DEVIATIONS.md §DEV-001]` — APP 8 Singapore obligations already covered in P3
 
 ### Secondary (HIGH confidence — Context7)
 - `[CITED: Context7 /supabase/supabase — guides/database/postgres/row-level-security.mdx]` — SECURITY DEFINER function pattern + search_path = '' requirement
@@ -1182,7 +1182,7 @@ All claims in this research are either verified in-repo (grep/Read) or cited via
 - Weights + persona simulation: HIGH — manually validated against seed numbers
 - Stretch math: HIGH — matches existing matcher.ts pattern
 - RPC shape + SECURITY DEFINER: HIGH — Context7 Supabase docs verified
-- MARA banner wording: HIGH — reused from P0.5 scrubbed canonical strings
+- banner wording: HIGH — reused from P0.5 scrubbed canonical strings
 - Match token TTL (server-component approach): HIGH — Next 16 App Router standard pattern
 - Seed migration order: HIGH — pattern matches P1 flow; adds --upsert mode (new minor scope)
 - /matches page design: HIGH — reuses existing design tokens and card patterns

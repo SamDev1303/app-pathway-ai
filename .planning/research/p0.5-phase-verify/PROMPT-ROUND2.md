@@ -1,6 +1,6 @@
 # P0.5 Phase-Verify ROUND 2 — after Gideon v1 FAIL fix
 
-**Repo:** `~/Desktop/atlas-ai`
+**Repo:** `~/Desktop/pathway-ai`
 **Previous verdict:** FAIL on item 6 only (13/14 PASS)
 **Fix commit:** `4a81cc8` — wires `/api/leads/route.ts` zod schema + email body + `LeadInput` type to new consent fields (`consent_service`, `consent_marketing`, `consent_wording_version`)
 **Cumulative commits:** `f425837` + `2bedf83` + `4a81cc8`

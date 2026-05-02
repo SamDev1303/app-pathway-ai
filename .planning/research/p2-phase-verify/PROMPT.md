@@ -1,6 +1,6 @@
 # P2 Phase-Verify — Supabase Auth magic link infrastructure
 
-**Repo:** `~/Desktop/atlas-ai`
+**Repo:** `~/Desktop/pathway-ai`
 **Commit:** `809d7dc feat(phase-2): Supabase Auth magic link infrastructure`
 **Plan-check (both seats PASS):** Gideon APPROVE-WITH-NOTES (note: prefer getClaims() over getUser() — non-blocker) + Specter APPROVE-WITH-NOTES
 **Reviewer role:** NO CODE WRITING. REVIEW ONLY. ONE OUTPUT FILE.

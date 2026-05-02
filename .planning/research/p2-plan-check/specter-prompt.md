@@ -1,8 +1,8 @@
-You are Specter — stateless P2 plan-check adjudicator for Atlas AI. Gideon (Codex gpt-5.4-mini) is running parallel review. Return compact independent verdict (150-300 words, markdown).
+You are Specter — stateless P2 plan-check adjudicator for Pathway-AI. Gideon (Codex gpt-5.4-mini) is running parallel review. Return compact independent verdict (150-300 words, markdown).
 
 ## P2 context
 
-Atlas AI phase 2 scope: "Supabase Auth magic link" per PRD §4 architecture stack. V1.1–V1.4 modules don't require user login — app is anonymous by design. P2 was debated for scope (admin dashboard cut to v2), Koda pushed back, Sam directed: build as INFRASTRUCTURE ONLY (no admin page yet, just wire the auth plumbing).
+Pathway-AI phase 2 scope: "Supabase Auth magic link" per PRD §4 architecture stack. V1.1–V1.4 modules don't require user login — app is anonymous by design. P2 was debated for scope (admin dashboard cut to v2), Koda pushed back, Sam directed: build as INFRASTRUCTURE ONLY (no admin page yet, just wire the auth plumbing).
 
 ## Commit 809d7dc delivered
 
@@ -16,8 +16,8 @@ Atlas AI phase 2 scope: "Supabase Auth magic link" per PRD §4 architecture stac
 - `src/app/login/page.tsx` — client component with email input, calls `supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${origin}/auth/callback` } })`, displays "check your email" confirmation state
 
 ### Supabase config applied via Management API
-- site_url: `https://atlas-ai.vercel.app`
-- uri_allow_list: `http://localhost:3000/**,https://atlas-ai.vercel.app/**,https://atlas-ai-*.vercel.app/**` (dev + prod + preview)
+- site_url: `https://pathway-ai.vercel.app`
+- uri_allow_list: `http://localhost:3000/**,https://pathway-ai.vercel.app/**,https://pathway-ai-*.vercel.app/**` (dev + prod + preview)
 - External email enabled, 1-hour OTP expiry
 
 ### Design choice (KEY POINT for review)

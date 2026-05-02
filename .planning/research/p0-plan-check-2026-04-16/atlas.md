@@ -1,10 +1,10 @@
-# Plan-Check: Atlas AI v1 Phase 0
+# Plan-Check: Pathway-AI v1 Phase 0
 **Agent:** Atlas
 **Date:** 2026-04-16
 **Verdict:** APPROVE WITH NOTES
 
 ## Summary (1 paragraph)
-The Atlas AI v1 plan is logically sound and surgically focused on conversion (leads/matches/SOP) while deferring operational overhead to v2. The transition from UniMate-demo to atlas-ai is complete in scaffold. The $3,000 AUD budget for 4 modules is realistic given the no-code (Lovable/Supabase) stack and manual seeding of 43 universities (skipping the scraper complexity). However, the mobile rebrand in Phase 7 carries a significant risk of delaying the 3-week ship due to App Store review times for a new bundle ID.
+The Pathway-AI v1 plan is logically sound and surgically focused on conversion (leads/matches/SOP) while deferring operational overhead to v2. The transition from Pathway-AI-demo to pathway-ai is complete in scaffold. The $3,000 AUD budget for 4 modules is realistic given the no-code (Lovable/Supabase) stack and manual seeding of 43 universities (skipping the scraper complexity). However, the mobile rebrand in Phase 7 carries a significant risk of delaying the 3-week ship due to App Store review times for a new bundle ID.
 
 ## 1. Scope realism
 - **Budget ($3k AUD):** Realistic for a 3-week build using Lovable/Bolt and Supabase. Manual seeding of 43 AU unis (PRD §3, X.3) is the correct play to avoid the $2k scraping overhead.
@@ -14,10 +14,10 @@ The Atlas AI v1 plan is logically sound and surgically focused on conversion (le
 ## 2. Phase ordering + gaps
 - **P7 Mobile Rebrand (RISK):** Phase 7 (PHASE.md) tasks a bundle ID change (`cloud.claudeking.atlasai`). This **cannot** be an OTA update; it requires a full App Store/Play Store re-submission. Review times (3–7 days) will block the 3-week ship unless the client already has the store accounts ready. **Note:** P7 should be pulled forward to P1 to unblock the review queue.
 - **P1 Seed Dependency:** Phase 5 (Chat) depends on the `embeddings` table from P1. This is correctly ordered.
-- **P8 Compliance:** Placing compliance at the end (Phase 8) is acceptable as a final "scan", but the MARA disclaimer **must** be hard-coded into the P5 system prompt from day one. PRD §6 confirms this.
+- **P8 Compliance:** Placing compliance at the end (Phase 8) is acceptable as a final "scan", but the disclaimer **must** be hard-coded into the P5 system prompt from day one. PRD §6 confirms this.
 
 ## 3. AU compliance coverage
-- **MARA (§6):** Per-turn chat footer + registration link in page footer is the gold standard for compliance.
+- ** (§6):** Per-turn chat footer + registration link in page footer is the gold standard for compliance.
 - **Privacy Act 1988 (§6):** Storing `consent_wording_version` (PRD §1.2) is a strong legal defense. We must ensure the "progressive save" in Phase 3 doesn't store PII before the Step 5 consent checkbox is ticked, or handle it as an "incomplete/abandoned" lead with a shorter retention TTL.
 - **QEAC (§6):** Limitation to 43 AU unis is defensible for v1. Claiming "all 43" is better than a broken scraper that misses 5.
 

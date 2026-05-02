@@ -11,7 +11,7 @@
 - Domain — atlasai.com.au vs subdomain on client's existing site
 - AI provider — direct Anthropic vs Vercel AI Gateway (env-gated either way)
 - Launch date — soft launch internal vs public + press
-- MARA reg# / ABN — placeholders `{PENDING_FROM_UNIMATE}` need real values
+- reg# / ABN — placeholders `{PENDING_FROM_UNIMATE}` need real values
 
 **Workspace audit:** Gideon read-only audit dispatched 2026-04-25 pre-meeting.
 Report: `~/Desktop/Gideon/drafts/koda-handoff-2026-04-25-workspace-audit.md`

@@ -1,6 +1,6 @@
-# P0.5 Plan-Check Review — MARA Scaffold Scrub
+# P0.5 Plan-Check Review — Scaffold Scrub
 
-**Repo:** `~/Desktop/atlas-ai`
+**Repo:** `~/Desktop/pathway-ai`
 **Commit under review:** `f425837` — `fix(phase-0.5): scaffold scrub`
 **Phase:** P0.5 (HARD BLOCK on P1)
 **Reviewer role:** NO CODE WRITING. REVIEW ONLY. ONE OUTPUT FILE.
@@ -10,7 +10,7 @@
 Write ONE markdown file to `.planning/research/p0.5-plan-check/{AGENT_NAME}-v1.md` with:
 
 - **Verdict:** `APPROVE` / `APPROVE-WITH-NOTES` / `BLOCK`
-- **MARA compliance check** — Does this commit achieve zero user-facing migration/visa advice? Cite any violations by file:line.
+- ** compliance check** — Does this commit achieve zero user-facing migration/visa advice? Cite any violations by file:line.
 - **Type correctness** — Did the `wants_pr → prioritize_outcomes` and `pr_eligible → industry_placement` renames leave any dangling references?
 - **UX cohesion** — Does "strong graduate outcomes (industry placement + regional)" checkbox make sense as a replacement for the PR toggle? Or does it introduce new problems?
 - **Consent split** — Is the LeadModal service/marketing consent split compliant with Privacy Act 1988 s.6 + APP 5?
@@ -18,7 +18,7 @@ Write ONE markdown file to `.planning/research/p0.5-plan-check/{AGENT_NAME}-v1.m
 
 ## Key files to review
 
-- `planning/atlas-ai/APPROVAL.md` — Sam's approval
+- `planning/pathway-ai/APPROVAL.md` — Sam's approval
 - `web/src/components/MatcherForm.tsx` — new "outcomes" checkbox + indicative-only disclaimer
 - `web/src/components/LeadModal.tsx` — consent split + APP 5 notice
 - `web/src/components/ChatDrawer.tsx` — suggestion chips rewrite
@@ -37,7 +37,7 @@ Write ONE markdown file to `.planning/research/p0.5-plan-check/{AGENT_NAME}-v1.m
 grep -riE "(subclass|MLTSSL|STSOL|PR points|PR pathway|visa success|DoHA|points test|Permanent Residency|visa pathway|post-study work|migration outcomes|PR-aware|PR-eligible|wants_pr|wantsPR|prIntent|visaUpdate)" web/src/ mobile/lib/ mobile/app/ --include="*.ts" --include="*.tsx"
 ```
 
-6 hits remaining — all in MARA-REQUIRED negative-constraint language (system prompts "NEVER give visa advice", code comment "// MARA-safe: NO migration/visa advice"). Zero user-facing violations claimed. **Review whether this claim is defensible** or if any of the 6 are actually violations.
+6 hits remaining — all in -REQUIRED negative-constraint language (system prompts "NEVER give visa advice", code comment "// -safe: NO migration/visa advice"). Zero user-facing violations claimed. **Review whether this claim is defensible** or if any of the 6 are actually violations.
 
 ## Typecheck
 

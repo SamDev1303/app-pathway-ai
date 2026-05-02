@@ -50,7 +50,7 @@ PASS for audit trail, BLOCK for production readiness.
 
 The region deviation is recorded well enough for audit purposes:
 - `PRD.md` §5 and §6 now explicitly note the `ap-southeast-1` deviation inline
-- `planning/atlas-ai/DEVIATIONS.md` DEV-001 captures the decision date, owner, actual vs target region, and the 4 downstream obligations
+- `planning/pathway-ai/DEVIATIONS.md` DEV-001 captures the decision date, owner, actual vs target region, and the 4 downstream obligations
 - the deviation record is explicit that real traffic must not ship until the obligations are addressed
 
 That is sufficient to close P1, but it is not sufficient to call the system production-ready. Production must remain blocked until the APP 8 disclosure and the other DEV-001 obligations are completed.

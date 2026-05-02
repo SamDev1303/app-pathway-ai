@@ -14,7 +14,7 @@ Locked in earlier phases or PRD — downstream agents must not re-ask.
 ### From PRD
 - **Tech stack:** Next.js 16 hand-coded (NOT Lovable / Bolt — PRD §5 is stale on this per `feedback_atlas-ai-hand-coded`). OpenAI `text-embedding-3-small` 1536-dim is the project's embedding spec (NOT used in P4 — deferred to v2 chat).
 - **Perf budget:** Top-3 results under 500ms from Supabase (PRD §2 V1.3 success metric).
-- **MARA Code compliance:** no visa / migration / PR / points-test / MLTSSL strings anywhere in output. Verified again in P0.5.
+- ** Code compliance:** no visa / migration / PR / points-test / MLTSSL strings anywhere in output. Verified again in P0.5.
 - **v1 ships 43 AU unis from CRICOS manual seed** — no scraping (X.3 cut).
 
 ### From P1 (DB + DEV-001)
@@ -29,7 +29,7 @@ Locked in earlier phases or PRD — downstream agents must not re-ask.
 ### From P3
 - Lead form anonymous until Step 5 consent tick.
 - Step 3 captures: `preferred_fields[]`, `preferred_levels[]`, `preferred_intake_month`, `industry_placement`, `prioritize_outcomes`. **No `preferred_state` column — gap confirmed by grep across `web/src` + `supabase` 2026-04-19.** Location tiebreaker dropped from P4 scope as a result.
-- Step 3 teaser uses `stubTopMatches()` client-side. **P4 leaves the stub in place for the live-teaser experience** — stub is fast, deterministic, MARA-safe. Real `/api/match` runs only at submit. This preserves P3's investment and keeps Step 3 perf under 16ms.
+- Step 3 teaser uses `stubTopMatches()` client-side. **P4 leaves the stub in place for the live-teaser experience** — stub is fast, deterministic, -safe. Real `/api/match` runs only at submit. This preserves P3's investment and keeps Step 3 perf under 16ms.
 - `lead_score` + `tier` computed server-side via `web/src/lib/lead-score.ts` inside the atomic INSERT — P4 extends this same route handler.
 - Single-seat Gideon on full `gpt-5.4` for plan-check + phase-verify. No dual-seat.
 
@@ -60,7 +60,7 @@ Locked in earlier phases or PRD — downstream agents must not re-ask.
 
 - **C-1 Storage:** JSONB on `leads` row. New columns: `matches jsonb`, `matches_computed_at timestamptz`, `match_token uuid`.
 - **C-2 Compute timing:** Inside the atomic Step-5 INSERT flow in `web/src/app/api/leads/route.ts`. Sequence: Zod validate → compute lead_score → INSERT lead → call `match_unis_for_lead()` → UPDATE leads SET matches = result → fire Resend email → return `{ok: true, match_token}`. If match RPC fails, lead INSERT still succeeds — match can be recomputed later (see open_for_planner item 3).
-- **C-3 Staleness:** Serve stale indefinitely. Once a lead is submitted, the match is their match. No silent recomputes. If UniMate asks for refresh, expose via admin tooling in v2.
+- **C-3 Staleness:** Serve stale indefinitely. Once a lead is submitted, the match is their match. No silent recomputes. If Pathway-AI asks for refresh, expose via admin tooling in v2.
 - **C-4 Access control:** `match_token` valid for current session (~30 min from `matches_computed_at`). After expiry, `/matches/{token}` triggers Supabase Auth magic-link to the email on the lead. On successful login, same `/matches/{token}` loads. Token is **permanent** server-side — expiry is purely client-gating. Lead form itself stays anonymous (P3 lock preserved).
 
 ### Reason text (RT-*)
@@ -68,7 +68,7 @@ Locked in earlier phases or PRD — downstream agents must not re-ask.
 - **RT-1 Source:** Template rendered in TypeScript from structured `reason_parts` JSONB. V1 ships template only. JSONB shape is deliberately structured (not pre-rendered strings) so v2 can feed it to `gpt-4o-mini` for LLM rewriting if desired — schema-ready without v1 scope bleed.
 - **RT-2 Shape:** One dot-separated line, 4-6 fragments max. Example: `"Matches IT + Business · Within budget · IELTS 6.5 needed · Group of Eight · QS #19"`. Mobile-safe, scannable, consistent with stub's current pattern.
 - **RT-3 Content:** Smart top-3 — the 3 signals that contributed most to THIS uni's score get named in the reason text. Different unis surface different fragments based on what won the score.
-- **RT-4 MARA disclaimer placement:** Single persistent banner on `/matches/{token}` — NOT per-result. Wording to be locked in planning (template: "These matches are educational information only. For visa, migration, or PR advice, consult UniMate's registered MARA agents.").
+- **RT-4 disclaimer placement:** Single persistent banner on `/matches/{token}` — NOT per-result. Wording to be locked in planning (template: "These matches are educational information only. For visa, migration, or PR advice, consult Pathway-AI's registered advisors.").
 
 ### Claude's Discretion
 - `reason_parts` JSONB exact schema (suggested: `{matched_fields: string[], budget_verdict: 'within'|'stretch', ielts_verdict: 'meets'|'stretch'|'below', qs_rank: int?, g8: bool, industry_placement: bool, regional: bool, intake_hit: bool, best_course_name: string}`)
@@ -114,7 +114,7 @@ Downstream agents (gsd-phase-researcher + gsd-planner + gsd-executor) **must rea
 - `PHASE.md` §"Phase 4: UniMatch engine (backend API)" — 4 tasks
 - `.planning/PROJECT.md` — GSD meta pointers to root SoT
 - `CLAUDE.md` §§"Plan check" and "Phase verify" (note: single-seat Gideon on gpt-5.4 supersedes dual-seat from P3)
-- `planning/atlas-ai/DEVIATIONS.md` §DEV-001 (Singapore region — P4 doesn't add new obligations; APP 8 already covered in P3)
+- `planning/pathway-ai/DEVIATIONS.md` §DEV-001 (Singapore region — P4 doesn't add new obligations; APP 8 already covered in P3)
 
 ### DB + prior phase artifacts
 - `supabase/migrations/001_initial_schema.sql` — universities (lines 18-36), courses (41-57), leads (62-102), embeddings (107-115)
@@ -158,16 +158,16 @@ Downstream agents (gsd-phase-researcher + gsd-planner + gsd-executor) **must rea
 ### Integration points
 - `/api/leads` route becomes the match dispatcher — no new route mount needed for v1 unless we want recompute endpoint (Claude's Discretion).
 - `/matches/{token}` is a new App Router route, unauthenticated (token-gated), with Supabase client-side fetch + magic-link-login fallback.
-- Email template (Resend, from P3 D9) already includes `lead_score` — P4 extends to also include "Top match: {uni_name} at {match_pct}%" for Sam + UniMate visibility.
+- Email template (Resend, from P3 D9) already includes `lead_score` — P4 extends to also include "Top match: {uni_name} at {match_pct}%" for Sam + Pathway-AI visibility.
 
 ---
 
 ## <specifics>
 
 - **Perf budget:** 500ms end-to-end for top-3 match from Supabase (PRD §2 V1.3). Gideon's research should model: Vercel US → Supabase Singapore round-trip + plpgsql function exec + TS normalization. Single RPC is the only plausible path.
-- **12 vs 43 unis:** Algorithm ships against whatever is in the DB. If P4.5 lands the 43-uni backfill before UniMate sends real leads, great. If not, matcher still runs against 12 and returns top-3 / stretch-2 from what exists.
-- **No free-text interest field in v1.** Student expresses interests via enum `preferred_fields` multi-select on Step 3. No pgvector needed. If UniMate wants free-text "tell us about yourself" in v2, that's when embeddings earn their cost.
-- **QS WUR source:** `universities-seed.ts` has integer ranks verified against 2025 QS public rankings. Low legal risk; flag in P4.5 compliance sweep for a lawyer pass if UniMate escalates.
+- **12 vs 43 unis:** Algorithm ships against whatever is in the DB. If P4.5 lands the 43-uni backfill before Pathway-AI sends real leads, great. If not, matcher still runs against 12 and returns top-3 / stretch-2 from what exists.
+- **No free-text interest field in v1.** Student expresses interests via enum `preferred_fields` multi-select on Step 3. No pgvector needed. If Pathway-AI wants free-text "tell us about yourself" in v2, that's when embeddings earn their cost.
+- **QS WUR source:** `universities-seed.ts` has integer ranks verified against 2025 QS public rankings. Low legal risk; flag in P4.5 compliance sweep for a lawyer pass if Pathway-AI escalates.
 
 ---
 
@@ -175,10 +175,10 @@ Downstream agents (gsd-phase-researcher + gsd-planner + gsd-executor) **must rea
 
 - **Location preference tiebreaker:** would need `leads.preferred_state text` column + Step 3 UI dropdown. Dropped from P4 to keep scope clean. Candidate for v1.1 patch or v2.
 - **Free-text interest field + pgvector similarity:** deferred to v2 chat (P5 integration) where embeddings earn their cost.
-- **LLM-generated reason prose:** schema-compatible but not implemented in v1. When UniMate asks for richer match explanations in v2, feed `reason_parts` JSONB into `gpt-4o-mini`.
-- **Recompute endpoint / admin tooling:** `POST /api/match/recompute` hook for UniMate to refresh stale matches. v2 admin CRM territory.
+- **LLM-generated reason prose:** schema-compatible but not implemented in v1. When Pathway-AI asks for richer match explanations in v2, feed `reason_parts` JSONB into `gpt-4o-mini`.
+- **Recompute endpoint / admin tooling:** `POST /api/match/recompute` hook for Pathway-AI to refresh stale matches. v2 admin CRM territory.
 - **Telemetry:** match quality feedback loop ("did student apply to top uni?") — v2 analytics scope.
-- **"Apply with UniMate" CTA on results page** — button exists visually, but the application flow itself is v2 scope. V1 just surfaces the email/phone in the UniMate notification.
+- **"Apply with Pathway-AI" CTA on results page** — button exists visually, but the application flow itself is v2 scope. V1 just surfaces the email/phone in the Pathway-AI notification.
 
 ---
 
@@ -189,7 +189,7 @@ Items the researcher + planner must close during `/gsd-plan-phase 4`:
 1. **Weight numbers:** Propose concrete values for each of the 10 signals in the tiered shape (70-80 core + 20-30 tiebreakers). Justify against QS WUR methodology + IDP / Study Australia lead-form conventions. Sample 3-4 persona profiles (high-budget G8-chaser, budget-constrained IT student, late-intake pathway student, regional-preference nurse) and run them through proposed weights to catch obviously-wrong rankings before implement.
 2. **Stretch math specifics:** The "within 20% budget" and "within 0.5 IELTS" windows need precise SQL. Linear decay inside the stretch zone, or flat 50% penalty? Researcher picks.
 3. **Match RPC failure handling:** If `match_unis_for_lead()` throws after lead INSERT succeeds, does the route return 200 (lead saved, matches recomputed lazy) or 500 (retry whole flow)? Propose with transaction shape + error-surface UX.
-4. **MARA disclaimer exact wording:** Lock the single-line text for `/matches/{token}` banner. Reference P0.5 scrub wording. Cross-check with `planning/atlas-ai/DEVIATIONS.md`.
+4. ** disclaimer exact wording:** Lock the single-line text for `/matches/{token}` banner. Reference P0.5 scrub wording. Cross-check with `planning/pathway-ai/DEVIATIONS.md`.
 5. **Match token TTL implementation:** Where does "30 min since matches_computed_at" live — client-side check or server-side middleware? Propose with Auth flow diagram.
 6. **`/api/match` endpoint existence:** Verify whether v1 needs a standalone `POST /api/match` route (e.g., for lazy recompute or admin use) OR whether the match logic can live entirely inside `/api/leads` for v1. Recommend with rationale.
 7. **Seed migration order:** 003_match_prep.sql adds `industry_placement` column with `NOT NULL DEFAULT false`, but `universities-seed.ts` already has accurate values. Plan the re-seed order: migration → UPSERT seed (not --wipe unless P4.5 is also ready).
@@ -204,7 +204,7 @@ Items the researcher + planner must close during `/gsd-plan-phase 4`:
 - Model flag: `-m gpt-5.4` — never `gpt-5.4-mini`. Never Neo. Never Atlas.
 - Invocation: `codex exec -m gpt-5.4 --full-auto < prompt.md` for plan-check, phase-verify, and debug.
 - Sign-off surface: `PHASE.md` §Phase 4 "Plan check sign-off" + "Phase verify sign-off".
-- Research agent: `gsd-phase-researcher` spawned by `/gsd-plan-phase 4` handles the weight numbers + stretch math + MARA wording work.
+- Research agent: `gsd-phase-researcher` spawned by `/gsd-plan-phase 4` handles the weight numbers + stretch math + wording work.
 
 ---
 

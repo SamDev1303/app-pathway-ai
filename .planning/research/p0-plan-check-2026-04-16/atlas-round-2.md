@@ -1,11 +1,11 @@
-# Plan-Check Round 2: Atlas AI v1 Phase 0
+# Plan-Check Round 2: Pathway-AI v1 Phase 0
 **Agent:** Atlas
 **Date:** 2026-04-16
 **Verdict:** APPROVE
 **Round 1 → Round 2 movement:** APPROVE WITH NOTES → APPROVE
 
 ## Summary
-The revised plan successfully integrates the critical compliance and governance guardrails requested in Round 1. The transition to a "localStorage-first" lead capture model directly addresses the Privacy Act 1988 concerns, and the insertion of explicit compliance gates (P0.5 and P4.5) ensures that the MARA-safe mandate is enforced both at the start of development and before the chat feature is exposed to users. The governance framework in `CLAUDE.md` is now robust enough to prevent cross-agent conflicts.
+The revised plan successfully integrates the critical compliance and governance guardrails requested in Round 1. The transition to a "localStorage-first" lead capture model directly addresses the Privacy Act 1988 concerns, and the insertion of explicit compliance gates (P0.5 and P4.5) ensures that the -safe mandate is enforced both at the start of development and before the chat feature is exposed to users. The governance framework in `CLAUDE.md` is now robust enough to prevent cross-agent conflicts.
 
 ## Blocker 1 resolution (consent pattern)
 **Addressed.** `PRD.md` §2 V1.2 and `PHASE.md` P3 now unambiguously specify that data is persisted only to `localStorage` for steps 1–4. The atomic write to Supabase on step 5 (after consent) is the correct technical pattern for minimizing Privacy Act risk. The inclusion of `consent_wording_version` and the split between service (required) and marketing (optional) consent aligns with OAIC guidance against bundled consent.

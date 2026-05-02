@@ -1,4 +1,4 @@
-# UniMate Australia Mobile
+# Pathway-AI Australia Mobile
 
 Expo SDK 55 demo app for an AI-powered migration consultancy concept.
 

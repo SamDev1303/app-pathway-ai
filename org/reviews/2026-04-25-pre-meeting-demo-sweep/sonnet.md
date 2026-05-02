@@ -12,7 +12,7 @@
 
 ## NOTE (cosmetic, backlog)
 
-- **Hero credential strip hidden on mobile** — The "UniMate Pty Ltd — MARA-registered education consultancy / Liverpool, NSW · Since 2018" trust line visible on desktop is absent from the mobile (375px) snapshot. Not a blocker for a screen-share demo, but worth noting for client-facing mobile use.
+- **Hero credential strip hidden on mobile** — The "Pathway-AI — registered education consultancy / · Since 2018" trust line visible on desktop is absent from the mobile (375px) snapshot. Not a blocker for a screen-share demo, but worth noting for client-facing mobile use.
 
 - **Nav label truncation on mobile** — "Book office" collapses to "Book" at 375px. Readable, no overflow observed.
 
@@ -24,4 +24,4 @@
 
 ## Confidence
 
-Full confidence on: landing renders clean, MARA/QEAC footer present, match widget returns strong+stretch+pathway cards with real data, PR deflection fires correctly with /consult CTA, /consult page renders with valid mailto, zero console errors across all pages, mobile layout intact. The one thing I cannot verify with Playwright's accessibility snapshot is whether streaming tokens visually flow in (the snapshot captures final DOM state after ~6s, not mid-stream). The response did arrive within that window so the API is live, but visual streaming animation was not directly observed. Sam should do a quick live finger-test on /chat before the call to confirm the typewriter effect is visible.
+Full confidence on: landing renders clean, /QEAC footer present, match widget returns strong+stretch+pathway cards with real data, PR deflection fires correctly with /consult CTA, /consult page renders with valid mailto, zero console errors across all pages, mobile layout intact. The one thing I cannot verify with Playwright's accessibility snapshot is whether streaming tokens visually flow in (the snapshot captures final DOM state after ~6s, not mid-stream). The response did arrive within that window so the API is live, but visual streaming animation was not directly observed. Sam should do a quick live finger-test on /chat before the call to confirm the typewriter effect is visible.

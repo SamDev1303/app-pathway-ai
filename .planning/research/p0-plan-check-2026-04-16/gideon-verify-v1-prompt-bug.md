@@ -1,13 +1,13 @@
-# Phase-Verify: Atlas AI Phase 0
+# Phase-Verify: Pathway-AI Phase 0
 **Agent:** Gideon
 **Date:** 2026-04-16
 **Verdict:** FAIL
 
 ## Repo structure
-- ✓ `~/Desktop/atlas-ai/` exists; `~/Desktop/Unimate-demo/` is absent.
+- ✓ `~/Desktop/pathway-ai/` exists; `~/Desktop/Unimate-demo/` is absent.
 - ✓ Root matches expected set exactly: `README.md`, `SOURCECODE.md`, `PRD.md`, `PHASE.md`, `CLAUDE.md`, `.gitignore`, `.vercel/`, `web/`, `mobile/`, `_reference/`, `.git/`.
 - ✓ `_reference/archive/` contains `STATE-2026-04-11.md` and `OLD-PRD-2026-04-11.md`.
-- ✓ `.vercel/project.json` has `"projectName":"atlas-ai"`.
+- ✓ `.vercel/project.json` has `"projectName":"pathway-ai"`.
 
 ## Doc coherence
 - ✓ P0 task list aligns with the four P0 commits in order: `1fac8b7` initial scaffold, `e83ee7d` §4a lock + Atlas round 1 transcription, `aa505d5` blocker acceptance + P0.5/P4.5 insertion, `64558e9` round 2 sign-off + note absorption.
@@ -23,7 +23,7 @@
 - ✓ No committed secrets found. `web/.env.local` exists locally but is ignored by `web/.gitignore:34` and does not appear in `git ls-files`; no tracked `.env`, key, or token patterns were found.
 
 ## Scaffold integrity
-- ✓ `web/src/app/layout.tsx:19-30` metadata is branded `Atlas AI`, not `UniMate Australia`.
+- ✓ `web/src/app/layout.tsx:19-30` metadata is branded `Pathway-AI`, not `Pathway-AI Australia`.
 - ✓ `web/src/app/api/` contains exactly `chat/`, `chat-simple/`, `leads/`, `match/`, and `sop/`.
 - ✓ The four P0 commits did not touch `web/src/components/`, `web/src/lib/`, `mobile/`, or `web/src/app/api/`; existing demo code in those areas remained unchanged during P0.
 

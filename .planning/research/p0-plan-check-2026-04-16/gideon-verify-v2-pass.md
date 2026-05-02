@@ -1,13 +1,13 @@
-# Phase-Verify: Atlas AI Phase 0
+# Phase-Verify: Pathway-AI Phase 0
 **Agent:** Gideon
 **Date:** 2026-04-16
 **Verdict:** PASS
 
 ## Repo structure
-✓ `~/Desktop/atlas-ai/` exists, and `~/Desktop/Unimate-demo/` is absent.
+✓ `~/Desktop/pathway-ai/` exists, and `~/Desktop/Unimate-demo/` is absent.
 ✓ Root entries match the expected set: `README.md`, `SOURCECODE.md`, `PRD.md`, `PHASE.md`, `CLAUDE.md`, `.gitignore`, `.vercel/`, `web/`, `mobile/`, `_reference/`, `.git`.
 ✓ `_reference/archive/` contains `STATE-2026-04-11.md` and `OLD-PRD-2026-04-11.md`.
-✓ `.vercel/project.json` has `"projectName":"atlas-ai"`.
+✓ `.vercel/project.json` has `"projectName":"pathway-ai"`.
 
 ## Doc coherence
 ✓ `PHASE.md` P0 task order matches the commit sequence in `git log --oneline`: `1fac8b7`, `e83ee7d`, `aa505d5`, `64558e9` ([PHASE.md:18], [git log output]).
@@ -23,7 +23,7 @@
 ✓ Secret scan returned no matches for `.env`, key files, or token patterns.
 
 ## Scaffold integrity
-✓ `web/src/app/layout.tsx` metadata says `Atlas AI`, not `UniMate Australia` ([web/src/app/layout.tsx:19]).
+✓ `web/src/app/layout.tsx` metadata says `Pathway-AI`, not `Pathway-AI Australia` ([web/src/app/layout.tsx:19]).
 ✓ `web/src/app/api/` contains exactly 5 route handlers: `chat/`, `chat-simple/`, `leads/`, `match/`, `sop/`.
 ✓ Existing demo code in `web/src/components/`, `web/src/lib/`, and `mobile/` was not modified by the phase-0 commits.
 

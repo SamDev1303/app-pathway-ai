@@ -1,4 +1,4 @@
-# Plan-Check Round 2: Atlas AI v1 Phase 0
+# Plan-Check Round 2: Pathway-AI v1 Phase 0
 **Agent:** Gideon
 **Date:** 2026-04-16
 **Verdict:** APPROVE WITH NOTES

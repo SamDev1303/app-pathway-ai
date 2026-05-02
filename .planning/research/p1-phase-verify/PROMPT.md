@@ -1,6 +1,6 @@
 # P1 Phase-Verify — Supabase schema + seed delivery check
 
-**Repo:** `~/Desktop/atlas-ai`
+**Repo:** `~/Desktop/pathway-ai`
 **Commit under review:** `5ac9bf7` (schema apply + seed exec + DEV-001)
 **Plan-check (both seats PASS):** Gideon APPROVE-WITH-NOTES + Specter APPROVE-WITH-NOTES
 **Reviewer role:** NO CODE WRITING. REVIEW ONLY. ONE OUTPUT FILE.
@@ -42,11 +42,11 @@ If needed, hit Supabase Management API query endpoint using the PAT saved as `SU
 ```bash
 source web/.env.local
 curl -X POST \
-  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -H "User-Agent: atlas-ai-koda/1.0" \
-  -d '{"query": "SELECT count(*) FROM universities;"}' \
-  https://api.supabase.com/v1/projects/szuqcptsmmgycvagteza/database/query
+ -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+ -H "Content-Type: application/json" \
+ -H "User-Agent: pathway-ai-koda/1.0" \
+ -d '{"query": "SELECT count(*) FROM universities;"}' \
+ https://api.supabase.com/v1/projects/szuqcptsmmgycvagteza/database/query
 ```
 
 ## DO NOT

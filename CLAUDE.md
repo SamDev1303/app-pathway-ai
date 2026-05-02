@@ -1,4 +1,4 @@
-# CLAUDE.md — Atlas AI Governance
+# CLAUDE.md — Pathway-AI Governance
 
 Rules every agent (Claude, Gideon, Atlas, Neo, minis) must follow in this repo. Violations block the commit. These rules supersede global CLAUDE.md defaults where they conflict.
 
@@ -43,8 +43,8 @@ The "Active HTTP endpoints" table in `SOURCECODE.md` is the audit surface. Befor
 
 ```bash
 # One row per route.ts file; row count must match file count
-routes=$(ls ~/Desktop/atlas-ai/web/src/app/api/*/route.ts 2>/dev/null | wc -l | tr -d ' ')
-rows=$(grep -c '^| POST\|^| GET\|^| DELETE' ~/Desktop/atlas-ai/SOURCECODE.md | head -1)
+routes=$(ls ~/Desktop/pathway-ai/web/src/app/api/*/route.ts 2>/dev/null | wc -l | tr -d ' ')
+rows=$(grep -c '^| POST\|^| GET\|^| DELETE' ~/Desktop/pathway-ai/SOURCECODE.md | head -1)
 [ "$routes" = "$rows" ] || echo "MISMATCH: $routes route files vs $rows table rows"
 ```
 
@@ -83,7 +83,7 @@ Gideon, Neo, Specter, Atlas (if ever re-enabled), and NIM minis MUST NOT edit `P
 
 Reason: agents dispatched in parallel cannot see each other's work. If both Gideon and Atlas edit PHASE.md simultaneously, they race. If one agent marks a team task `[x]` when only it has signed, that's a governance breach and a false "done" — Sam loses the ability to trust PHASE.md as the source of truth.
 
-**Prompt-template rule for every dispatch:** include an explicit "DO NOT modify any file under `~/Desktop/atlas-ai/`. Write ONLY to your designated output path — no other files." If an agent mutates PHASE.md anyway, Koda reverts and re-dispatches with a tighter prompt.
+**Prompt-template rule for every dispatch:** include an explicit "DO NOT modify any file under `~/Desktop/pathway-ai/`. Write ONLY to your designated output path — no other files." If an agent mutates PHASE.md anyway, Koda reverts and re-dispatches with a tighter prompt.
 
 Exception: Koda itself writes to PHASE.md as part of every commit (per §3). That's the whole point — one writer, no races.
 
@@ -93,9 +93,9 @@ Exception: Koda itself writes to PHASE.md as part of every commit (per §3). Tha
 
 - One commit = one logical unit of work
 - Format: `{type}(phase-N): what changed`
-  - `feat(phase-3): lead form step 1 — personal info`
-  - `fix(phase-5): chat timeout raised to 30s`
-  - `chore(phase-0): rename Unimate-demo → atlas-ai + governance docs`
+ - `feat(phase-3): lead form step 1 — personal info`
+ - `fix(phase-5): chat timeout raised to 30s`
+ - `chore(phase-0): rename Unimate-demo → pathway-ai + governance docs`
 - Allowed types: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`
 - Never commit `.env` files or credentials (pre-push-guard skill enforces)
 - Never `git reset --hard` or `git push --force` without Sam's explicit confirmation per session
@@ -106,7 +106,7 @@ Exception: Koda itself writes to PHASE.md as part of every commit (per §3). Tha
 
 Per-phase research dispatches via `/org-dispatch` or `superpowers:dispatching-parallel-agents`:
 
-- **Neo** — primary researcher (Context7 + WebSearch for current API docs, AU legal, MARA/QEAC standards)
+- **Neo** — primary researcher (Context7 + WebSearch for current API docs, AU legal, /QEAC standards)
 - **Echo / Vector / Nexus / Forge** (NIM minis) — parallel scans for framework patterns, security gotchas, AU-specific edge cases
 - Output lands in `.planning/{phase}/research/` — referenced from the phase's research sign-off row
 
@@ -117,7 +117,7 @@ Universal Context7 gate (from global feedback memory): BEFORE any external API /
 ## 7. Gideon + Neo are final-say agents (Specter/NeMo Tron fallback)
 
 - Code that Sam can't do in Lovable/Bolt → Gideon writes it (TS APIs, SQL migrations, react-pdf, anything outside no-code reach)
-- UX copy, MARA-safe tone, landing text, SOW wording → Neo
+- UX copy, -safe tone, landing text, SOW wording → Neo
 - Plan checks before `/gsd-execute-phase` → BOTH Gideon + Neo
 - Phase verify before `done` → BOTH Gideon + Neo
 - **NeMo Tron fallback:** when Neo/OpenCode infrastructure fails (sandbox rejects external dirs, model unreachable, etc.), Specter (NVIDIA `nemotron-3-super-120b-a12b` via NIM `nim-dispatch.py --agents specter`) serves as the second seat. Koda notes the fallback in the PHASE.md sign-off row.
@@ -128,7 +128,7 @@ Koda orchestrates but does not override. Sam signs invoices and holds ultimate v
 
 ## 8. AU compliance is non-negotiable
 
-- **MARA Code of Conduct:** chat must NEVER give migration advice. System prompt hard rule + per-turn footer disclaimer: "This is not migration advice. Consult a registered MARA agent." UniMate's MARA number must be visible in page footer.
+- ** Code of Conduct:** chat must NEVER give migration advice. System prompt hard rule + per-turn footer disclaimer: "This is not migration advice. Consult a registered advisor." Pathway-AI's number must be visible in page footer.
 - **Privacy Act 1988:** lead capture stores `consent_given_at` + `consent_wording_version` + `consent_service` + `consent_marketing`. Consent wording drafted + signed off by Neo.
 - **QEAC:** only CRICOS-registered courses surface. "CRICOS-registered" badge visible. No ranking claims beyond QS WUR public data.
 - **Data residency:** Supabase region `ap-southeast-2` (Sydney). Do not change without Sam's approval.
@@ -153,7 +153,7 @@ Global rules inherited from `~/.claude/CLAUDE.md` and the parent `claudeking.clo
 - HITL for all deletes (never `rm -rf` or `git reset --hard` without Sam's confirmation)
 - Check date + time on session start/close via `mcp__time__get_current_time`
 - Commit + push after work checkpoints
-- Never expose real client names in public content (client = UniMate Pty Ltd internally; "our migration consultancy partner" externally if needed)
+- Never expose real client names in public content (client = Pathway-AI internally; "our migration consultancy partner" externally if needed)
 - Vercel committer must be `krishnashamal143@gmail.com`
 
 ---
@@ -162,6 +162,6 @@ Global rules inherited from `~/.claude/CLAUDE.md` and the parent `claudeking.clo
 
 - Verify live + visually before claiming "done" — URL + mobile 375px width check, buttons clickable, nav/footer present
 - Sam-facing progress: always keep an active todo list visible; Sam should never ask "where are we?"
-- Telegram approval gate — Sam writes timestamped "proceed" in `planning/atlas-ai/APPROVAL.md` before `/gsd-execute-phase 1` runs
+- Telegram approval gate — Sam writes timestamped "proceed" in `planning/pathway-ai/APPROVAL.md` before `/gsd-execute-phase 1` runs
 
 If in doubt, read `PHASE.md` first. If still in doubt, ask Sam.

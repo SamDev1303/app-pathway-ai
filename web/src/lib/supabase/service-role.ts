@@ -16,22 +16,22 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
  * catastrophic privacy/security failure.
  */
 export function createServiceRoleClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+ const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+ const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!url) {
-    throw new Error("[atlas-ai] NEXT_PUBLIC_SUPABASE_URL is not set");
-  }
-  if (!key) {
-    throw new Error(
-      "[atlas-ai] SUPABASE_SERVICE_ROLE_KEY is not set — required for server-only lead INSERT",
-    );
-  }
+ if (!url) {
+ throw new Error("[pathway-ai] NEXT_PUBLIC_SUPABASE_URL is not set");
+ }
+ if (!key) {
+ throw new Error(
+ "[pathway-ai] SUPABASE_SERVICE_ROLE_KEY is not set — required for server-only lead INSERT",
+ );
+ }
 
-  return createSupabaseClient(url, key, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
+ return createSupabaseClient(url, key, {
+ auth: {
+ persistSession: false,
+ autoRefreshToken: false,
+ },
+ });
 }

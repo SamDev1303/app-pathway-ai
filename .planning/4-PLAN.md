@@ -5,33 +5,33 @@ phase: 4
 waves: 6
 tasks: 16
 files_modified:
-  - supabase/migrations/003_match_prep.sql          # new
-  - supabase/migrations/004_match_function.sql     # new
-  - web/src/lib/match-weights.ts                    # new
-  - web/src/lib/match-reason.ts                     # new
-  - web/src/lib/match-schema.ts                    # new
-  - web/src/lib/mara-disclaimer.ts                 # new
-  - web/src/lib/types.ts                            # modify — add Match* types
-  - web/src/app/api/leads/route.ts                  # modify — call RPC + return match_token
-  - web/src/app/api/match/route.ts                  # DELETE (orphan — no callers; confirmed via grep round-2 Gideon)
-  # universities.ts + matcher.ts + MatcherForm.tsx + MatcherSection.tsx KEPT
-  # — still rendered on home page (app/page.tsx:13) via MatcherSection
-  # — their retirement is post-P4 scope (see Task 4.2 notes + P4.5 backlog)
-  - web/scripts/seed-universities.ts                # modify — add --upsert mode
-  - web/src/app/matches/[token]/page.tsx            # new (Server Component)
-  - web/src/components/matches/MaraBanner.tsx       # new
-  - web/src/components/matches/MatchesHero.tsx      # new
-  - web/src/components/matches/MatchList.tsx        # new
-  - web/src/components/matches/MatchCard.tsx       # new
-  - web/src/components/matches/StretchSection.tsx   # new
-  - web/src/components/matches/StretchCard.tsx      # new
-  - web/src/components/matches/ConsultCTA.tsx       # new
-  - web/src/components/matches/PendingMatches.tsx   # new
-  - web/src/components/matches/ExpiredTokenFallback.tsx  # new
-  - web/src/components/matches/NotFoundFallback.tsx # new
-  - SOURCECODE.md                                   # modify — route table update
-  - PHASE.md                                        # modify — tick P4 tasks + sign-off rows
-  - .planning/STATE.md                              # modify — P4 in_progress → done
+ - supabase/migrations/003_match_prep.sql # new
+ - supabase/migrations/004_match_function.sql # new
+ - web/src/lib/match-weights.ts # new
+ - web/src/lib/match-reason.ts # new
+ - web/src/lib/match-schema.ts # new
+ - web/src/lib/mara-disclaimer.ts # new
+ - web/src/lib/types.ts # modify — add Match* types
+ - web/src/app/api/leads/route.ts # modify — call RPC + return match_token
+ - web/src/app/api/match/route.ts # DELETE (orphan — no callers; confirmed via grep round-2 Gideon)
+ # universities.ts + matcher.ts + MatcherForm.tsx + MatcherSection.tsx KEPT
+ # — still rendered on home page (app/page.tsx:13) via MatcherSection
+ # — their retirement is post-P4 scope (see Task 4.2 notes + P4.5 backlog)
+ - web/scripts/seed-universities.ts # modify — add --upsert mode
+ - web/src/app/matches/[token]/page.tsx # new (Server Component)
+ - web/src/components/matches/MaraBanner.tsx # new
+ - web/src/components/matches/MatchesHero.tsx # new
+ - web/src/components/matches/MatchList.tsx # new
+ - web/src/components/matches/MatchCard.tsx # new
+ - web/src/components/matches/StretchSection.tsx # new
+ - web/src/components/matches/StretchCard.tsx # new
+ - web/src/components/matches/ConsultCTA.tsx # new
+ - web/src/components/matches/PendingMatches.tsx # new
+ - web/src/components/matches/ExpiredTokenFallback.tsx # new
+ - web/src/components/matches/NotFoundFallback.tsx # new
+ - SOURCECODE.md # modify — route table update
+ - PHASE.md # modify — tick P4 tasks + sign-off rows
+ - .planning/STATE.md # modify — P4 in_progress → done
 autonomous: true
 created: 2026-04-19
 planner: gsd-planner (Claude Opus 4.7 1M)
@@ -85,42 +85,42 @@ Replace the client-side `match-stub.ts` teaser-only flow with a real Postgres-RP
 Goal-backward phase-verify checks. Each is independently testable.
 
 1. **Truth — a submitted lead always gets a match_token returned and stored.**
-   Artifact: `leads.match_token uuid UNIQUE NOT NULL DEFAULT uuid_generate_v4()` column exists. `/api/leads` POST returns `{ ok: true, match_token: <uuid>, matches_ready: <bool> }`.
-   Verify: `psql -c "\d leads" | grep match_token` + `curl -X POST /api/leads -d @persona-a.json | jq -r .match_token` returns a uuid.
+ Artifact: `leads.match_token uuid UNIQUE NOT NULL DEFAULT uuid_generate_v4()` column exists. `/api/leads` POST returns `{ ok: true, match_token: <uuid>, matches_ready: <bool> }`.
+ Verify: `psql -c "\d leads" | grep match_token` + `curl -X POST /api/leads -d @persona-a.json | jq -r .match_token` returns a uuid.
 
 2. **Truth — the RPC returns the locked weight vector's exact top-3 for all 4 research personas.**
-   Artifact: `match_unis_for_lead(uuid, jsonb)` function present; exact top-3 arrays (order matters): A=`['UNSW','UWA','Adelaide']`, B=`['WSU','UTS','RMIT']`, C=`['UWA','UTS','RMIT']`, D=`['Adelaide','UOW','WSU']` (round-1 Blocker #4 locked — no tolerance).
-   Verify: SQL smoke via Supabase Studio per Wave 6 Task 6.2 scripts.
+ Artifact: `match_unis_for_lead(uuid, jsonb)` function present; exact top-3 arrays (order matters): A=`['UNSW','UWA','Adelaide']`, B=`['WSU','UTS','RMIT']`, C=`['UWA','UTS','RMIT']`, D=`['Adelaide','UOW','WSU']` (round-1 Blocker #4 locked — no tolerance).
+ Verify: SQL smoke via Supabase Studio per Wave 6 Task 6.2 scripts.
 
 3. **Truth — RPC failure never rolls back the lead INSERT.**
-   Artifact: `/api/leads/route.ts` — RPC call wrapped in try/catch, errors logged, route still returns 200 with `matches_ready: false`.
-   Verify (deterministic failure injection — Gideon plan-check round 1 Blocker #5):
-     (a) temporarily `REVOKE EXECUTE ON FUNCTION public.match_unis_for_lead(uuid, jsonb) FROM service_role;` via Supabase SQL editor
-     (b) submit a persona-A lead via `/api/leads`; assert response is HTTP 200 with `{ok:true, match_token:<uuid>, matches_ready:false}`
-     (c) `SELECT matches, matches_computed_at FROM public.leads WHERE email='persona-a-smoke@example.com'` returns `NULL, NULL`
-     (d) Resend email arrives (check `/tmp/resend-log.txt` or Resend dashboard) with `Matches computed: NO — RPC failed`
-     (e) `GRANT EXECUTE ON FUNCTION public.match_unis_for_lead(uuid, jsonb) TO service_role;` to restore; cleanup test lead.
-   The previous `preferred_fields = NULL` approach was flagged: the RPC's Landmine #6 handling deliberately treats NULL as half-score, so that lead succeeds by design.
+ Artifact: `/api/leads/route.ts` — RPC call wrapped in try/catch, errors logged, route still returns 200 with `matches_ready: false`.
+ Verify (deterministic failure injection — Gideon plan-check round 1 Blocker #5):
+ (a) temporarily `REVOKE EXECUTE ON FUNCTION public.match_unis_for_lead(uuid, jsonb) FROM service_role;` via Supabase SQL editor
+ (b) submit a persona-A lead via `/api/leads`; assert response is HTTP 200 with `{ok:true, match_token:<uuid>, matches_ready:false}`
+ (c) `SELECT matches, matches_computed_at FROM public.leads WHERE email='persona-a-smoke@example.com'` returns `NULL, NULL`
+ (d) Resend email arrives (check `/tmp/resend-log.txt` or Resend dashboard) with `Matches computed: NO — RPC failed`
+ (e) `GRANT EXECUTE ON FUNCTION public.match_unis_for_lead(uuid, jsonb) TO service_role;` to restore; cleanup test lead.
+ The previous `preferred_fields = NULL` approach was flagged: the RPC's Landmine #6 handling deliberately treats NULL as half-score, so that lead succeeds by design.
 
 4. **Truth — /matches/{token} renders fresh results anonymously for 30 min, falls back to magic-link after.**
-   Artifact: `web/src/app/matches/[token]/page.tsx` Server Component branching on `(!lead.matches, age_ms <= 30min, age_ms > 30min)`.
-   Verify: browser UAT after Sam submits a lead; flip `matches_computed_at = now() - interval '31 minutes'` in SQL, reload, assert `ExpiredTokenFallback` renders.
+ Artifact: `web/src/app/matches/[token]/page.tsx` Server Component branching on `(!lead.matches, age_ms <= 30min, age_ms > 30min)`.
+ Verify: browser UAT after Sam submits a lead; flip `matches_computed_at = now() - interval '31 minutes'` in SQL, reload, assert `ExpiredTokenFallback` renders.
 
 5. **Truth — no visa/migration/PR/MLTSSL/subclass strings in match output.**
-   Artifact: MARA banner uses canonical constant from `lib/mara-disclaimer.ts`; reason fragments use field/level/budget/IELTS/QS/G8/placement/regional/intake vocabulary only.
-   Verify: `grep -riE "(visa|migration|PR|MLTSSL|subclass|points test|post-study work)" web/src/app/matches/ web/src/components/matches/ web/src/lib/match-*.ts` returns only the explicit MaraBanner disclaimer line (which names them in the negative).
+ Artifact: banner uses canonical constant from `lib/mara-disclaimer.ts`; reason fragments use field/level/budget/IELTS/QS/G8/placement/regional/intake vocabulary only.
+ Verify: `grep -riE "(visa|migration|PR|MLTSSL|subclass|points test|post-study work)" web/src/app/matches/ web/src/components/matches/ web/src/lib/match-*.ts` returns only the explicit MaraBanner disclaimer line (which names them in the negative).
 
 6. **Truth — the orphan /api/match route is removed.**
-   Artifact: `web/src/app/api/match/route.ts` does not exist. `universities.ts` + `matcher.ts` are retained — they back the live home-page `MatcherSection`, retiring that UI is a follow-up phase (tracked in CONTEXT §deferred).
-   Verify: `test ! -f web/src/app/api/match/route.ts` returns exit 0; `grep -rn 'api/match' web/src --include='*.ts' --include='*.tsx'` returns zero hits.
+ Artifact: `web/src/app/api/match/route.ts` does not exist. `universities.ts` + `matcher.ts` are retained — they back the live home-page `MatcherSection`, retiring that UI is a follow-up phase (tracked in CONTEXT §deferred).
+ Verify: `test ! -f web/src/app/api/match/route.ts` returns exit 0; `grep -rn 'api/match' web/src --include='*.ts' --include='*.tsx'` returns zero hits.
 
 7. **Truth — migrations applied live + industry_placement repopulated via UPSERT.**
-   Artifact: production Supabase project has `courses.industry_placement` column, `leads.matches`/`matches_computed_at`/`match_token` columns, `idx_leads_match_token` index, `match_unis_for_lead` function with EXECUTE granted to `service_role` only.
-   Verify: `psql -c "\df match_unis_for_lead"` returns one row; `psql -c "SELECT has_function_privilege('anon', 'public.match_unis_for_lead(uuid, jsonb)', 'execute')"` returns `false`; `SELECT count(*) FROM courses WHERE industry_placement = true` returns > 20 (not the all-false DEFAULT).
+ Artifact: production Supabase project has `courses.industry_placement` column, `leads.matches`/`matches_computed_at`/`match_token` columns, `idx_leads_match_token` index, `match_unis_for_lead` function with EXECUTE granted to `service_role` only.
+ Verify: `psql -c "\df match_unis_for_lead"` returns one row; `psql -c "SELECT has_function_privilege('anon', 'public.match_unis_for_lead(uuid, jsonb)', 'execute')"` returns `false`; `SELECT count(*) FROM courses WHERE industry_placement = true` returns > 20 (not the all-false DEFAULT).
 
 8. **Truth — match_token has UNIQUE constraint + cryptographic uuid4 entropy.**
-   Artifact: `leads_match_token_unique` constraint exists on leads; `match_token` defaults to `uuid_generate_v4()`.
-   Verify: `psql -c "\d leads" | grep leads_match_token_unique` returns a row.
+ Artifact: `leads_match_token_unique` constraint exists on leads; `match_token` defaults to `uuid_generate_v4()`.
+ Verify: `psql -c "\d leads" | grep leads_match_token_unique` returns a row.
 
 ## Deviations from CONTEXT
 
@@ -130,9 +130,9 @@ Two research-surfaced deltas require Gideon plan-check sign-off before execute.
 
 - **CONTEXT R-2 locked:** `match_unis_for_lead(lead_id uuid, weights jsonb) RETURNS TABLE(...)`
 - **Research recommended:** `RETURNS jsonb` — the function self-UPDATEs `leads.matches` + `leads.matches_computed_at` as a side-effect and returns the same jsonb payload. Reasoning:
-  1. One round-trip — caller uses returned payload directly for email body + response, no second SELECT
-  2. Atomicity — if SELECT-then-UPDATE were split across TS + SQL, a mid-flight crash leaves a half-computed state
-  3. `leads.matches` is already `jsonb` — same shape in, out, stored
+ 1. One round-trip — caller uses returned payload directly for email body + response, no second SELECT
+ 2. Atomicity — if SELECT-then-UPDATE were split across TS + SQL, a mid-flight crash leaves a half-computed state
+ 3. `leads.matches` is already `jsonb` — same shape in, out, stored
 - **Risk:** low. Side-effecting function is Supabase-idiomatic; audit trail unchanged.
 - **Recommendation:** adopt `RETURNS jsonb`. If Gideon plan-check rejects, fall back to `RETURNS TABLE(...)` and add a second `UPDATE leads SET matches = (SELECT jsonb_agg(r.*) FROM ...)` statement — adds ~40 LoC, no semantic change to output shape.
 
@@ -197,34 +197,34 @@ Create `web/src/lib/match-weights.ts` with the exact typed constants below. No e
 // mismatched uni from winning on G8 alone.
 
 export const MATCH_WEIGHTS = {
-  // Core (77 pts — CONTEXT W-5 "70-80 envelope")
-  // Post round-1 revision: budget +5 (reclaimed from zeroed industry_placement)
-  field: 30,               // Dominant lever — IDP "study area" top-of-funnel
-  level: 12,               // Bachelor-vs-Masters misfire produces useless matches
-  budget: 23,              // #1 abandonment driver on AU edu lead forms (+5 from industry_placement=0)
-  ielts: 12,               // Hard gate on admission; most seeded unis cluster at 6.5
+ // Core (77 pts — CONTEXT W-5 "70-80 envelope")
+ // Post round-1 revision: budget +5 (reclaimed from zeroed industry_placement)
+ field: 30, // Dominant lever — IDP "study area" top-of-funnel
+ level: 12, // Bachelor-vs-Masters misfire produces useless matches
+ budget: 23, // #1 abandonment driver on AU edu lead forms (+5 from industry_placement=0)
+ ielts: 12, // Hard gate on admission; most seeded unis cluster at 6.5
 
-  // Tiebreakers (23 pts — CONTEXT W-5 "20-30 envelope")
-  // Post round-1 revision: qs_rank +5 (reclaimed from zeroed regional per Gideon DELTA-2)
-  qs_rank: 15,             // Scaled: max(0, 15 * (1 - rank/200))  (+5 from regional=0)
-  g8: 5,                   // Capped — QS already captures most G8s
-  industry_placement: 0,   // Gated behind a lead signal (prioritize_outcomes) that P3 never captured.
-                            // Column still ships in migration 003 for a v2 signal-capture phase.
-  regional: 0,             // Heuristic rejected by Gideon plan-check round 1 — no preferred_state column.
-  intake: 3,               // Low-signal within 12-uni seed (all have Feb+Jul)
+ // Tiebreakers (23 pts — CONTEXT W-5 "20-30 envelope")
+ // Post round-1 revision: qs_rank +5 (reclaimed from zeroed regional per Gideon DELTA-2)
+ qs_rank: 15, // Scaled: max(0, 15 * (1 - rank/200)) (+5 from regional=0)
+ g8: 5, // Capped — QS already captures most G8s
+ industry_placement: 0, // Gated behind a lead signal (prioritize_outcomes) that P3 never captured.
+ // Column still ships in migration 003 for a v2 signal-capture phase.
+ regional: 0, // Heuristic rejected by Gideon plan-check round 1 — no preferred_state column.
+ intake: 3, // Low-signal within 12-uni seed (all have Feb+Jul)
 } as const;
 
 export type MatchWeights = typeof MATCH_WEIGHTS;
 
 export const STRETCH = {
-  budget_pct: 0.20,        // 20% over budget → stretch zone
-  far_stretch_pct: 0.50,   // 20-50% over → excluded from course_total (0 budget_score)
-  ielts_band: 0.5,         // 0.5 below course req → stretch
-  weight_penalty: 0.50,    // stretch gets 50% of signal weight
+ budget_pct: 0.20, // 20% over budget → stretch zone
+ far_stretch_pct: 0.50, // 20-50% over → excluded from course_total (0 budget_score)
+ ielts_band: 0.5, // 0.5 below course req → stretch
+ weight_penalty: 0.50, // stretch gets 50% of signal weight
 } as const;
 
 export const NORMALIZATION = {
-  qs_rank_max: 200,        // unis past QS 200 → qs_score = 0
+ qs_rank_max: 200, // unis past QS 200 → qs_score = 0
 } as const;
 
 export const TOKEN_TTL_MINUTES = 30;
@@ -254,13 +254,13 @@ Do not add helper functions. Do not add a default export. The `as const` type na
 
 ---
 
-#### Task 1.2: Create `mara-disclaimer.ts` — canonical MARA banner constant
+#### Task 1.2: Create `mara-disclaimer.ts` — canonical banner constant
 
-<objective>Single source of truth for the MARA banner text. Prevents the "copy drift" landmine where developers edit the banner string without updating RESEARCH/PHASE canonical references.</objective>
+<objective>Single source of truth for the banner text. Prevents the "copy drift" landmine where developers edit the banner string without updating RESEARCH/PHASE canonical references.</objective>
 
 <read_first>
-- `.planning/research/4-RESEARCH.md` §"MARA Banner Wording (open item 4)" (lines 379-408)
-- `web/src/lib/content.ts` — existing MARA disclaimer patterns (P0.5 scrubbed)
+- `.planning/research/4-RESEARCH.md` §" Banner Wording (open item 4)" (lines 379-408)
+- `web/src/lib/content.ts` — existing disclaimer patterns (P0.5 scrubbed)
 - `web/src/app/api/chat/route.ts:45` — existing disclaimer string
 </read_first>
 
@@ -269,8 +269,8 @@ Create `web/src/lib/mara-disclaimer.ts` with the exact constants below. Follows 
 
 ```typescript
 // web/src/lib/mara-disclaimer.ts
-// P4 UniMatch — canonical MARA disclaimer strings for /matches/[token].
-// Research: .planning/research/4-RESEARCH.md §"MARA Banner Wording (open item 4)"
+// P4 UniMatch — canonical disclaimer strings for /matches/[token].
+// Research: .planning/research/4-RESEARCH.md §" Banner Wording (open item 4)"
 //
 // Edit rule: bumping the string requires bumping MARA_DISCLAIMER_VERSION in the
 // same commit, same way CONSENT_WORDING_VERSION works in lib/lead-schema.ts.
@@ -279,8 +279,8 @@ Create `web/src/lib/mara-disclaimer.ts` with the exact constants below. Follows 
 export const MARA_DISCLAIMER_VERSION = "2026-04-19.v1";
 
 export const MARA_DISCLAIMER_BODY =
-  "Atlas AI matches are educational information only, not migration advice. " +
-  "For visa, migration, or PR guidance, consult UniMate's registered MARA agents.";
+ "Pathway-AI matches are educational information only, not migration advice. " +
+ "For visa, migration, or PR guidance, consult Pathway-AI's registered advisors.";
 
 export const MARA_DISCLAIMER_EYEBROW = "Disclaimer";
 
@@ -293,13 +293,13 @@ No React. No JSX. Plain string constants. Imported by `MaraBanner.tsx` (Wave 5).
 
 <acceptance_criteria>
 - `test -f web/src/lib/mara-disclaimer.ts` returns exit 0.
-- `grep -F "Atlas AI matches are educational information only, not migration advice." web/src/lib/mara-disclaimer.ts` returns exactly one hit.
+- `grep -F "Pathway-AI matches are educational information only, not migration advice." web/src/lib/mara-disclaimer.ts` returns exactly one hit.
 - `grep -F "visa, migration, or PR guidance" web/src/lib/mara-disclaimer.ts` returns exactly one hit.
-- `grep -F "UniMate's registered MARA agents" web/src/lib/mara-disclaimer.ts` returns exactly one hit.
+- `grep -F "Pathway-AI's registered advisors" web/src/lib/mara-disclaimer.ts` returns exactly one hit.
 - `cd web && npx tsc --noEmit` exits clean.
 </acceptance_criteria>
 
-<done>Canonical MARA banner string locked as module constant; version stamp matches plan-lock date.</done>
+<done>Canonical banner string locked as module constant; version stamp matches plan-lock date.</done>
 
 ---
 
@@ -325,29 +325,29 @@ Create `web/src/lib/match-schema.ts` with the Zod schemas below verbatim from RE
 import { z } from "zod";
 
 export const MatchResultSchema = z.object({
-  uni_id: z.string().uuid(),
-  uni_name: z.string(),
-  short_name: z.string(),
-  course_name: z.string(),
-  match_pct: z.number().int().min(0).max(100),
-  reason_parts: z.object({
-    matched_fields: z.array(z.string()),
-    budget_verdict: z.enum(["within", "stretch", "far_stretch"]),
-    ielts_verdict: z.enum(["meets", "stretch", "below"]),
-    qs_rank: z.number().int().nullable(),
-    g8: z.boolean(),
-    industry_placement: z.boolean(),
-    regional: z.boolean(),
-    intake_hit: z.boolean(),
-    best_course_name: z.string(),
-  }),
-  stretch_reason: z.string().optional(),
+ uni_id: z.string().uuid(),
+ uni_name: z.string(),
+ short_name: z.string(),
+ course_name: z.string(),
+ match_pct: z.number().int().min(0).max(100),
+ reason_parts: z.object({
+ matched_fields: z.array(z.string()),
+ budget_verdict: z.enum(["within", "stretch", "far_stretch"]),
+ ielts_verdict: z.enum(["meets", "stretch", "below"]),
+ qs_rank: z.number().int().nullable(),
+ g8: z.boolean(),
+ industry_placement: z.boolean(),
+ regional: z.boolean(),
+ intake_hit: z.boolean(),
+ best_course_name: z.string(),
+ }),
+ stretch_reason: z.string().optional(),
 });
 
 export const MatchesJsonbSchema = z.object({
-  strong: z.array(MatchResultSchema).max(3),
-  stretch: z.array(MatchResultSchema).max(2),
-  computed_at: z.string().datetime({ offset: true }),
+ strong: z.array(MatchResultSchema).max(3),
+ stretch: z.array(MatchResultSchema).max(2),
+ computed_at: z.string().datetime({ offset: true }),
 });
 
 export type MatchResult = z.infer<typeof MatchResultSchema>;
@@ -394,73 +394,73 @@ Create `web/src/lib/match-reason.ts`. Pure function, no side effects. Takes `Rea
 import type { ReasonParts } from "./match-schema";
 
 export interface RenderedReason {
-  line: string;          // "Matches Business · Within budget · IELTS met · QS #19"
-  fragments: string[];   // for UI that wants per-chip rendering
+ line: string; // "Matches Business · Within budget · IELTS met · QS #19"
+ fragments: string[]; // for UI that wants per-chip rendering
 }
 
 // Ordered signal list — selection order matches "importance" weighting.
 type FragmentBuilder = (r: ReasonParts) => string | null;
 
 const FRAGMENT_BUILDERS: FragmentBuilder[] = [
-  // Field — always first if present; joins multi-field with " + "
-  (r) => (r.matched_fields.length > 0
-    ? `Matches ${r.matched_fields.join(" + ")}`
-    : null),
-  // Budget verdict — use plain English, never monetary specifics (those belong
-  // in stretch_reason if the card is a stretch card).
-  (r) => {
-    if (r.budget_verdict === "within") return "Within budget";
-    if (r.budget_verdict === "stretch") return "Slight budget stretch";
-    if (r.budget_verdict === "far_stretch") return "Over budget";
-    return null;
-  },
-  // IELTS verdict — never show the raw number; course requirement is per-course.
-  (r) => {
-    if (r.ielts_verdict === "meets") return "IELTS met";
-    if (r.ielts_verdict === "stretch") return "IELTS 0.5 band short";
-    if (r.ielts_verdict === "below") return null; // shouldn't surface — hard cut
-    return null;
-  },
-  // QS rank — only if in top 200
-  (r) => (r.qs_rank != null && r.qs_rank <= 200 ? `QS #${r.qs_rank}` : null),
-  // G8
-  (r) => (r.g8 ? "Group of Eight" : null),
-  // Industry placement
-  (r) => (r.industry_placement ? "Industry placement" : null),
-  // Regional
-  (r) => (r.regional ? "Regional campus" : null),
-  // Intake proximity
-  (r) => (r.intake_hit ? "Your intake month" : null),
+ // Field — always first if present; joins multi-field with " + "
+ (r) => (r.matched_fields.length > 0
+ ? `Matches ${r.matched_fields.join(" + ")}`
+ : null),
+ // Budget verdict — use plain English, never monetary specifics (those belong
+ // in stretch_reason if the card is a stretch card).
+ (r) => {
+ if (r.budget_verdict === "within") return "Within budget";
+ if (r.budget_verdict === "stretch") return "Slight budget stretch";
+ if (r.budget_verdict === "far_stretch") return "Over budget";
+ return null;
+ },
+ // IELTS verdict — never show the raw number; course requirement is per-course.
+ (r) => {
+ if (r.ielts_verdict === "meets") return "IELTS met";
+ if (r.ielts_verdict === "stretch") return "IELTS 0.5 band short";
+ if (r.ielts_verdict === "below") return null; // shouldn't surface — hard cut
+ return null;
+ },
+ // QS rank — only if in top 200
+ (r) => (r.qs_rank != null && r.qs_rank <= 200 ? `QS #${r.qs_rank}` : null),
+ // G8
+ (r) => (r.g8 ? "Group of Eight" : null),
+ // Industry placement
+ (r) => (r.industry_placement ? "Industry placement" : null),
+ // Regional
+ (r) => (r.regional ? "Regional campus" : null),
+ // Intake proximity
+ (r) => (r.intake_hit ? "Your intake month" : null),
 ];
 
 const MAX_FRAGMENTS = 6; // RT-2: 4-6 fragments max
 
 export function renderReason(parts: ReasonParts): RenderedReason {
-  const fragments: string[] = [];
-  for (const build of FRAGMENT_BUILDERS) {
-    if (fragments.length >= MAX_FRAGMENTS) break;
-    const frag = build(parts);
-    if (frag) fragments.push(frag);
-  }
-  return {
-    line: fragments.join(" · "),
-    fragments,
-  };
+ const fragments: string[] = [];
+ for (const build of FRAGMENT_BUILDERS) {
+ if (fragments.length >= MAX_FRAGMENTS) break;
+ const frag = build(parts);
+ if (frag) fragments.push(frag);
+ }
+ return {
+ line: fragments.join(" · "),
+ fragments,
+ };
 }
 
 // Helper for StretchCard — builds the explicit "$X above your stated $Y" text.
 // Parameters are the displayed tuition (from course) and the lead's stated
 // budget. Used only when stretch_reason is not pre-populated by the RPC.
 export function stretchBudgetExplanation(
-  indicativeFee: number,
-  studentBudget: number,
+ indicativeFee: number,
+ studentBudget: number,
 ): string {
-  const over = Math.round(((indicativeFee - studentBudget) / studentBudget) * 100);
-  return `Tuition $${indicativeFee.toLocaleString()} is ~${over}% above your stated $${studentBudget.toLocaleString()}.`;
+ const over = Math.round(((indicativeFee - studentBudget) / studentBudget) * 100);
+ return `Tuition $${indicativeFee.toLocaleString()} is ~${over}% above your stated $${studentBudget.toLocaleString()}.`;
 }
 ```
 
-Do not introduce a MARA-flagged word (visa/migration/PR/etc.) in any fragment text. The fragments are hard-coded; a grep gate in Wave 6 enforces this.
+Do not introduce a -flagged word (visa/migration/PR/etc.) in any fragment text. The fragments are hard-coded; a grep gate in Wave 6 enforces this.
 </action>
 
 <acceptance_criteria>
@@ -471,7 +471,7 @@ Do not introduce a MARA-flagged word (visa/migration/PR/etc.) in any fragment te
 - `cd web && npx tsc --noEmit` exits clean.
 </acceptance_criteria>
 
-<done>Pure template function shipped; renders `reason_parts` → dot-joined line up to 6 fragments; MARA-safe word list only.</done>
+<done>Pure template function shipped; renders `reason_parts` → dot-joined line up to 6 fragments; -safe word list only.</done>
 
 ---
 
@@ -493,16 +493,16 @@ Steps:
 1. Read `types.ts` current content.
 2. Leave lines 61-82 (`MatchBucket`, `ReasonChip`, `MatchResult`, `MatchResponse`) unchanged.
 3. Append at the bottom:
-   ```typescript
-   // -----------------------------------------------------------------
-   // P4 UniMatch — new types live in web/src/lib/match-schema.ts (Zod-first).
-   // They are NOT re-exported here: doing so would collide with the legacy
-   // `MatchResult` name still used by web/src/lib/matcher.ts + MatcherForm.tsx.
-   // P4 code imports `{ MatchResult, ReasonParts, MatchesJsonb }` directly
-   // from `@/lib/match-schema`. This file only exposes the tier discriminator.
-   // -----------------------------------------------------------------
-   export type MatchTier = "strong" | "stretch";
-   ```
+ ```typescript
+ // -----------------------------------------------------------------
+ // P4 UniMatch — new types live in web/src/lib/match-schema.ts (Zod-first).
+ // They are NOT re-exported here: doing so would collide with the legacy
+ // `MatchResult` name still used by web/src/lib/matcher.ts + MatcherForm.tsx.
+ // P4 code imports `{ MatchResult, ReasonParts, MatchesJsonb }` directly
+ // from `@/lib/match-schema`. This file only exposes the tier discriminator.
+ // -----------------------------------------------------------------
+ export type MatchTier = "strong" | "stretch";
+ ```
 </action>
 
 <acceptance_criteria>
@@ -537,7 +537,7 @@ Two migration files authored but NOT yet applied to live DB. Application happens
 Create `supabase/migrations/003_match_prep.sql` with the body below. Lifted verbatim from RESEARCH.md with two additions per Landmine #4 (UNIQUE constraint) and Landmine #7 (pg_policies pre-flight comment).
 
 ```sql
--- Atlas AI — P4 UniMatch prep: add industry_placement, match storage, token
+-- Pathway-AI — P4 UniMatch prep: add industry_placement, match storage, token
 -- Region: ap-southeast-1 (Singapore)
 -- Apply via: supabase db push (or Supabase Management API /v1/projects/{ref}/database/query)
 -- Prerequisites: 001_initial_schema.sql + 002_leads_status.sql applied.
@@ -552,15 +552,15 @@ Create `supabase/migrations/003_match_prep.sql` with the body below. Lifted verb
 -- Seed script (web/scripts/seed-universities.ts:24) explicitly flagged as P4's job
 -- ================================================================
 ALTER TABLE public.courses
-  ADD COLUMN IF NOT EXISTS industry_placement boolean NOT NULL DEFAULT false;
+ ADD COLUMN IF NOT EXISTS industry_placement boolean NOT NULL DEFAULT false;
 
 -- ================================================================
 -- leads match result storage
 -- ================================================================
 ALTER TABLE public.leads
-  ADD COLUMN IF NOT EXISTS matches jsonb,
-  ADD COLUMN IF NOT EXISTS matches_computed_at timestamptz,
-  ADD COLUMN IF NOT EXISTS match_token uuid DEFAULT uuid_generate_v4();
+ ADD COLUMN IF NOT EXISTS matches jsonb,
+ ADD COLUMN IF NOT EXISTS matches_computed_at timestamptz,
+ ADD COLUMN IF NOT EXISTS match_token uuid DEFAULT uuid_generate_v4();
 
 -- ================================================================
 -- Drop the array column (was scaffolded in P1, never populated, superseded by matches jsonb)
@@ -568,7 +568,7 @@ ALTER TABLE public.leads
 -- P1 migration added only leads_anon_insert (WITH CHECK (true)) — no column refs. Safe.
 -- ================================================================
 ALTER TABLE public.leads
-  DROP COLUMN IF EXISTS matched_university_ids;
+ DROP COLUMN IF EXISTS matched_university_ids;
 
 -- ================================================================
 -- Backfill match_token for any pre-existing rows (zero rows in prod today; safe no-op)
@@ -580,10 +580,10 @@ UPDATE public.leads SET match_token = uuid_generate_v4() WHERE match_token IS NU
 -- Enforce NOT NULL + UNIQUE (Landmine #4 — DEFAULT alone doesn't guarantee uniqueness)
 -- ================================================================
 ALTER TABLE public.leads
-  ALTER COLUMN match_token SET NOT NULL;
+ ALTER COLUMN match_token SET NOT NULL;
 
 ALTER TABLE public.leads
-  ADD CONSTRAINT leads_match_token_unique UNIQUE (match_token);
+ ADD CONSTRAINT leads_match_token_unique UNIQUE (match_token);
 
 -- ================================================================
 -- Token lookup index — /matches/{token} server component uses this exclusively
@@ -634,7 +634,7 @@ File naming: `003_match_prep.sql` (three-digit padded, matches P1/P2 convention)
 Create `supabase/migrations/004_match_function.sql` with the full plpgsql function body below. Lifted from RESEARCH.md §"Migration 004 outline" with Landmine #6 fix applied (NULL preferred_fields → half-score, not zero) and Landmine #2 REVOKE/GRANT block at end.
 
 ```sql
--- Atlas AI — P4 UniMatch engine RPC
+-- Pathway-AI — P4 UniMatch engine RPC
 -- Region: ap-southeast-1 (Singapore)
 -- Apply via: supabase db push (applied AFTER 003_match_prep.sql)
 -- Prerequisites: 003_match_prep.sql applied (needs industry_placement + matches/token columns).
@@ -651,263 +651,263 @@ Create `supabase/migrations/004_match_function.sql` with the full plpgsql functi
 -- See 4-PLAN.md §"Deviations from CONTEXT — Delta 2" for the ruling.
 
 CREATE OR REPLACE FUNCTION public.match_unis_for_lead(
-  p_lead_id uuid,
-  p_weights jsonb
+ p_lead_id uuid,
+ p_weights jsonb
 )
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = ''  -- Landmine #1: prevent search_path hijack; fully qualify all refs
+SET search_path = '' -- Landmine #1: prevent search_path hijack; fully qualify all refs
 AS $$
 DECLARE
-  v_lead record;
-  v_matches jsonb;
-  -- weights unpacked from p_weights
-  v_w_field numeric;
-  v_w_level numeric;
-  v_w_budget numeric;
-  v_w_ielts numeric;
-  v_w_qs numeric;
-  v_w_g8 numeric;
-  v_w_placement numeric;
-  v_w_regional numeric;
-  v_w_intake numeric;
-  v_lead_prioritizes_outcomes boolean;
+ v_lead record;
+ v_matches jsonb;
+ -- weights unpacked from p_weights
+ v_w_field numeric;
+ v_w_level numeric;
+ v_w_budget numeric;
+ v_w_ielts numeric;
+ v_w_qs numeric;
+ v_w_g8 numeric;
+ v_w_placement numeric;
+ v_w_regional numeric;
+ v_w_intake numeric;
+ v_lead_prioritizes_outcomes boolean;
 BEGIN
-  -- ------------------------------------------------------------------
-  -- Load lead profile (fully qualified per search_path='')
-  -- ------------------------------------------------------------------
-  SELECT id, preferred_fields, preferred_levels, preferred_intake_month,
-         tuition_budget_aud, ielts_overall
-  INTO v_lead
-  FROM public.leads
-  WHERE id = p_lead_id;
+ -- ------------------------------------------------------------------
+ -- Load lead profile (fully qualified per search_path='')
+ -- ------------------------------------------------------------------
+ SELECT id, preferred_fields, preferred_levels, preferred_intake_month,
+ tuition_budget_aud, ielts_overall
+ INTO v_lead
+ FROM public.leads
+ WHERE id = p_lead_id;
 
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'lead % not found', p_lead_id;
-  END IF;
+ IF NOT FOUND THEN
+ RAISE EXCEPTION 'lead % not found', p_lead_id;
+ END IF;
 
-  -- prioritize_outcomes is not captured anywhere in the P3 lead flow (only in the
-  -- retained pre-P3 MatcherForm scaffold). Per 4-PLAN.md Delta 3 (Gideon round-1
-  -- REJECT) we do not infer it from preferred_fields — that was judged scope drift.
-  -- Weight `industry_placement` is 0 in the passed-in jsonb. The branch below stays
-  -- in place so a future phase can flip it on by capturing a real signal.
-  v_lead_prioritizes_outcomes := false;
+ -- prioritize_outcomes is not captured anywhere in the P3 lead flow (only in the
+ -- retained pre-P3 MatcherForm scaffold). Per 4-PLAN.md Delta 3 (Gideon round-1
+ -- REJECT) we do not infer it from preferred_fields — that was judged scope drift.
+ -- Weight `industry_placement` is 0 in the passed-in jsonb. The branch below stays
+ -- in place so a future phase can flip it on by capturing a real signal.
+ v_lead_prioritizes_outcomes := false;
 
-  -- ------------------------------------------------------------------
-  -- Unpack weights jsonb → numeric locals
-  -- ------------------------------------------------------------------
-  v_w_field     := (p_weights->>'field')::numeric;
-  v_w_level     := (p_weights->>'level')::numeric;
-  v_w_budget    := (p_weights->>'budget')::numeric;
-  v_w_ielts     := (p_weights->>'ielts')::numeric;
-  v_w_qs        := (p_weights->>'qs_rank')::numeric;
-  v_w_g8        := (p_weights->>'g8')::numeric;
-  v_w_placement := (p_weights->>'industry_placement')::numeric;
-  v_w_regional  := (p_weights->>'regional')::numeric;
-  v_w_intake    := (p_weights->>'intake')::numeric;
+ -- ------------------------------------------------------------------
+ -- Unpack weights jsonb → numeric locals
+ -- ------------------------------------------------------------------
+ v_w_field := (p_weights->>'field')::numeric;
+ v_w_level := (p_weights->>'level')::numeric;
+ v_w_budget := (p_weights->>'budget')::numeric;
+ v_w_ielts := (p_weights->>'ielts')::numeric;
+ v_w_qs := (p_weights->>'qs_rank')::numeric;
+ v_w_g8 := (p_weights->>'g8')::numeric;
+ v_w_placement := (p_weights->>'industry_placement')::numeric;
+ v_w_regional := (p_weights->>'regional')::numeric;
+ v_w_intake := (p_weights->>'intake')::numeric;
 
-  -- ------------------------------------------------------------------
-  -- Score all courses via chained CTEs
-  -- ------------------------------------------------------------------
-  WITH course_scores AS (
-    SELECT
-      c.id                AS course_id,
-      c.university_id,
-      c.name              AS course_name,
-      c.field,
-      c.level,
-      c.indicative_fee,
-      c.ielts_overall     AS course_ielts,
-      c.industry_placement,
-      u.name              AS uni_name,
-      u.short_name,
-      u.qs_ranking_2025,
-      u.is_group_of_eight,
-      u.is_regional,
-      u.city,
-      u.state,
-      -- field_score — Landmine #6: NULL preferred_fields → half-score (not 0)
-      CASE
-        WHEN v_lead.preferred_fields IS NULL
-          OR array_length(v_lead.preferred_fields, 1) IS NULL THEN v_w_field / 2
-        WHEN c.field = ANY(v_lead.preferred_fields) THEN v_w_field
-        ELSE 0
-      END AS field_score,
-      -- level_score — empty/NULL preferred_levels → full (student didn't filter)
-      CASE
-        WHEN v_lead.preferred_levels IS NULL
-          OR array_length(v_lead.preferred_levels, 1) IS NULL THEN v_w_level
-        WHEN c.level = ANY(v_lead.preferred_levels) THEN v_w_level
-        ELSE 0
-      END AS level_score,
-      -- budget_score — stretch math per Research §Stretch Math
-      CASE
-        WHEN v_lead.tuition_budget_aud IS NULL THEN v_w_budget / 2
-        WHEN c.indicative_fee IS NULL THEN v_w_budget / 2
-        WHEN c.indicative_fee <= v_lead.tuition_budget_aud THEN v_w_budget
-        WHEN c.indicative_fee <= v_lead.tuition_budget_aud * 1.20 THEN v_w_budget / 2
-        WHEN c.indicative_fee <= v_lead.tuition_budget_aud * 1.50 THEN 0
-        ELSE -1  -- sentinel: hard-cut, course excluded downstream
-      END AS budget_score,
-      -- ielts_score — stretch math
-      CASE
-        WHEN v_lead.ielts_overall IS NULL THEN v_w_ielts / 2
-        WHEN c.ielts_overall IS NULL THEN v_w_ielts / 2
-        WHEN v_lead.ielts_overall >= c.ielts_overall THEN v_w_ielts
-        WHEN v_lead.ielts_overall >= c.ielts_overall - 0.5 THEN v_w_ielts / 2
-        ELSE -1  -- sentinel: hard-cut
-      END AS ielts_score,
-      -- qs_score — scaled 0..v_w_qs; unranked unis (NULL) treated as rank 999
-      GREATEST(0, v_w_qs * (1 - COALESCE(u.qs_ranking_2025, 999)::numeric / 200)) AS qs_score,
-      -- g8_score
-      CASE WHEN u.is_group_of_eight THEN v_w_g8 ELSE 0 END AS g8_score,
-      -- placement_score — triggers only when student's field matches AND course has placement
-      CASE
-        WHEN v_lead_prioritizes_outcomes
-         AND c.field = ANY(COALESCE(v_lead.preferred_fields, ARRAY[]::text[]))
-         AND c.industry_placement
-        THEN v_w_placement
-        ELSE 0
-      END AS placement_score,
-      -- regional_score — heuristic REJECTED round 1; hard-zero.
-      -- v_w_regional is 0 in the passed weight vector; no preferred_state column
-      -- exists to drive this signal. A v2 phase will reintroduce this branch once
-      -- the signal is captured.
-      0::numeric AS regional_score,
-      -- intake_score
-      CASE
-        WHEN v_lead.preferred_intake_month IS NULL THEN v_w_intake / 2
-        WHEN v_lead.preferred_intake_month = ANY(c.intake_months) THEN v_w_intake
-        ELSE 0
-      END AS intake_score
-    FROM public.courses c
-    JOIN public.universities u ON c.university_id = u.id
-  ),
-  course_totals AS (
-    SELECT *,
-      -- total_score: sum of all signals, treating -1 sentinels as 0
-      CASE WHEN budget_score < 0 THEN 0 ELSE budget_score END
-      + CASE WHEN ielts_score < 0 THEN 0 ELSE ielts_score END
-      + field_score + level_score
-      + qs_score + g8_score + placement_score + regional_score + intake_score
-      AS total_score,
-      -- hard_cut: exclude from matches entirely
-      (budget_score < 0 OR ielts_score < 0 OR field_score = 0) AS hard_cut,
-      -- stretch_flag: 50%-of-weight on budget OR ielts (but not hard-cut)
-      (budget_score < 0 OR ielts_score < 0) = false
-      AND (budget_score = v_w_budget / 2 OR ielts_score = v_w_ielts / 2)
-      AS stretch_flag
-    FROM course_scores
-  ),
-  uni_best AS (
-    -- Per R-1: per-uni score = max(course_score). DISTINCT ON keeps the best course per uni.
-    SELECT DISTINCT ON (university_id) *
-    FROM course_totals
-    WHERE NOT hard_cut
-    ORDER BY university_id, total_score DESC
-  ),
-  ranked AS (
-    -- Per R-3: order by total desc, tiebreak QS asc, G8 desc, name asc
-    SELECT *,
-      ROW_NUMBER() OVER (
-        ORDER BY total_score DESC,
-                 qs_ranking_2025 ASC NULLS LAST,
-                 is_group_of_eight DESC,
-                 uni_name ASC
-      ) AS rn
-    FROM uni_best
-  ),
-  top_score AS (
-    SELECT total_score AS max_score FROM ranked WHERE rn = 1
-  ),
-  enriched AS (
-    -- Build the per-match jsonb shape consumed by match-schema.ts MatchResultSchema
-    SELECT
-      r.*,
-      jsonb_build_object(
-        'uni_id',      r.university_id,
-        'uni_name',    r.uni_name,
-        'short_name',  r.short_name,
-        'course_name', r.course_name,
-        'match_pct',   ROUND(
-          100.0 * r.total_score / NULLIF((SELECT max_score FROM top_score), 0)
-        )::int,
-        'reason_parts', jsonb_build_object(
-          'matched_fields',   ARRAY[r.field],
-          'budget_verdict',
-            CASE
-              WHEN r.budget_score = v_w_budget THEN 'within'
-              WHEN r.budget_score = v_w_budget / 2 THEN 'stretch'
-              ELSE 'far_stretch'
-            END,
-          'ielts_verdict',
-            CASE
-              WHEN r.ielts_score = v_w_ielts THEN 'meets'
-              WHEN r.ielts_score = v_w_ielts / 2 THEN 'stretch'
-              ELSE 'below'
-            END,
-          'qs_rank',            r.qs_ranking_2025,
-          'g8',                 r.is_group_of_eight,
-          'industry_placement', r.industry_placement,
-          'regional',           r.is_regional,
-          'intake_hit',         r.intake_score = v_w_intake,
-          'best_course_name',   r.course_name
-        ),
-        'stretch_reason',
-          CASE
-            WHEN r.budget_score = v_w_budget / 2 AND v_lead.tuition_budget_aud IS NOT NULL THEN
-              'Tuition above your stated budget by roughly ' ||
-              ROUND(100.0 * (r.indicative_fee - v_lead.tuition_budget_aud) / v_lead.tuition_budget_aud)::text ||
-              '%.'
-            WHEN r.ielts_score = v_w_ielts / 2 THEN
-              'IELTS 0.5 band below the course requirement.'
-            ELSE NULL
-          END
-      ) AS match_row
-    FROM ranked r
-  )
-  -- ------------------------------------------------------------------
-  -- Classify strong vs stretch BY TIER (stretch_flag), then cap 3 + 2.
-  -- Per W-3: "Matches" (hard fit) + "Stretch" (within budget/IELTS tolerance).
-  -- Gideon plan-check round 1 Blocker #2: prior impl used rn <= 3 / rn BETWEEN 4 AND 5
-  -- which could leak stretch into strong and include non-stretch rows as stretch.
-  -- ------------------------------------------------------------------
-  SELECT jsonb_build_object(
-    'strong',
-      COALESCE(
-        (SELECT jsonb_agg(e.match_row ORDER BY e.rn)
-         FROM (
-           SELECT match_row, rn FROM enriched
-           WHERE NOT stretch_flag
-           ORDER BY rn ASC
-           LIMIT 3
-         ) e),
-        '[]'::jsonb
-      ),
-    'stretch',
-      COALESCE(
-        (SELECT jsonb_agg(e.match_row ORDER BY e.rn)
-         FROM (
-           SELECT match_row, rn FROM enriched
-           WHERE stretch_flag
-           ORDER BY rn ASC
-           LIMIT 2
-         ) e),
-        '[]'::jsonb
-      ),
-    'computed_at', to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
-  ) INTO v_matches;
+ -- ------------------------------------------------------------------
+ -- Score all courses via chained CTEs
+ -- ------------------------------------------------------------------
+ WITH course_scores AS (
+ SELECT
+ c.id AS course_id,
+ c.university_id,
+ c.name AS course_name,
+ c.field,
+ c.level,
+ c.indicative_fee,
+ c.ielts_overall AS course_ielts,
+ c.industry_placement,
+ u.name AS uni_name,
+ u.short_name,
+ u.qs_ranking_2025,
+ u.is_group_of_eight,
+ u.is_regional,
+ u.city,
+ u.state,
+ -- field_score — Landmine #6: NULL preferred_fields → half-score (not 0)
+ CASE
+ WHEN v_lead.preferred_fields IS NULL
+ OR array_length(v_lead.preferred_fields, 1) IS NULL THEN v_w_field / 2
+ WHEN c.field = ANY(v_lead.preferred_fields) THEN v_w_field
+ ELSE 0
+ END AS field_score,
+ -- level_score — empty/NULL preferred_levels → full (student didn't filter)
+ CASE
+ WHEN v_lead.preferred_levels IS NULL
+ OR array_length(v_lead.preferred_levels, 1) IS NULL THEN v_w_level
+ WHEN c.level = ANY(v_lead.preferred_levels) THEN v_w_level
+ ELSE 0
+ END AS level_score,
+ -- budget_score — stretch math per Research §Stretch Math
+ CASE
+ WHEN v_lead.tuition_budget_aud IS NULL THEN v_w_budget / 2
+ WHEN c.indicative_fee IS NULL THEN v_w_budget / 2
+ WHEN c.indicative_fee <= v_lead.tuition_budget_aud THEN v_w_budget
+ WHEN c.indicative_fee <= v_lead.tuition_budget_aud * 1.20 THEN v_w_budget / 2
+ WHEN c.indicative_fee <= v_lead.tuition_budget_aud * 1.50 THEN 0
+ ELSE -1 -- sentinel: hard-cut, course excluded downstream
+ END AS budget_score,
+ -- ielts_score — stretch math
+ CASE
+ WHEN v_lead.ielts_overall IS NULL THEN v_w_ielts / 2
+ WHEN c.ielts_overall IS NULL THEN v_w_ielts / 2
+ WHEN v_lead.ielts_overall >= c.ielts_overall THEN v_w_ielts
+ WHEN v_lead.ielts_overall >= c.ielts_overall - 0.5 THEN v_w_ielts / 2
+ ELSE -1 -- sentinel: hard-cut
+ END AS ielts_score,
+ -- qs_score — scaled 0..v_w_qs; unranked unis (NULL) treated as rank 999
+ GREATEST(0, v_w_qs * (1 - COALESCE(u.qs_ranking_2025, 999)::numeric / 200)) AS qs_score,
+ -- g8_score
+ CASE WHEN u.is_group_of_eight THEN v_w_g8 ELSE 0 END AS g8_score,
+ -- placement_score — triggers only when student's field matches AND course has placement
+ CASE
+ WHEN v_lead_prioritizes_outcomes
+ AND c.field = ANY(COALESCE(v_lead.preferred_fields, ARRAY[]::text[]))
+ AND c.industry_placement
+ THEN v_w_placement
+ ELSE 0
+ END AS placement_score,
+ -- regional_score — heuristic REJECTED round 1; hard-zero.
+ -- v_w_regional is 0 in the passed weight vector; no preferred_state column
+ -- exists to drive this signal. A v2 phase will reintroduce this branch once
+ -- the signal is captured.
+ 0::numeric AS regional_score,
+ -- intake_score
+ CASE
+ WHEN v_lead.preferred_intake_month IS NULL THEN v_w_intake / 2
+ WHEN v_lead.preferred_intake_month = ANY(c.intake_months) THEN v_w_intake
+ ELSE 0
+ END AS intake_score
+ FROM public.courses c
+ JOIN public.universities u ON c.university_id = u.id
+ ),
+ course_totals AS (
+ SELECT *,
+ -- total_score: sum of all signals, treating -1 sentinels as 0
+ CASE WHEN budget_score < 0 THEN 0 ELSE budget_score END
+ + CASE WHEN ielts_score < 0 THEN 0 ELSE ielts_score END
+ + field_score + level_score
+ + qs_score + g8_score + placement_score + regional_score + intake_score
+ AS total_score,
+ -- hard_cut: exclude from matches entirely
+ (budget_score < 0 OR ielts_score < 0 OR field_score = 0) AS hard_cut,
+ -- stretch_flag: 50%-of-weight on budget OR ielts (but not hard-cut)
+ (budget_score < 0 OR ielts_score < 0) = false
+ AND (budget_score = v_w_budget / 2 OR ielts_score = v_w_ielts / 2)
+ AS stretch_flag
+ FROM course_scores
+ ),
+ uni_best AS (
+ -- Per R-1: per-uni score = max(course_score). DISTINCT ON keeps the best course per uni.
+ SELECT DISTINCT ON (university_id) *
+ FROM course_totals
+ WHERE NOT hard_cut
+ ORDER BY university_id, total_score DESC
+ ),
+ ranked AS (
+ -- Per R-3: order by total desc, tiebreak QS asc, G8 desc, name asc
+ SELECT *,
+ ROW_NUMBER() OVER (
+ ORDER BY total_score DESC,
+ qs_ranking_2025 ASC NULLS LAST,
+ is_group_of_eight DESC,
+ uni_name ASC
+ ) AS rn
+ FROM uni_best
+ ),
+ top_score AS (
+ SELECT total_score AS max_score FROM ranked WHERE rn = 1
+ ),
+ enriched AS (
+ -- Build the per-match jsonb shape consumed by match-schema.ts MatchResultSchema
+ SELECT
+ r.*,
+ jsonb_build_object(
+ 'uni_id', r.university_id,
+ 'uni_name', r.uni_name,
+ 'short_name', r.short_name,
+ 'course_name', r.course_name,
+ 'match_pct', ROUND(
+ 100.0 * r.total_score / NULLIF((SELECT max_score FROM top_score), 0)
+ )::int,
+ 'reason_parts', jsonb_build_object(
+ 'matched_fields', ARRAY[r.field],
+ 'budget_verdict',
+ CASE
+ WHEN r.budget_score = v_w_budget THEN 'within'
+ WHEN r.budget_score = v_w_budget / 2 THEN 'stretch'
+ ELSE 'far_stretch'
+ END,
+ 'ielts_verdict',
+ CASE
+ WHEN r.ielts_score = v_w_ielts THEN 'meets'
+ WHEN r.ielts_score = v_w_ielts / 2 THEN 'stretch'
+ ELSE 'below'
+ END,
+ 'qs_rank', r.qs_ranking_2025,
+ 'g8', r.is_group_of_eight,
+ 'industry_placement', r.industry_placement,
+ 'regional', r.is_regional,
+ 'intake_hit', r.intake_score = v_w_intake,
+ 'best_course_name', r.course_name
+ ),
+ 'stretch_reason',
+ CASE
+ WHEN r.budget_score = v_w_budget / 2 AND v_lead.tuition_budget_aud IS NOT NULL THEN
+ 'Tuition above your stated budget by roughly ' ||
+ ROUND(100.0 * (r.indicative_fee - v_lead.tuition_budget_aud) / v_lead.tuition_budget_aud)::text ||
+ '%.'
+ WHEN r.ielts_score = v_w_ielts / 2 THEN
+ 'IELTS 0.5 band below the course requirement.'
+ ELSE NULL
+ END
+ ) AS match_row
+ FROM ranked r
+ )
+ -- ------------------------------------------------------------------
+ -- Classify strong vs stretch BY TIER (stretch_flag), then cap 3 + 2.
+ -- Per W-3: "Matches" (hard fit) + "Stretch" (within budget/IELTS tolerance).
+ -- Gideon plan-check round 1 Blocker #2: prior impl used rn <= 3 / rn BETWEEN 4 AND 5
+ -- which could leak stretch into strong and include non-stretch rows as stretch.
+ -- ------------------------------------------------------------------
+ SELECT jsonb_build_object(
+ 'strong',
+ COALESCE(
+ (SELECT jsonb_agg(e.match_row ORDER BY e.rn)
+ FROM (
+ SELECT match_row, rn FROM enriched
+ WHERE NOT stretch_flag
+ ORDER BY rn ASC
+ LIMIT 3
+ ) e),
+ '[]'::jsonb
+ ),
+ 'stretch',
+ COALESCE(
+ (SELECT jsonb_agg(e.match_row ORDER BY e.rn)
+ FROM (
+ SELECT match_row, rn FROM enriched
+ WHERE stretch_flag
+ ORDER BY rn ASC
+ LIMIT 2
+ ) e),
+ '[]'::jsonb
+ ),
+ 'computed_at', to_char(now() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"')
+ ) INTO v_matches;
 
-  -- ------------------------------------------------------------------
-  -- Persist to the lead row (side effect — keeps single round-trip)
-  -- ------------------------------------------------------------------
-  UPDATE public.leads
-  SET matches = v_matches,
-      matches_computed_at = now()
-  WHERE id = p_lead_id;
+ -- ------------------------------------------------------------------
+ -- Persist to the lead row (side effect — keeps single round-trip)
+ -- ------------------------------------------------------------------
+ UPDATE public.leads
+ SET matches = v_matches,
+ matches_computed_at = now()
+ WHERE id = p_lead_id;
 
-  RETURN v_matches;
+ RETURN v_matches;
 END;
 $$;
 
@@ -967,65 +967,65 @@ const UPSERT = process.argv.includes("--upsert");
 // ... existing --apply / --wipe branches ...
 
 if (UPSERT && APPLY) {
-  console.log(`Mode: UPSERT (non-destructive refresh)`);
+ console.log(`Mode: UPSERT (non-destructive refresh)`);
 
-  for (const uni of seedUniversities) {
-    // University: upsert by slug
-    const { data: upsertedUni, error: uniErr } = await supabase
-      .from("universities")
-      .upsert({
-        slug: uni.slug,
-        name: uni.name,
-        short_name: uni.short_name,
-        city: uni.city,
-        state: uni.state,
-        cricos_provider_code: uni.cricos_provider_code ?? null,
-        qs_ranking_2025: uni.qs_ranking_2025 ?? null,
-        is_group_of_eight: uni.is_group_of_eight,
-        is_regional: uni.regional ?? false,
-        website: uni.website ?? null,
-        logo_letter: uni.logo_letter ?? null,
-        hero_color: uni.hero_color ?? null,
-      }, { onConflict: 'slug' })
-      .select("id")
-      .single();
+ for (const uni of seedUniversities) {
+ // University: upsert by slug
+ const { data: upsertedUni, error: uniErr } = await supabase
+ .from("universities")
+ .upsert({
+ slug: uni.slug,
+ name: uni.name,
+ short_name: uni.short_name,
+ city: uni.city,
+ state: uni.state,
+ cricos_provider_code: uni.cricos_provider_code ?? null,
+ qs_ranking_2025: uni.qs_ranking_2025 ?? null,
+ is_group_of_eight: uni.is_group_of_eight,
+ is_regional: uni.regional ?? false,
+ website: uni.website ?? null,
+ logo_letter: uni.logo_letter ?? null,
+ hero_color: uni.hero_color ?? null,
+ }, { onConflict: 'slug' })
+ .select("id")
+ .single();
 
-    if (uniErr) {
-      console.error(`[seed] upsert failed for ${uni.slug}:`, uniErr);
-      continue;
-    }
+ if (uniErr) {
+ console.error(`[seed] upsert failed for ${uni.slug}:`, uniErr);
+ continue;
+ }
 
-    // Courses: match on (university_id, name) — UPDATE if exists, INSERT if not.
-    for (const course of uni.courses) {
-      const { data: existing } = await supabase
-        .from("courses")
-        .select("id")
-        .eq("university_id", upsertedUni!.id)
-        .eq("name", course.course_name)
-        .maybeSingle();
+ // Courses: match on (university_id, name) — UPDATE if exists, INSERT if not.
+ for (const course of uni.courses) {
+ const { data: existing } = await supabase
+ .from("courses")
+ .select("id")
+ .eq("university_id", upsertedUni!.id)
+ .eq("name", course.course_name)
+ .maybeSingle();
 
-      const coursePayload = {
-        university_id: upsertedUni!.id,
-        cricos_code: (course as any).cricos_code ?? null,
-        name: course.course_name,
-        level: course.level,
-        field: course.field,
-        duration_months: course.duration_months,
-        indicative_fee: course.annual_fee_aud,
-        ielts_overall: course.ielts_min,
-        industry_placement: course.industry_placement, // P4 migration 003 adds this column
-        intake_months: [2, 7], // seed default; per-course backfill deferred to P4.5
-      };
+ const coursePayload = {
+ university_id: upsertedUni!.id,
+ cricos_code: (course as any).cricos_code ?? null,
+ name: course.course_name,
+ level: course.level,
+ field: course.field,
+ duration_months: course.duration_months,
+ indicative_fee: course.annual_fee_aud,
+ ielts_overall: course.ielts_min,
+ industry_placement: course.industry_placement, // P4 migration 003 adds this column
+ intake_months: [2, 7], // seed default; per-course backfill deferred to P4.5
+ };
 
-      if (existing?.id) {
-        await supabase.from("courses").update(coursePayload).eq("id", existing.id);
-      } else {
-        await supabase.from("courses").insert(coursePayload);
-      }
-    }
-  }
-  console.log(`Upsert complete. Verify via Supabase Studio → courses → filter industry_placement=true.`);
-  return;
+ if (existing?.id) {
+ await supabase.from("courses").update(coursePayload).eq("id", existing.id);
+ } else {
+ await supabase.from("courses").insert(coursePayload);
+ }
+ }
+ }
+ console.log(`Upsert complete. Verify via Supabase Studio → courses → filter industry_placement=true.`);
+ return;
 }
 ```
 
@@ -1033,7 +1033,7 @@ Keep the existing `--apply` and `--wipe` branches untouched. The upsert path use
 
 Update the file header comment block (lines 17-26) to document the new mode:
 ```
- *   npx tsx scripts/seed-universities.ts --upsert --apply  # non-destructive refresh (P4+)
+ * npx tsx scripts/seed-universities.ts --upsert --apply # non-destructive refresh (P4+)
 ```
 </action>
 
@@ -1057,7 +1057,7 @@ Update the file header comment block (lines 17-26) to document the new mode:
 <read_first>
 - `.planning/research/4-RESEARCH.md` §"Seed Migration Order" — 3-command sequence (lines 582-604)
 - `.planning/research/4-RESEARCH.md` §"Environment Availability" — CLI vs Management API fallback
-- `planning/atlas-ai/DEVIATIONS.md` §DEV-001 — region ap-southeast-1
+- `planning/pathway-ai/DEVIATIONS.md` §DEV-001 — region ap-southeast-1
 - `web/.env.local` — SUPABASE_ACCESS_TOKEN (PAT) or SUPABASE_SERVICE_ROLE_KEY available
 - `supabase/migrations/003_match_prep.sql` (Wave 2 Task 2.1)
 - `supabase/migrations/004_match_function.sql` (Wave 2 Task 2.2)
@@ -1068,44 +1068,44 @@ Apply the migrations in this exact order. Prefer Supabase CLI; if unavailable (C
 
 Step 1 — Apply migration 003:
 ```bash
-cd ~/Desktop/atlas-ai
+cd ~/Desktop/pathway-ai
 # Preferred:
 supabase db push --linked
 # Fallback via Management API (if `supabase` CLI missing):
 # Reads PAT from web/.env.local SUPABASE_ACCESS_TOKEN
 # curl -X POST "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/database/query" \
-#   -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-#   -H "Content-Type: application/json" \
-#   -d "$(jq -Rs '{query: .}' < supabase/migrations/003_match_prep.sql)"
+# -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+# -H "Content-Type: application/json" \
+# -d "$(jq -Rs '{query: .}' < supabase/migrations/003_match_prep.sql)"
 
 # Verify:
 # Via Supabase Studio SQL editor:
-#   \d public.courses   → must show industry_placement column
-#   \d public.leads     → must show matches, matches_computed_at, match_token columns
-#                         AND must NOT show matched_university_ids
-#   \di idx_leads_match_token → must show index
+# \d public.courses → must show industry_placement column
+# \d public.leads → must show matches, matches_computed_at, match_token columns
+# AND must NOT show matched_university_ids
+# \di idx_leads_match_token → must show index
 ```
 
 Step 2 — Apply migration 004 (same command sequence, different file):
 ```bash
 supabase db push --linked
 # Verify:
-#   \df public.match_unis_for_lead
-#     → returns one row, arg types (uuid, jsonb), returns jsonb
-#   SELECT has_function_privilege('service_role', 'public.match_unis_for_lead(uuid, jsonb)', 'execute')
-#     → true
-#   SELECT has_function_privilege('anon', 'public.match_unis_for_lead(uuid, jsonb)', 'execute')
-#     → false
+# \df public.match_unis_for_lead
+# → returns one row, arg types (uuid, jsonb), returns jsonb
+# SELECT has_function_privilege('service_role', 'public.match_unis_for_lead(uuid, jsonb)', 'execute')
+# → true
+# SELECT has_function_privilege('anon', 'public.match_unis_for_lead(uuid, jsonb)', 'execute')
+# → false
 ```
 
 Step 3 — Run seed upsert:
 ```bash
-cd ~/Desktop/atlas-ai/web
+cd ~/Desktop/pathway-ai/web
 npx tsx scripts/seed-universities.ts --upsert --apply
 # Verify on return:
-#   SELECT count(*) FROM public.courses WHERE industry_placement = true
-#     → returns a count > 20 (most seeded courses are true per universities-seed.ts)
-#     → NOT 0 (which would mean only DEFAULT false applied, seed didn't run)
+# SELECT count(*) FROM public.courses WHERE industry_placement = true
+# → returns a count > 20 (most seeded courses are true per universities-seed.ts)
+# → NOT 0 (which would mean only DEFAULT false applied, seed didn't run)
 ```
 
 If any verify step fails — STOP and surface the failure to Sam via Telegram before continuing. Do not move to Wave 4 with a broken RPC.
@@ -1115,20 +1115,20 @@ Run the persona smoke test to confirm RPC works live:
 -- In Supabase Studio SQL editor, run:
 -- Persona A: G8 Business $55k IELTS 7.5 Masters
 INSERT INTO public.leads (
-  full_name, email, phone, country,
-  preferred_fields, preferred_levels, preferred_intake_month,
-  tuition_budget_aud, ielts_overall,
-  consent_service, consent_marketing, consent_wording_version, consent_given_at
+ full_name, email, phone, country,
+ preferred_fields, preferred_levels, preferred_intake_month,
+ tuition_budget_aud, ielts_overall,
+ consent_service, consent_marketing, consent_wording_version, consent_given_at
 ) VALUES (
-  'Persona A Test', 'persona-a@example.com', '+61400000001', 'Nepal',
-  ARRAY['Business'], ARRAY['postgraduate'], 2,
-  55000, 7.5,
-  true, false, '2026-04-17.v2', now()
+ 'Persona A Test', 'persona-a@example.com', '+61400000001', 'Nepal',
+ ARRAY['Business'], ARRAY['postgraduate'], 2,
+ 55000, 7.5,
+ true, false, '2026-04-17.v2', now()
 ) RETURNING id;
 -- Copy the returned uuid, then:
 SELECT public.match_unis_for_lead(
-  '<copied-uuid>'::uuid,
-  '{"field":30,"level":12,"budget":23,"ielts":12,"qs_rank":15,"g8":5,"industry_placement":0,"regional":0,"intake":3}'::jsonb
+ '<copied-uuid>'::uuid,
+ '{"field":30,"level":12,"budget":23,"ielts":12,"qs_rank":15,"g8":5,"industry_placement":0,"regional":0,"intake":3}'::jsonb
 );
 -- Expected: jsonb with strong array containing UNSW + UWA + Adelaide.
 -- Cleanup: DELETE FROM public.leads WHERE email = 'persona-a@example.com';
@@ -1172,65 +1172,65 @@ Waves 1-3 leave the schema + constants in place. Wave 4 wires the API route + pr
 Edit `web/src/app/api/leads/route.ts`:
 
 1. Add import near the top (after existing imports):
-   ```typescript
-   import { MATCH_WEIGHTS_JSON } from "@/lib/match-weights";
-   ```
+ ```typescript
+ import { MATCH_WEIGHTS_JSON } from "@/lib/match-weights";
+ ```
 
 2. Change the INSERT call at line 64 to `.select("id, match_token").single()` so we receive the server-generated uuid token back:
-   ```typescript
-   const { data: inserted, error: insertError } = await supabase
-     .from("leads")
-     .insert(row)
-     .select("id, match_token")
-     .single();
-   ```
+ ```typescript
+ const { data: inserted, error: insertError } = await supabase
+ .from("leads")
+ .insert(row)
+ .select("id, match_token")
+ .single();
+ ```
 
 3. Leave the `insertError` branch (returns 500) unchanged.
 
 4. After the successful INSERT path (line 66 onward), BEFORE calling `sendNotificationEmails`, add the RPC call block. Match the Research §"Transaction shape" code:
-   ```typescript
-   // P4 UniMatch: compute matches via Postgres RPC. Failure path is lazy:
-   // lead INSERT is preserved, matches remain null, /matches/{token} shows the
-   // PendingMatches fallback. Sam gets notified via email body so he can
-   // manually recompute via Supabase Studio if the RPC ever fails in prod.
-   let matchesReady = false;
-   try {
-     const { error: rpcError } = await supabase.rpc("match_unis_for_lead", {
-       p_lead_id: inserted!.id,
-       p_weights: MATCH_WEIGHTS_JSON,
-     });
-     if (rpcError) {
-       console.error(
-         "[atlas-ai.leads] match_unis_for_lead RPC failed — lead saved, matches null",
-         { lead_id: inserted!.id, err: rpcError },
-       );
-     } else {
-       matchesReady = true;
-     }
-   } catch (err) {
-     console.error(
-       "[atlas-ai.leads] match_unis_for_lead RPC threw — lead saved, matches null",
-       { lead_id: inserted!.id, err },
-     );
-   }
-   ```
+ ```typescript
+ // P4 UniMatch: compute matches via Postgres RPC. Failure path is lazy:
+ // lead INSERT is preserved, matches remain null, /matches/{token} shows the
+ // PendingMatches fallback. Sam gets notified via email body so he can
+ // manually recompute via Supabase Studio if the RPC ever fails in prod.
+ let matchesReady = false;
+ try {
+ const { error: rpcError } = await supabase.rpc("match_unis_for_lead", {
+ p_lead_id: inserted!.id,
+ p_weights: MATCH_WEIGHTS_JSON,
+ });
+ if (rpcError) {
+ console.error(
+ "[pathway-ai.leads] match_unis_for_lead RPC failed — lead saved, matches null",
+ { lead_id: inserted!.id, err: rpcError },
+ );
+ } else {
+ matchesReady = true;
+ }
+ } catch (err) {
+ console.error(
+ "[pathway-ai.leads] match_unis_for_lead RPC threw — lead saved, matches null",
+ { lead_id: inserted!.id, err },
+ );
+ }
+ ```
 
 5. Extend `sendNotificationEmails` to also receive `matchToken: inserted!.match_token` + `matchesReady` and include them in the email body:
-   ```
-   Match token: ${matchToken}
-   Results page: https://atlas-ai.vercel.app/matches/${matchToken}
-   Matches computed: ${matchesReady ? "yes" : "NO — RPC failed, manual recompute needed"}
-   ```
-   (Extend the function signature accordingly: add `matchToken: string; matchesReady: boolean` to the interface.)
+ ```
+ Match token: ${matchToken}
+ Results page: https://pathway-ai.vercel.app/matches/${matchToken}
+ Matches computed: ${matchesReady ? "yes" : "NO — RPC failed, manual recompute needed"}
+ ```
+ (Extend the function signature accordingly: add `matchToken: string; matchesReady: boolean` to the interface.)
 
 6. Change the final return at line 93 to include the token + readiness flag:
-   ```typescript
-   return Response.json({
-     ok: true,
-     match_token: inserted!.match_token,
-     matches_ready: matchesReady,
-   });
-   ```
+ ```typescript
+ return Response.json({
+ ok: true,
+ match_token: inserted!.match_token,
+ matches_ready: matchesReady,
+ });
+ ```
 
 Do not add a new endpoint — match logic stays inside `/api/leads`. Do not refactor `buildLeadRow` (unchanged — the DB defaults handle `match_token` and `matches` nullability).
 </action>
@@ -1264,22 +1264,22 @@ Do not add a new endpoint — match logic stays inside `/api/leads`. Do not refa
 
 <action>
 1. Re-verify the orphan status before delete (hard gate):
-   ```bash
-   grep -rn '"/api/match"\|fetch.*api/match\|api/match"' web/src --include='*.ts' --include='*.tsx'
-   grep -rn 'from "@/app/api/match' web/src --include='*.ts' --include='*.tsx'
-   ```
-   Expected: zero hits (the only references to `/api/match` are inside the route file itself + SOURCECODE.md).
-   **STOP and surface to Sam if any hit appears.**
+ ```bash
+ grep -rn '"/api/match"\|fetch.*api/match\|api/match"' web/src --include='*.ts' --include='*.tsx'
+ grep -rn 'from "@/app/api/match' web/src --include='*.ts' --include='*.tsx'
+ ```
+ Expected: zero hits (the only references to `/api/match` are inside the route file itself + SOURCECODE.md).
+ **STOP and surface to Sam if any hit appears.**
 
 2. Delete the single orphan file:
-   ```bash
-   rm web/src/app/api/match/route.ts
-   ```
+ ```bash
+ rm web/src/app/api/match/route.ts
+ ```
 
 3. If the `web/src/app/api/match/` directory is now empty, remove it:
-   ```bash
-   rmdir web/src/app/api/match
-   ```
+ ```bash
+ rmdir web/src/app/api/match
+ ```
 
 4. Update `SOURCECODE.md` route table: find the row for `POST /api/match` and remove it. Update any route count totals in adjacent text (e.g. "N routes" → "N-1 routes").
 
@@ -1327,36 +1327,36 @@ Create three files, all Server Components (no "use client").
 
 ```tsx
 import {
-  MARA_DISCLAIMER_BODY,
-  MARA_DISCLAIMER_EYEBROW,
-  MARA_CONSULT_CTA_LABEL,
-  MARA_CONSULT_CTA_HREF,
+ MARA_DISCLAIMER_BODY,
+ MARA_DISCLAIMER_EYEBROW,
+ MARA_CONSULT_CTA_LABEL,
+ MARA_CONSULT_CTA_HREF,
 } from "@/lib/mara-disclaimer";
 
 interface MaraBannerProps {
-  variant?: "top" | "footer";
+ variant?: "top" | "footer";
 }
 
 export function MaraBanner({ variant = "top" }: MaraBannerProps) {
-  const padded = variant === "top" ? "mt-6 mb-8" : "mt-12 mb-6";
-  return (
-    <aside
-      role="note"
-      aria-label="MARA disclaimer"
-      className={`rail-gold paper-grain bg-cream/90 border-y border-gold-500/30 px-5 py-4 ${padded}`}
-    >
-      <p className="eyebrow mb-1 text-navy-950/60">{MARA_DISCLAIMER_EYEBROW}</p>
-      <p className="text-navy-950 leading-relaxed">
-        {MARA_DISCLAIMER_BODY}{" "}
-        <a
-          href={MARA_CONSULT_CTA_HREF}
-          className="font-semibold text-gold-700 underline underline-offset-4 hover:text-gold-800"
-        >
-          {MARA_CONSULT_CTA_LABEL} →
-        </a>
-      </p>
-    </aside>
-  );
+ const padded = variant === "top" ? "mt-6 mb-8" : "mt-12 mb-6";
+ return (
+ <aside
+ role="note"
+ aria-label=" disclaimer"
+ className={`rail-gold paper-grain bg-cream/90 border-y border-gold-500/30 px-5 py-4 ${padded}`}
+ >
+ <p className="eyebrow mb-1 text-navy-950/60">{MARA_DISCLAIMER_EYEBROW}</p>
+ <p className="text-navy-950 leading-relaxed">
+ {MARA_DISCLAIMER_BODY}{" "}
+ <a
+ href={MARA_CONSULT_CTA_HREF}
+ className="font-semibold text-gold-700 underline underline-offset-4 hover:text-gold-800"
+ >
+ {MARA_CONSULT_CTA_LABEL} →
+ </a>
+ </p>
+ </aside>
+ );
 }
 ```
 
@@ -1364,21 +1364,21 @@ export function MaraBanner({ variant = "top" }: MaraBannerProps) {
 
 ```tsx
 interface MatchesHeroProps {
-  firstName: string;
+ firstName: string;
 }
 
 export function MatchesHero({ firstName }: MatchesHeroProps) {
-  return (
-    <header className="mt-10 mb-8">
-      <p className="eyebrow text-navy-950/60">YOUR SHORTLIST · ATLAS AI</p>
-      <h1 className="font-display text-4xl md:text-5xl text-navy-950 mt-2">
-        Your top matches
-      </h1>
-      <p className="text-navy-950/70 mt-3 max-w-xl">
-        {firstName}, here are the Australian universities that best match your profile.
-      </p>
-    </header>
-  );
+ return (
+ <header className="mt-10 mb-8">
+ <p className="eyebrow text-navy-950/60">YOUR SHORTLIST · ATLAS AI</p>
+ <h1 className="font-display text-4xl md:text-5xl text-navy-950 mt-2">
+ Your top matches
+ </h1>
+ <p className="text-navy-950/70 mt-3 max-w-xl">
+ {firstName}, here are the Australian universities that best match your profile.
+ </p>
+ </header>
+ );
 }
 ```
 
@@ -1386,18 +1386,18 @@ export function MatchesHero({ firstName }: MatchesHeroProps) {
 
 ```tsx
 export function NotFoundFallback() {
-  return (
-    <main className="container mx-auto max-w-2xl py-24">
-      <p className="eyebrow text-navy-950/60">NOT FOUND</p>
-      <h1 className="font-display text-3xl text-navy-950 mt-2">
-        We can&rsquo;t find that shortlist
-      </h1>
-      <p className="text-navy-950/70 mt-4">
-        The match link may have expired or the token is invalid. If you just submitted
-        an enquiry, please check your email for a fresh link.
-      </p>
-    </main>
-  );
+ return (
+ <main className="container mx-auto max-w-2xl py-24">
+ <p className="eyebrow text-navy-950/60">NOT FOUND</p>
+ <h1 className="font-display text-3xl text-navy-950 mt-2">
+ We can&rsquo;t find that shortlist
+ </h1>
+ <p className="text-navy-950/70 mt-4">
+ The match link may have expired or the token is invalid. If you just submitted
+ an enquiry, please check your email for a fresh link.
+ </p>
+ </main>
+ );
 }
 ```
 
@@ -1414,7 +1414,7 @@ Do NOT render the literal strings "visa", "migration", "PR", "MLTSSL", "subclass
 - None of the three files contain `"use client"` — all are Server Components.
 </acceptance_criteria>
 
-<done>Three leaf components shipped; MARA banner strictly imports canonical text; hero + 404 fallback use design tokens.</done>
+<done>Three leaf components shipped; banner strictly imports canonical text; hero + 404 fallback use design tokens.</done>
 
 ---
 
@@ -1440,51 +1440,51 @@ import type { MatchResult } from "@/lib/match-schema";
 import { renderReason } from "@/lib/match-reason";
 
 interface MatchCardProps {
-  match: MatchResult;
-  rank: number; // 1..3 for strong, 4..5 for stretch — affects only header badge
+ match: MatchResult;
+ rank: number; // 1..3 for strong, 4..5 for stretch — affects only header badge
 }
 
 export function MatchCard({ match, rank }: MatchCardProps) {
-  const reason = renderReason(match.reason_parts);
-  const eyebrowBits: string[] = [];
-  if (match.reason_parts.qs_rank != null && match.reason_parts.qs_rank <= 200) {
-    eyebrowBits.push(`#${match.reason_parts.qs_rank} QS`);
-  }
-  if (match.reason_parts.g8) eyebrowBits.push("Group of Eight");
-  if (match.reason_parts.regional) eyebrowBits.push("Regional");
+ const reason = renderReason(match.reason_parts);
+ const eyebrowBits: string[] = [];
+ if (match.reason_parts.qs_rank != null && match.reason_parts.qs_rank <= 200) {
+ eyebrowBits.push(`#${match.reason_parts.qs_rank} QS`);
+ }
+ if (match.reason_parts.g8) eyebrowBits.push("Group of Eight");
+ if (match.reason_parts.regional) eyebrowBits.push("Regional");
 
-  return (
-    <article className="paper-grain bg-cream border border-navy-950/10 rounded-lg p-6 mb-4 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-4 min-w-0">
-          <div
-            className="flex h-12 w-12 items-center justify-center rounded-md bg-navy-950 text-cream font-display text-xl flex-shrink-0"
-            aria-hidden="true"
-          >
-            {match.short_name.charAt(0)}
-          </div>
-          <div className="min-w-0">
-            <h2 className="font-display text-xl text-navy-950 truncate">{match.uni_name}</h2>
-            <p className="text-sm text-navy-950/60 mt-1">
-              {eyebrowBits.join(" · ") || "Profile"}
-            </p>
-          </div>
-        </div>
-        <div className="flex-shrink-0 text-right">
-          <p className="font-display text-3xl text-gold-700">{match.match_pct}%</p>
-          <p className="eyebrow text-navy-950/50 text-[10px]">
-            {rank <= 3 ? "match" : "stretch"}
-          </p>
-        </div>
-      </div>
+ return (
+ <article className="paper-grain bg-cream border border-navy-950/10 rounded-lg p-6 mb-4 shadow-sm">
+ <div className="flex items-start justify-between gap-4">
+ <div className="flex items-start gap-4 min-w-0">
+ <div
+ className="flex h-12 w-12 items-center justify-center rounded-md bg-navy-950 text-cream font-display text-xl flex-shrink-0"
+ aria-hidden="true"
+ >
+ {match.short_name.charAt(0)}
+ </div>
+ <div className="min-w-0">
+ <h2 className="font-display text-xl text-navy-950 truncate">{match.uni_name}</h2>
+ <p className="text-sm text-navy-950/60 mt-1">
+ {eyebrowBits.join(" · ") || "Profile"}
+ </p>
+ </div>
+ </div>
+ <div className="flex-shrink-0 text-right">
+ <p className="font-display text-3xl text-gold-700">{match.match_pct}%</p>
+ <p className="eyebrow text-navy-950/50 text-[10px]">
+ {rank <= 3 ? "match" : "stretch"}
+ </p>
+ </div>
+ </div>
 
-      <div className="mt-4 pt-4 border-t border-navy-950/10">
-        <p className="eyebrow text-navy-950/50 mb-1">Best course</p>
-        <p className="font-display text-lg text-navy-950">{match.reason_parts.best_course_name}</p>
-        <p className="text-navy-950/70 mt-2 text-sm leading-relaxed">{reason.line}</p>
-      </div>
-    </article>
-  );
+ <div className="mt-4 pt-4 border-t border-navy-950/10">
+ <p className="eyebrow text-navy-950/50 mb-1">Best course</p>
+ <p className="font-display text-lg text-navy-950">{match.reason_parts.best_course_name}</p>
+ <p className="text-navy-950/70 mt-2 text-sm leading-relaxed">{reason.line}</p>
+ </div>
+ </article>
+ );
 }
 ```
 
@@ -1495,26 +1495,26 @@ import type { MatchResult } from "@/lib/match-schema";
 import { MatchCard } from "./MatchCard";
 
 interface MatchListProps {
-  matches: MatchResult[];
+ matches: MatchResult[];
 }
 
 export function MatchList({ matches }: MatchListProps) {
-  if (matches.length === 0) {
-    return (
-      <p className="text-navy-950/70 my-8">
-        We couldn&rsquo;t find strong matches in the current shortlist. Have a look at
-        the stretch options below or book a consultation — our counsellors can broaden
-        the search.
-      </p>
-    );
-  }
-  return (
-    <section aria-label="Strong matches" className="mt-4">
-      {matches.map((m, i) => (
-        <MatchCard key={m.uni_id} match={m} rank={i + 1} />
-      ))}
-    </section>
-  );
+ if (matches.length === 0) {
+ return (
+ <p className="text-navy-950/70 my-8">
+ We couldn&rsquo;t find strong matches in the current shortlist. Have a look at
+ the stretch options below or book a consultation — our counsellors can broaden
+ the search.
+ </p>
+ );
+ }
+ return (
+ <section aria-label="Strong matches" className="mt-4">
+ {matches.map((m, i) => (
+ <MatchCard key={m.uni_id} match={m} rank={i + 1} />
+ ))}
+ </section>
+ );
 }
 ```
 
@@ -1525,41 +1525,41 @@ import type { MatchResult } from "@/lib/match-schema";
 import { renderReason } from "@/lib/match-reason";
 
 interface StretchCardProps {
-  match: MatchResult;
-  rank: number;
+ match: MatchResult;
+ rank: number;
 }
 
 export function StretchCard({ match, rank }: StretchCardProps) {
-  const reason = renderReason(match.reason_parts);
-  return (
-    <article className="bg-cream/50 border border-dashed border-navy-950/20 rounded-lg p-5 mb-3">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3 min-w-0">
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-md bg-navy-950/80 text-cream font-display text-lg flex-shrink-0"
-            aria-hidden="true"
-          >
-            {match.short_name.charAt(0)}
-          </div>
-          <div className="min-w-0">
-            <h3 className="font-display text-lg text-navy-950 truncate">{match.uni_name}</h3>
-            <p className="text-sm text-navy-950/60">
-              {match.reason_parts.qs_rank != null ? `#${match.reason_parts.qs_rank} QS` : "Profile"}
-              {match.reason_parts.g8 ? " · Group of Eight" : ""}
-            </p>
-          </div>
-        </div>
-        <p className="font-display text-xl text-gold-700/80 flex-shrink-0">{match.match_pct}%</p>
-      </div>
-      {match.stretch_reason && (
-        <p className="mt-3 pt-3 border-t border-navy-950/10 text-sm text-navy-950/70">
-          <span className="eyebrow text-navy-950/50 mr-2">Stretch:</span>
-          {match.stretch_reason}
-        </p>
-      )}
-      <p className="text-navy-950/60 mt-2 text-xs leading-relaxed">{reason.line}</p>
-    </article>
-  );
+ const reason = renderReason(match.reason_parts);
+ return (
+ <article className="bg-cream/50 border border-dashed border-navy-950/20 rounded-lg p-5 mb-3">
+ <div className="flex items-start justify-between gap-4">
+ <div className="flex items-start gap-3 min-w-0">
+ <div
+ className="flex h-10 w-10 items-center justify-center rounded-md bg-navy-950/80 text-cream font-display text-lg flex-shrink-0"
+ aria-hidden="true"
+ >
+ {match.short_name.charAt(0)}
+ </div>
+ <div className="min-w-0">
+ <h3 className="font-display text-lg text-navy-950 truncate">{match.uni_name}</h3>
+ <p className="text-sm text-navy-950/60">
+ {match.reason_parts.qs_rank != null ? `#${match.reason_parts.qs_rank} QS` : "Profile"}
+ {match.reason_parts.g8 ? " · Group of Eight" : ""}
+ </p>
+ </div>
+ </div>
+ <p className="font-display text-xl text-gold-700/80 flex-shrink-0">{match.match_pct}%</p>
+ </div>
+ {match.stretch_reason && (
+ <p className="mt-3 pt-3 border-t border-navy-950/10 text-sm text-navy-950/70">
+ <span className="eyebrow text-navy-950/50 mr-2">Stretch:</span>
+ {match.stretch_reason}
+ </p>
+ )}
+ <p className="text-navy-950/60 mt-2 text-xs leading-relaxed">{reason.line}</p>
+ </article>
+ );
 }
 ```
 
@@ -1570,25 +1570,25 @@ import type { MatchResult } from "@/lib/match-schema";
 import { StretchCard } from "./StretchCard";
 
 interface StretchSectionProps {
-  matches: MatchResult[];
+ matches: MatchResult[];
 }
 
 export function StretchSection({ matches }: StretchSectionProps) {
-  if (!matches || matches.length === 0) return null;
+ if (!matches || matches.length === 0) return null;
 
-  return (
-    <section aria-label="Stretch options" className="mt-10">
-      <div className="border-t border-gold-500/30 pt-6">
-        <p className="eyebrow text-navy-950/60">ALSO CONSIDER</p>
-        <h2 className="font-display text-2xl text-navy-950 mt-1 mb-6">
-          Within reach if your budget or IELTS shifts
-        </h2>
-      </div>
-      {matches.map((m, i) => (
-        <StretchCard key={m.uni_id} match={m} rank={i + 4} />
-      ))}
-    </section>
-  );
+ return (
+ <section aria-label="Stretch options" className="mt-10">
+ <div className="border-t border-gold-500/30 pt-6">
+ <p className="eyebrow text-navy-950/60">ALSO CONSIDER</p>
+ <h2 className="font-display text-2xl text-navy-950 mt-1 mb-6">
+ Within reach if your budget or IELTS shifts
+ </h2>
+ </div>
+ {matches.map((m, i) => (
+ <StretchCard key={m.uni_id} match={m} rank={i + 4} />
+ ))}
+ </section>
+ );
 }
 ```
 
@@ -1598,24 +1598,24 @@ export function StretchSection({ matches }: StretchSectionProps) {
 import { MARA_CONSULT_CTA_HREF } from "@/lib/mara-disclaimer";
 
 export function ConsultCTA() {
-  return (
-    <section className="paper-grain bg-cream border border-gold-500/30 rounded-lg p-6 mt-12">
-      <p className="eyebrow text-navy-950/60">NEXT STEP</p>
-      <h2 className="font-display text-2xl text-navy-950 mt-1">
-        Bring your shortlist to our Liverpool office
-      </h2>
-      <p className="text-navy-950/70 mt-3">
-        Our MARA-registered counsellors will audit fees, scholarships, IELTS gaps, and
-        next steps in a free 30-minute session.
-      </p>
-      <a
-        href={MARA_CONSULT_CTA_HREF}
-        className="inline-flex items-center gap-2 rounded-md bg-gold-700 text-cream font-semibold px-5 py-3 mt-5 hover:bg-gold-800 transition"
-      >
-        Book your consultation →
-      </a>
-    </section>
-  );
+ return (
+ <section className="paper-grain bg-cream border border-gold-500/30 rounded-lg p-6 mt-12">
+ <p className="eyebrow text-navy-950/60">NEXT STEP</p>
+ <h2 className="font-display text-2xl text-navy-950 mt-1">
+ Bring your shortlist to our office
+ </h2>
+ <p className="text-navy-950/70 mt-3">
+ Our registered counsellors will audit fees, scholarships, IELTS gaps, and
+ next steps in a free 30-minute session.
+ </p>
+ <a
+ href={MARA_CONSULT_CTA_HREF}
+ className="inline-flex items-center gap-2 rounded-md bg-gold-700 text-cream font-semibold px-5 py-3 mt-5 hover:bg-gold-800 transition"
+ >
+ Book your consultation →
+ </a>
+ </section>
+ );
 }
 ```
 </action>
@@ -1629,7 +1629,7 @@ export function ConsultCTA() {
 - `cd web && npx tsc --noEmit` exits clean.
 </acceptance_criteria>
 
-<done>Five match-display components shipped; use Zod-validated `MatchResult` type + render via `match-reason.ts` template; MARA-safe word list only.</done>
+<done>Five match-display components shipped; use Zod-validated `MatchResult` type + render via `match-reason.ts` template; -safe word list only.</done>
 
 ---
 
@@ -1653,31 +1653,31 @@ Create two files, both client components.
 "use client";
 
 interface PendingMatchesProps {
-  leadId: string;
-  email: string;
+ leadId: string;
+ email: string;
 }
 
 export function PendingMatches({ leadId, email }: PendingMatchesProps) {
-  return (
-    <main className="container mx-auto max-w-2xl py-16">
-      <p className="eyebrow text-navy-950/60">STILL COMPUTING</p>
-      <h1 className="font-display text-3xl text-navy-950 mt-2">
-        We&rsquo;re still finding your matches
-      </h1>
-      <p className="text-navy-950/70 mt-4 leading-relaxed">
-        Your enquiry is saved and our counsellors at {email.replace(/(.{2}).*(@.*)/, "$1••••$2")} have
-        been notified. The uni ranking is still being crunched — check back in 30 seconds.
-      </p>
-      <button
-        type="button"
-        onClick={() => window.location.reload()}
-        className="mt-6 inline-flex items-center gap-2 rounded-md bg-navy-950 text-cream font-semibold px-5 py-3 hover:bg-navy-900"
-      >
-        Refresh
-      </button>
-      <p className="eyebrow text-navy-950/40 text-[10px] mt-6">Ref: {leadId.slice(0, 8)}</p>
-    </main>
-  );
+ return (
+ <main className="container mx-auto max-w-2xl py-16">
+ <p className="eyebrow text-navy-950/60">STILL COMPUTING</p>
+ <h1 className="font-display text-3xl text-navy-950 mt-2">
+ We&rsquo;re still finding your matches
+ </h1>
+ <p className="text-navy-950/70 mt-4 leading-relaxed">
+ Your enquiry is saved and our counsellors at {email.replace(/(.{2}).*(@.*)/, "$1••••$2")} have
+ been notified. The uni ranking is still being crunched — check back in 30 seconds.
+ </p>
+ <button
+ type="button"
+ onClick={() => window.location.reload()}
+ className="mt-6 inline-flex items-center gap-2 rounded-md bg-navy-950 text-cream font-semibold px-5 py-3 hover:bg-navy-900"
+ >
+ Refresh
+ </button>
+ <p className="eyebrow text-navy-950/40 text-[10px] mt-6">Ref: {leadId.slice(0, 8)}</p>
+ </main>
+ );
 }
 ```
 
@@ -1690,76 +1690,76 @@ import { useState } from "react";
 import { createBrowserClient } from "@/lib/supabase/client";
 
 interface ExpiredTokenFallbackProps {
-  email: string;
-  token: string;
+ email: string;
+ token: string;
 }
 
 export function ExpiredTokenFallback({ email, token }: ExpiredTokenFallbackProps) {
-  const [requested, setRequested] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+ const [requested, setRequested] = useState(false);
+ const [err, setErr] = useState<string | null>(null);
+ const [busy, setBusy] = useState(false);
 
-  async function requestLink() {
-    setBusy(true);
-    setErr(null);
-    try {
-      const supabase = createBrowserClient();
-      const redirectTo =
-        typeof window !== "undefined"
-          ? `${window.location.origin}/auth/callback?next=/matches/${token}`
-          : undefined;
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
-        options: { emailRedirectTo: redirectTo },
-      });
-      if (error) {
-        setErr(error.message);
-        setBusy(false);
-        return;
-      }
-      setRequested(true);
-      setBusy(false);
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : "Unknown error");
-      setBusy(false);
-    }
-  }
+ async function requestLink() {
+ setBusy(true);
+ setErr(null);
+ try {
+ const supabase = createBrowserClient();
+ const redirectTo =
+ typeof window !== "undefined"
+ ? `${window.location.origin}/auth/callback?next=/matches/${token}`
+ : undefined;
+ const { error } = await supabase.auth.signInWithOtp({
+ email,
+ options: { emailRedirectTo: redirectTo },
+ });
+ if (error) {
+ setErr(error.message);
+ setBusy(false);
+ return;
+ }
+ setRequested(true);
+ setBusy(false);
+ } catch (e) {
+ setErr(e instanceof Error ? e.message : "Unknown error");
+ setBusy(false);
+ }
+ }
 
-  return (
-    <main className="container mx-auto max-w-2xl py-16">
-      <p className="eyebrow text-navy-950/60">LINK EXPIRED</p>
-      <h1 className="font-display text-3xl text-navy-950 mt-2">
-        Your preview has expired
-      </h1>
-      <p className="text-navy-950/70 mt-4 leading-relaxed">
-        Your matches are saved to your account. Enter your email and we&rsquo;ll send you
-        a fresh link to view them.
-      </p>
-      {requested ? (
-        <div className="mt-6 rounded-md bg-cream p-4 border border-gold-500/30">
-          <p className="font-semibold text-navy-950">Check your email.</p>
-          <p className="text-navy-950/70 text-sm mt-1">
-            We sent a magic link to <strong>{email.replace(/(.{2}).*(@.*)/, "$1••••$2")}</strong>.
-            Click it to return to your matches.
-          </p>
-        </div>
-      ) : (
-        <button
-          type="button"
-          onClick={requestLink}
-          disabled={busy}
-          className="mt-6 inline-flex items-center gap-2 rounded-md bg-navy-950 text-cream font-semibold px-5 py-3 hover:bg-navy-900 disabled:opacity-50"
-        >
-          {busy ? "Sending…" : "Email me a fresh link"}
-        </button>
-      )}
-      {err && (
-        <p className="mt-4 text-sm text-red-700" role="alert">
-          {err}
-        </p>
-      )}
-    </main>
-  );
+ return (
+ <main className="container mx-auto max-w-2xl py-16">
+ <p className="eyebrow text-navy-950/60">LINK EXPIRED</p>
+ <h1 className="font-display text-3xl text-navy-950 mt-2">
+ Your preview has expired
+ </h1>
+ <p className="text-navy-950/70 mt-4 leading-relaxed">
+ Your matches are saved to your account. Enter your email and we&rsquo;ll send you
+ a fresh link to view them.
+ </p>
+ {requested ? (
+ <div className="mt-6 rounded-md bg-cream p-4 border border-gold-500/30">
+ <p className="font-semibold text-navy-950">Check your email.</p>
+ <p className="text-navy-950/70 text-sm mt-1">
+ We sent a magic link to <strong>{email.replace(/(.{2}).*(@.*)/, "$1••••$2")}</strong>.
+ Click it to return to your matches.
+ </p>
+ </div>
+ ) : (
+ <button
+ type="button"
+ onClick={requestLink}
+ disabled={busy}
+ className="mt-6 inline-flex items-center gap-2 rounded-md bg-navy-950 text-cream font-semibold px-5 py-3 hover:bg-navy-900 disabled:opacity-50"
+ >
+ {busy ? "Sending…" : "Email me a fresh link"}
+ </button>
+ )}
+ {err && (
+ <p className="mt-4 text-sm text-red-700" role="alert">
+ {err}
+ </p>
+ )}
+ </main>
+ );
 }
 ```
 
@@ -1815,65 +1815,65 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs"; // service-role client requires Node, not Edge
 
 interface PageProps {
-  params: Promise<{ token: string }>; // Next 15+ async params
+ params: Promise<{ token: string }>; // Next 15+ async params
 }
 
 export default async function MatchesPage({ params }: PageProps) {
-  const { token } = await params;
+ const { token } = await params;
 
-  const supabase = createServiceRoleClient();
-  const { data: lead, error } = await supabase
-    .from("leads")
-    .select("id, full_name, email, matches, matches_computed_at, match_token")
-    .eq("match_token", token)
-    .maybeSingle();
+ const supabase = createServiceRoleClient();
+ const { data: lead, error } = await supabase
+ .from("leads")
+ .select("id, full_name, email, matches, matches_computed_at, match_token")
+ .eq("match_token", token)
+ .maybeSingle();
 
-  if (error) {
-    console.error("[atlas-ai.matches] lookup failed", { token, error });
-    return <NotFoundFallback />;
-  }
-  if (!lead) {
-    return <NotFoundFallback />;
-  }
+ if (error) {
+ console.error("[pathway-ai.matches] lookup failed", { token, error });
+ return <NotFoundFallback />;
+ }
+ if (!lead) {
+ return <NotFoundFallback />;
+ }
 
-  const firstName = (lead.full_name ?? "").trim().split(/\s+/)[0] || "there";
+ const firstName = (lead.full_name ?? "").trim().split(/\s+/)[0] || "there";
 
-  // Case 1: RPC hasn't run yet or failed — show pending state
-  if (!lead.matches || !lead.matches_computed_at) {
-    return <PendingMatches leadId={lead.id} email={lead.email} />;
-  }
+ // Case 1: RPC hasn't run yet or failed — show pending state
+ if (!lead.matches || !lead.matches_computed_at) {
+ return <PendingMatches leadId={lead.id} email={lead.email} />;
+ }
 
-  // Validate jsonb shape (Landmine #10 — Zod parse on read)
-  const parsed = MatchesJsonbSchema.safeParse(lead.matches);
-  if (!parsed.success) {
-    console.error("[atlas-ai.matches] jsonb schema drift", {
-      token,
-      issues: parsed.error.issues,
-    });
-    return <PendingMatches leadId={lead.id} email={lead.email} />;
-  }
-  const matches = parsed.data;
+ // Validate jsonb shape (Landmine #10 — Zod parse on read)
+ const parsed = MatchesJsonbSchema.safeParse(lead.matches);
+ if (!parsed.success) {
+ console.error("[pathway-ai.matches] jsonb schema drift", {
+ token,
+ issues: parsed.error.issues,
+ });
+ return <PendingMatches leadId={lead.id} email={lead.email} />;
+ }
+ const matches = parsed.data;
 
-  // Case 2: Fresh — serve results directly (anonymous path)
-  const computedAtMs = new Date(lead.matches_computed_at).getTime();
-  const ageMs = Date.now() - computedAtMs;
-  const ttlMs = TOKEN_TTL_MINUTES * 60 * 1000;
+ // Case 2: Fresh — serve results directly (anonymous path)
+ const computedAtMs = new Date(lead.matches_computed_at).getTime();
+ const ageMs = Date.now() - computedAtMs;
+ const ttlMs = TOKEN_TTL_MINUTES * 60 * 1000;
 
-  if (ageMs <= ttlMs) {
-    return (
-      <main className="container mx-auto max-w-3xl px-4 pb-16">
-        <MaraBanner variant="top" />
-        <MatchesHero firstName={firstName} />
-        <MatchList matches={matches.strong} />
-        <StretchSection matches={matches.stretch} />
-        <ConsultCTA />
-        <MaraBanner variant="footer" />
-      </main>
-    );
-  }
+ if (ageMs <= ttlMs) {
+ return (
+ <main className="container mx-auto max-w-3xl px-4 pb-16">
+ <MaraBanner variant="top" />
+ <MatchesHero firstName={firstName} />
+ <MatchList matches={matches.strong} />
+ <StretchSection matches={matches.stretch} />
+ <ConsultCTA />
+ <MaraBanner variant="footer" />
+ </main>
+ );
+ }
 
-  // Case 3: Expired — require auth (P2 magic-link flow)
-  return <ExpiredTokenFallback email={lead.email} token={token} />;
+ // Case 3: Expired — require auth (P2 magic-link flow)
+ return <ExpiredTokenFallback email={lead.email} token={token} />;
 }
 ```
 
@@ -1902,14 +1902,14 @@ Note on `params`: Next.js 15+ in the async-params era requires `params: Promise<
 
 Final sweeps before calling phase-verify. Grep gates + persona SQL smoke tests + PHASE/STATE sign-off.
 
-#### Task 6.1: MARA grep gate — zero forbidden strings in match surface
+#### Task 6.1: grep gate — zero forbidden strings in match surface
 
-<objective>Enforce the P0.5 + P4.5 MARA compliance rule across the new match surface. The only permitted use of banned strings is within the explicit `mara-disclaimer.ts` canonical constant (which names them in the negative).</objective>
+<objective>Enforce the P0.5 + P4.5 compliance rule across the new match surface. The only permitted use of banned strings is within the explicit `mara-disclaimer.ts` canonical constant (which names them in the negative).</objective>
 
 <read_first>
 - `web/src/lib/mara-disclaimer.ts` (Wave 1 Task 1.2) — canonical allowlisted text
 - PHASE.md §Phase 0.5 — precedent for grep gate enforcement
-- `web/src/lib/content.ts` — existing allowlisted MARA phrasing
+- `web/src/lib/content.ts` — existing allowlisted phrasing
 </read_first>
 
 <action>
@@ -1918,25 +1918,25 @@ Run these grep commands and surface the output. All four MUST return 0 hits. If 
 ```bash
 # 1. No banned strings in new match components/pages/libs (excluding the banner constant file itself)
 grep -rE "(visa|migration|\\bPR\\b|MLTSSL|subclass|points test|post-study work)" \
-  web/src/app/matches/ \
-  web/src/components/matches/ \
-  web/src/lib/match-weights.ts \
-  web/src/lib/match-reason.ts \
-  web/src/lib/match-schema.ts \
-  | grep -v "mara-disclaimer"
+ web/src/app/matches/ \
+ web/src/components/matches/ \
+ web/src/lib/match-weights.ts \
+ web/src/lib/match-reason.ts \
+ web/src/lib/match-schema.ts \
+ | grep -v "mara-disclaimer"
 
 # 2. No banned strings in either migration file
 grep -nE "(visa|migration|\\bPR\\b|MLTSSL|subclass)" supabase/migrations/003_match_prep.sql supabase/migrations/004_match_function.sql
 
-# 3. The canonical MARA banner string is referenced, not duplicated, in MaraBanner.tsx
-grep -c "Atlas AI matches are educational information" web/src/components/matches/MaraBanner.tsx
+# 3. The canonical banner string is referenced, not duplicated, in MaraBanner.tsx
+grep -c "Pathway-AI matches are educational information" web/src/components/matches/MaraBanner.tsx
 # Expected: 0 (the string lives in mara-disclaimer.ts, imported by MaraBanner.tsx)
 
 grep -c "MARA_DISCLAIMER_BODY" web/src/components/matches/MaraBanner.tsx
 # Expected: at least 1
 
 # 4. The canonical string exists exactly once in the codebase
-grep -rF "Atlas AI matches are educational information only, not migration advice." web/src/
+grep -rF "Pathway-AI matches are educational information only, not migration advice." web/src/
 # Expected: exactly one hit — web/src/lib/mara-disclaimer.ts
 ```
 
@@ -1946,12 +1946,12 @@ If any check fails, halt and request Sam's guidance before iterating.
 <acceptance_criteria>
 - Grep #1 returns zero hits.
 - Grep #2 returns zero hits.
-- Grep #3 (`grep -c "Atlas AI matches" web/src/components/matches/MaraBanner.tsx`) returns `0`.
+- Grep #3 (`grep -c "Pathway-AI matches" web/src/components/matches/MaraBanner.tsx`) returns `0`.
 - Grep #3 (`grep -c "MARA_DISCLAIMER_BODY" web/src/components/matches/MaraBanner.tsx`) returns ≥ `1`.
 - Grep #4 returns exactly one file path: `web/src/lib/mara-disclaimer.ts`.
 </acceptance_criteria>
 
-<done>MARA grep gate clean; canonical disclaimer string lives in exactly one constant; no forbidden vocabulary in match surface.</done>
+<done> grep gate clean; canonical disclaimer string lives in exactly one constant; no forbidden vocabulary in match surface.</done>
 
 ---
 
@@ -1970,89 +1970,89 @@ Run the following SQL block in Supabase Studio SQL editor (production project ap
 ```sql
 -- Weight vector from web/src/lib/match-weights.ts MATCH_WEIGHTS
 WITH w AS (
-  SELECT '{"field":30,"level":12,"budget":23,"ielts":12,"qs_rank":15,"g8":5,"industry_placement":0,"regional":0,"intake":3}'::jsonb AS p_weights
+ SELECT '{"field":30,"level":12,"budget":23,"ielts":12,"qs_rank":15,"g8":5,"industry_placement":0,"regional":0,"intake":3}'::jsonb AS p_weights
 )
 
 -- Persona A: G8 Business $55k IELTS 7.5 Masters (expected: UNSW → UWA → Adelaide)
 , persona_a AS (
-  INSERT INTO public.leads (
-    full_name, email, phone, country,
-    preferred_fields, preferred_levels, preferred_intake_month,
-    tuition_budget_aud, ielts_overall,
-    consent_service, consent_marketing, consent_wording_version, consent_given_at
-  ) VALUES (
-    'Persona A', 'persona-a-test@example.com', '+61400000001', 'Nepal',
-    ARRAY['Business']::text[], ARRAY['postgraduate']::text[], 2,
-    55000, 7.5,
-    true, false, '2026-04-17.v2', now()
-  ) RETURNING id
+ INSERT INTO public.leads (
+ full_name, email, phone, country,
+ preferred_fields, preferred_levels, preferred_intake_month,
+ tuition_budget_aud, ielts_overall,
+ consent_service, consent_marketing, consent_wording_version, consent_given_at
+ ) VALUES (
+ 'Persona A', 'persona-a-test@example.com', '+61400000001', 'Nepal',
+ ARRAY['Business']::text[], ARRAY['postgraduate']::text[], 2,
+ 55000, 7.5,
+ true, false, '2026-04-17.v2', now()
+ ) RETURNING id
 )
 SELECT 'A' AS persona, public.match_unis_for_lead((SELECT id FROM persona_a), (SELECT p_weights FROM w));
 
 -- Persona B: Budget IT $28k IELTS 6.0 Bachelor (expected: WSU strong, UOW/RMIT stretch)
 WITH w AS (SELECT '{"field":30,"level":12,"budget":23,"ielts":12,"qs_rank":15,"g8":5,"industry_placement":0,"regional":0,"intake":3}'::jsonb AS p),
 persona_b AS (
-  INSERT INTO public.leads (
-    full_name, email, phone, country,
-    preferred_fields, preferred_levels, preferred_intake_month,
-    tuition_budget_aud, ielts_overall,
-    consent_service, consent_marketing, consent_wording_version, consent_given_at
-  ) VALUES (
-    'Persona B', 'persona-b-test@example.com', '+61400000002', 'India',
-    ARRAY['IT']::text[], ARRAY['undergraduate']::text[], 2,
-    28000, 6.0,
-    true, false, '2026-04-17.v2', now()
-  ) RETURNING id
+ INSERT INTO public.leads (
+ full_name, email, phone, country,
+ preferred_fields, preferred_levels, preferred_intake_month,
+ tuition_budget_aud, ielts_overall,
+ consent_service, consent_marketing, consent_wording_version, consent_given_at
+ ) VALUES (
+ 'Persona B', 'persona-b-test@example.com', '+61400000002', 'India',
+ ARRAY['IT']::text[], ARRAY['undergraduate']::text[], 2,
+ 28000, 6.0,
+ true, false, '2026-04-17.v2', now()
+ ) RETURNING id
 )
 SELECT 'B' AS persona, public.match_unis_for_lead((SELECT id FROM persona_b), (SELECT p FROM w));
 
 -- Persona C: July intake Engineering $35k IELTS 6.5 Bachelor (expected: UWA → UOW → UTS)
 WITH w AS (SELECT '{"field":30,"level":12,"budget":23,"ielts":12,"qs_rank":15,"g8":5,"industry_placement":0,"regional":0,"intake":3}'::jsonb AS p),
 persona_c AS (
-  INSERT INTO public.leads (
-    full_name, email, phone, country,
-    preferred_fields, preferred_levels, preferred_intake_month,
-    tuition_budget_aud, ielts_overall,
-    consent_service, consent_marketing, consent_wording_version, consent_given_at
-  ) VALUES (
-    'Persona C', 'persona-c-test@example.com', '+61400000003', 'Vietnam',
-    ARRAY['Engineering']::text[], ARRAY['undergraduate']::text[], 7,
-    35000, 6.5,
-    true, false, '2026-04-17.v2', now()
-  ) RETURNING id
+ INSERT INTO public.leads (
+ full_name, email, phone, country,
+ preferred_fields, preferred_levels, preferred_intake_month,
+ tuition_budget_aud, ielts_overall,
+ consent_service, consent_marketing, consent_wording_version, consent_given_at
+ ) VALUES (
+ 'Persona C', 'persona-c-test@example.com', '+61400000003', 'Vietnam',
+ ARRAY['Engineering']::text[], ARRAY['undergraduate']::text[], 7,
+ 35000, 6.5,
+ true, false, '2026-04-17.v2', now()
+ ) RETURNING id
 )
 SELECT 'C' AS persona, public.match_unis_for_lead((SELECT id FROM persona_c), (SELECT p FROM w));
 
 -- Persona D: Regional Health Nurse $32k IELTS 6.5 Bachelor (expected: Adelaide → UOW → WSU)
 WITH w AS (SELECT '{"field":30,"level":12,"budget":23,"ielts":12,"qs_rank":15,"g8":5,"industry_placement":0,"regional":0,"intake":3}'::jsonb AS p),
 persona_d AS (
-  INSERT INTO public.leads (
-    full_name, email, phone, country,
-    preferred_fields, preferred_levels, preferred_intake_month,
-    tuition_budget_aud, ielts_overall,
-    consent_service, consent_marketing, consent_wording_version, consent_given_at
-  ) VALUES (
-    'Persona D', 'persona-d-test@example.com', '+61400000004', 'Philippines',
-    ARRAY['Health']::text[], ARRAY['undergraduate']::text[], 2,
-    32000, 6.5,
-    true, false, '2026-04-17.v2', now()
-  ) RETURNING id
+ INSERT INTO public.leads (
+ full_name, email, phone, country,
+ preferred_fields, preferred_levels, preferred_intake_month,
+ tuition_budget_aud, ielts_overall,
+ consent_service, consent_marketing, consent_wording_version, consent_given_at
+ ) VALUES (
+ 'Persona D', 'persona-d-test@example.com', '+61400000004', 'Philippines',
+ ARRAY['Health']::text[], ARRAY['undergraduate']::text[], 2,
+ 32000, 6.5,
+ true, false, '2026-04-17.v2', now()
+ ) RETURNING id
 )
 SELECT 'D' AS persona, public.match_unis_for_lead((SELECT id FROM persona_d), (SELECT p FROM w));
 
 -- PERF smoke: EXPLAIN ANALYZE should show total runtime <500ms
 EXPLAIN (ANALYZE, BUFFERS)
 SELECT public.match_unis_for_lead(
-  (SELECT id FROM public.leads WHERE email='persona-a-test@example.com' ORDER BY created_at DESC LIMIT 1),
-  '{"field":30,"level":12,"budget":23,"ielts":12,"qs_rank":15,"g8":5,"industry_placement":0,"regional":0,"intake":3}'::jsonb
+ (SELECT id FROM public.leads WHERE email='persona-a-test@example.com' ORDER BY created_at DESC LIMIT 1),
+ '{"field":30,"level":12,"budget":23,"ielts":12,"qs_rank":15,"g8":5,"industry_placement":0,"regional":0,"intake":3}'::jsonb
 );
 
 -- Cleanup
 DELETE FROM public.leads WHERE email IN (
-  'persona-a-test@example.com',
-  'persona-b-test@example.com',
-  'persona-c-test@example.com',
-  'persona-d-test@example.com'
+ 'persona-a-test@example.com',
+ 'persona-b-test@example.com',
+ 'persona-c-test@example.com',
+ 'persona-d-test@example.com'
 );
 ```
 
@@ -2102,36 +2102,36 @@ Do NOT silently re-tune weights to make the test pass — `match-weights.ts` vec
 
 <action>
 1. Edit `PHASE.md` §Phase 4:
-   - Tick each of the 4 existing task checkboxes as Wave 4+5 lands them:
-     - `[x] Port existing JS matcher to /api/match reading from Supabase` → reframe as "Supabase RPC replaces /api/match — see 4-PLAN Delta / Decision"
-     - `[x] Returns ranked list with match % + reason text`
-     - `[x] Caches per-user match result for 24h` → reframe as "matches persisted to leads.matches JSONB; served for 30min anonymous then magic-link"
-     - `[x] Commit feat(phase-4): ...`
-   - Add sign-off rows (once Gideon plan-check + phase-verify complete — Wave 6 closeout):
-     ```
-     **Plan check sign-off:** Gideon APPROVE/APPROVE-WITH-NOTES (single-seat, {date}) — transcript `.planning/research/p4-plan-check/gideon-v1.md`
-     **Phase verify sign-off:** Gideon PASS (single-seat, {date}) — transcript `.planning/research/p4-phase-verify/gideon-v1.md`
-     ```
-   - Update `**Status:**` from `not_started` → `in_progress` at Wave 1 start, `ready_for_verify` after Wave 5, `done` after Gideon PASS.
-   - Add `**Commits:**` line listing each SHA from the commit chain.
+ - Tick each of the 4 existing task checkboxes as Wave 4+5 lands them:
+ - `[x] Port existing JS matcher to /api/match reading from Supabase` → reframe as "Supabase RPC replaces /api/match — see 4-PLAN Delta / Decision"
+ - `[x] Returns ranked list with match % + reason text`
+ - `[x] Caches per-user match result for 24h` → reframe as "matches persisted to leads.matches JSONB; served for 30min anonymous then magic-link"
+ - `[x] Commit feat(phase-4): ...`
+ - Add sign-off rows (once Gideon plan-check + phase-verify complete — Wave 6 closeout):
+ ```
+ **Plan check sign-off:** Gideon APPROVE/APPROVE-WITH-NOTES (single-seat, {date}) — transcript `.planning/research/p4-plan-check/gideon-v1.md`
+ **Phase verify sign-off:** Gideon PASS (single-seat, {date}) — transcript `.planning/research/p4-phase-verify/gideon-v1.md`
+ ```
+ - Update `**Status:**` from `not_started` → `in_progress` at Wave 1 start, `ready_for_verify` after Wave 5, `done` after Gideon PASS.
+ - Add `**Commits:**` line listing each SHA from the commit chain.
 
 2. Edit `.planning/STATE.md`:
-   - Bump `Last updated:` to current Sydney time.
-   - Move P4 row in phase-status-snapshot from "context captured" → "in_progress" → "ready_for_verify" → "✅ done" as waves land.
-   - Update `Current phase:` + `Last completed phase:` + `Next phase:` accordingly.
+ - Bump `Last updated:` to current Sydney time.
+ - Move P4 row in phase-status-snapshot from "context captured" → "in_progress" → "ready_for_verify" → "✅ done" as waves land.
+ - Update `Current phase:` + `Last completed phase:` + `Next phase:` accordingly.
 
 3. Commit chain (atomic per wave):
 
-   ```
-   Commit 1 (after Wave 1):  feat(phase-4): match weights + Zod schema + reason template + MARA disclaimer constants
-   Commit 2 (after Wave 2):  feat(phase-4): migration 003 match_prep + migration 004 match_unis_for_lead RPC
-   Commit 3 (after Wave 3):  feat(phase-4): apply 003+004 to live Supabase + seed upsert (persona A smoke PASS)
-   Commit 4 (after Wave 4):  feat(phase-4): /api/leads invokes match RPC + returns match_token; delete orphan /api/match route (universities.ts + matcher.ts retained for home-page MatcherSection)
-   Commit 5 (after Wave 5):  feat(phase-4): /matches/[token] Server Component + match components + magic-link fallback
-   Commit 6 (after Wave 6):  feat(phase-4): MARA grep gate clean + 4-persona SQL smoke PASS + PHASE/STATE sign-off + Gideon PASS
-   ```
+ ```
+ Commit 1 (after Wave 1): feat(phase-4): match weights + Zod schema + reason template + disclaimer constants
+ Commit 2 (after Wave 2): feat(phase-4): migration 003 match_prep + migration 004 match_unis_for_lead RPC
+ Commit 3 (after Wave 3): feat(phase-4): apply 003+004 to live Supabase + seed upsert (persona A smoke PASS)
+ Commit 4 (after Wave 4): feat(phase-4): /api/leads invokes match RPC + returns match_token; delete orphan /api/match route (universities.ts + matcher.ts retained for home-page MatcherSection)
+ Commit 5 (after Wave 5): feat(phase-4): /matches/[token] Server Component + match components + magic-link fallback
+ Commit 6 (after Wave 6): feat(phase-4): grep gate clean + 4-persona SQL smoke PASS + PHASE/STATE sign-off + Gideon PASS
+ ```
 
-   Each commit message ends with `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>` per project convention.
+ Each commit message ends with `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>` per project convention.
 
 4. Per HITL-for-deletes rule (MEMORY.md): Wave 4 deletion of `/api/match/route.ts` requires explicit Sam confirmation before `rm`. Ask via Telegram before running Wave 4 Task 4.2. (Delete scope narrowed post-Gideon round 1 — `universities.ts` and `matcher.ts` are no longer deleted, so there's one file to confirm, not three.)
 </action>
@@ -2157,7 +2157,7 @@ Do NOT silently re-tune weights to make the test pass — `match-weights.ts` vec
 - `.planning/4-CONTEXT.md` (19 decisions)
 - `.planning/research/4-RESEARCH.md` (locked weight vector + personas)
 - `.planning/4-PLAN.md` (this file — deviations + must_haves)
-- `PRD.md` §2 V1.3 + §6 MARA compliance
+- `PRD.md` §2 V1.3 + §6 compliance
 - `PHASE.md` §Phase 4
 - All 25 files in `files_modified` frontmatter
 
@@ -2169,7 +2169,7 @@ Gideon verifies each of the 8 `must_haves.truths` by running the SQL checks + gr
 | 2. RPC returns persona-expected top-3 | Wave 6 Task 6.2 SQL results | Exact top-3 arrays per persona: A=`['UNSW','UWA','Adelaide']`, B=`['WSU','UTS','RMIT']`, C=`['UWA','UTS','RMIT']`, D=`['Adelaide','UOW','WSU']` |
 | 3. RPC failure → lead still saves | Deterministic REVOKE-EXECUTE injection (per round-1 Blocker #5) | 200 response with `matches_ready:false`, `leads.matches IS NULL`, Resend email sent with "RPC failed" flag; GRANT restores |
 | 4. /matches/{token} 4-state rendering | Browser UAT + psql timestamp flip | `pending` (matches=null) / `fresh` (<30m) / `expired` (>30m) / `not-found` (bad token) all render correctly |
-| 5. No MARA-banned strings | Wave 6 Task 6.1 grep gate | All 4 greps clean |
+| 5. No -banned strings | Wave 6 Task 6.1 grep gate | All 4 greps clean |
 | 6. Orphan /api/match removed (narrowed delete per round-1 Blocker #1) | `test ! -f web/src/app/api/match/route.ts` + home-page smoke | Route file gone; `MatcherSection` home-page render still live (`universities.ts` + `matcher.ts` preserved) |
 | 7. Migrations + seed live | `\df match_unis_for_lead` + industry_placement count | Function exists + count > 20 |
 | 8. match_token UNIQUE constraint | `\d leads` + pg_catalog check | `leads_match_token_unique` constraint present |

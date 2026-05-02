@@ -1,9 +1,9 @@
-# P0.5 Plan-Check Review — MARA Scaffold Scrub
+# P0.5 Plan-Check Review — Scaffold Scrub
 
 ## Verdict
 `BLOCK`
 
-## MARA compliance check
+## compliance check
 The commit does **not** yet achieve zero user-facing migration/visa advice.
 
 ### Actual blockers

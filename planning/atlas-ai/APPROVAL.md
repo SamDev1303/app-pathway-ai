@@ -1,4 +1,4 @@
-# APPROVAL.md — Atlas AI Phase gate
+# APPROVAL.md — Pathway-AI Phase gate
 
 ## proceed 2026-04-17 12:08 AEDT — Sam — approve P0.5 scaffold scrub + P1 provisioning
 
@@ -33,10 +33,10 @@ Sam's instruction: "yes" — in response to Koda's Telegram approval-gate summar
 - `.planning/3-PLAN.md` — 8 waves (A–H) + acceptance matrix + rollback + Gideon plan-check + Telegram approval gate
 - `PRD.md` v1.1 — changelog block + §3 X.1.1 N8N add-on row + §5 Lead CRM row update (Make.com removed)
 - `web/.env.example` — Make.com env removed, N8N dormant documentation added, Supabase region comment fixed to ap-southeast-1 (DEV-001)
-- `ops/n8n/lead-sync-workflow.json` — dormant importable workflow for UniMate Hostinger N8N
+- `ops/n8n/lead-sync-workflow.json` — dormant importable workflow for Pathway-AI Hostinger N8N
 - `ops/n8n/README.md` — X.1.1 activation runbook
 
-**✅ P3 Wave A–H execution (atlas-ai web/ hand-coded extensions):**
+**✅ P3 Wave A–H execution (pathway-ai web/ hand-coded extensions):**
 - Wave A: shared foundations (`lead-schema.ts` + `lead-score.ts` + `match-stub.ts` + `Field.tsx`)
 - Wave B: per-step components (Step1Personal → Step5Contact)
 - Wave C: `LeadModal.tsx` refactor to 5-step wizard + localStorage draft
@@ -48,7 +48,7 @@ Sam's instruction: "yes" — in response to Koda's Telegram approval-gate summar
 
 **Scope boundaries honoured:**
 - ⛔ No scope creep beyond PHASE.md §Phase 3 checklist (10 tasks)
-- ⛔ N8N X.1.1 activation is OUT of this approval — requires UniMate PO + additional $200 invoice
+- ⛔ N8N X.1.1 activation is OUT of this approval — requires Pathway-AI PO + additional $200 invoice
 - ⛔ Real matcher engine (P4) is OUT — Step-3 teaser uses `match-stub.ts` only
 
 ### Review protocol (updated this session — supersedes P0–P2 dual-seat)
@@ -66,7 +66,7 @@ Sam's instruction: "yes" — in response to Koda's Telegram approval-gate summar
 ### Budget
 
 - v1 scope: **within $3,000 AUD fixed** (HARD-CUT)
-- X.1.1 add-on: **+$200** priced separately; invoice only on UniMate PO sign-off post-launch
+- X.1.1 add-on: **+$200** priced separately; invoice only on Pathway-AI PO sign-off post-launch
 
 ### Governance
 
@@ -82,23 +82,23 @@ Sam's instruction: "yes" — in response to Koda's Telegram approval-gate summar
 **Verbal approval chain captured in CLI session 50:**
 
 1. **01:45 AEST — plan-then-ship authorization:** Sam's instruction "continue plan both and ship before going to the next phase" — interpreted as timestamped approval to collapse `/gsd-discuss-phase 4.5 → /gsd-plan-phase 4.5 → /gsd-execute-phase 4.5` into a single-session flow.
-2. **01:50 AEST — decision gate:** Sam chose defer-region (D2), TBC MARA # (D1 original), staging-only chat prompt (D3) via AskUserQuestion.
-3. **02:02 AEST — emergency discovery:** Koda found `MARN 1798425` + `QEAC P538` hardcoded in 5 production render paths. Sam chose "verify via MARA register myself" option.
-4. **02:03 AEST — verified fake:** Playwright check confirmed MARN 1798425 + business name UniMate both return "no records to display" on portal.mara.gov.au. Evidence in `.planning/research/p4.5-mara-registry-verify/`.
+2. **01:50 AEST — decision gate:** Sam chose defer-region (D2), TBC # (D1 original), staging-only chat prompt (D3) via AskUserQuestion.
+3. **02:02 AEST — emergency discovery:** Koda found `` + `QEAC P538` hardcoded in 5 production render paths. Sam chose "verify via register myself" option.
+4. **02:03 AEST — verified fake:** Playwright check confirmed + business name Pathway-AI both return "no records to display" on portal.mara.gov.au. Evidence in `.planning/research/p4.5-mara-registry-verify/`.
 5. **02:05 AEST — Wave 0 authorization:** Sam's "Wave 0 scrub NOW + keep demo live (Recommended)" — approved scope expansion to scrub all 5 files + Footer + content.ts before continuing with original Waves 1-6.
 
 ### Scope of this approval
 
 **✅ Plan-phase close (immediate commit):**
-- `planning/atlas-ai/4.5-CONTEXT.md` — 10 locked decisions (D1-D10), revised D1 post-MARN discovery
-- `planning/atlas-ai/4.5-PLAN.md` — 7 waves (0-6) + rollback + HITL gates
-- `.planning/research/p4.5-mara-registry-verify/findings.md` + 2 screenshots (evidence of fake MARN)
+- `planning/pathway-ai/4.5-CONTEXT.md` — 10 locked decisions (D1-D10), revised D1 post-discovery
+- `planning/pathway-ai/4.5-PLAN.md` — 7 waves (0-6) + rollback + HITL gates
+- `.planning/research/p4.5-mara-registry-verify/findings.md` + 2 screenshots (evidence of fake )
 
 **✅ P4.5 Wave 0 execution (emergency scrub, landed this session):**
-- Scrub `MARN 1798425` → `MARN [PENDING_FROM_UNIMATE]` (5 files)
+- Scrub `` → `[PENDING_FROM_UNIMATE]` (5 files)
 - Scrub `QEAC P538` → `QEAC [PENDING_FROM_UNIMATE]` (3 files)
 - Scrub `ABN 12 345 678 901` → `ABN [PENDING_FROM_UNIMATE]` (3 files)
-- Normalize `MARN {PENDING}` (content.ts:79) → `MARN [PENDING_FROM_UNIMATE]`
+- Normalize `{PENDING}` (content.ts:79) → `[PENDING_FROM_UNIMATE]`
 - Square-bracket convention: JSX-safe (curly `{}` fails typecheck as undefined expression)
 
 **✅ P4.5 Waves 1-6 authorization (to execute this session):**
@@ -119,7 +119,7 @@ Sam's instruction: "yes" — in response to Koda's Telegram approval-gate summar
 
 ### Open items carried to P8 final audit
 
-1. MARA registration number replacement (CI gate deadline 2026-04-27 23:59 AEST)
+1. registration number replacement (CI gate deadline 2026-04-27 23:59 AEST)
 2. Supabase region decision (ap-southeast-1 vs ap-southeast-2)
 3. QS WUR licensing agreement
 4. Service-role key rotation runbook

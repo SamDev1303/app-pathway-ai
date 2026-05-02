@@ -1,4 +1,4 @@
-# UniMate Australia — Imagery Sources
+# Pathway-AI Australia — Imagery Sources
 
 Source: Wikimedia Commons. All images verified ≥1200px wide, direct `upload.wikimedia.org` URLs (jpg/jpeg), free licenses (CC BY / CC BY-SA / Public Domain). No Tourism Australia editorial images, no watermarked stock.
 

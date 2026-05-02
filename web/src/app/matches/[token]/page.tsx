@@ -5,7 +5,6 @@ import { TOKEN_TTL_MINUTES } from "@/lib/match-weights";
 import { logger } from "@/lib/logger";
 
 const log = logger.child({ route: "/matches/[token]" });
-import { MaraBanner } from "@/components/matches/MaraBanner";
 import { MatchesHero } from "@/components/matches/MatchesHero";
 import { MatchList } from "@/components/matches/MatchList";
 import { StretchSection } from "@/components/matches/StretchSection";
@@ -97,7 +96,6 @@ async function MatchesContent({ params }: { params: Promise<{ token: string }> }
   if (ageMs <= ttlMs) {
     return (
       <main className="container mx-auto max-w-3xl px-4 pb-16">
-        <MaraBanner variant="top" />
         <MatchesHero firstName={firstName} />
         <MatchList matches={matches.strong} />
         <StretchSection matches={matches.stretch} />
@@ -107,8 +105,7 @@ async function MatchesContent({ params }: { params: Promise<{ token: string }> }
           </h2>
           <p className="mt-2 text-sm text-navy-950/70">
             Draft an academic Statement of Purpose against your top match.
-            Your UniMate MARA agent reviews the final version before
-            submission.
+            A Pathway-AI advisor reviews the final version before submission.
           </p>
           <a
             href={`/sop/${token}`}
@@ -118,7 +115,6 @@ async function MatchesContent({ params }: { params: Promise<{ token: string }> }
           </a>
         </section>
         <ConsultCTA />
-        <MaraBanner variant="footer" />
       </main>
     );
   }

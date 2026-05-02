@@ -1,4 +1,4 @@
-# Post-Meeting Capture — Atlas AI Client Call (2026-04-25 15:30 AEST)
+# Post-Meeting Capture — Pathway-AI Client Call (2026-04-25 15:30 AEST)
 
 **Captured:** 2026-04-26 13:04 AEST (s54)
 **Source:** Sam verbal recap during /hi
@@ -19,7 +19,7 @@ We shipped pre-meeting hardening work (s52, 2026-04-25) that included items NOT 
 - [ ] If client's new info expands scope → bump PRD-CLIENT to v1.3 + sync SOW
 
 ## Next phase recommendation
-Run `/gsd-add-phase` against atlas-ai with this CONTEXT.md as input. Likely phase: **P5.7 Post-meeting reconciliation** (sits between P5.6 and P6 SOP UI). Discuss-phase Q&A should pin every meeting input to a code artifact or a PRD line before plan-phase.
+Run `/gsd-add-phase` against pathway-ai with this CONTEXT.md as input. Likely phase: **P5.7 Post-meeting reconciliation** (sits between P5.6 and P6 SOP UI). Discuss-phase Q&A should pin every meeting input to a code artifact or a PRD line before plan-phase.
 
 ## Why this matters (Push-back framework)
 - **Business:** unscoped work = unbilled hours = sets a precedent that erodes the SOW

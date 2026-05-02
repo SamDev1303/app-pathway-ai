@@ -15,7 +15,7 @@ Plan-check (both seats APPROVE-WITH-NOTES):
 5. Middleware does NOT redirect (deliberate design — anonymous-first)
 6. `src/app/auth/callback/route.ts` uses `verifyOtp({ type, token_hash })`, redirects via `pathname` (not full URL — no open redirect)
 7. `src/app/login/page.tsx` uses `signInWithOtp({ email, options: { emailRedirectTo } })`, shows success state
-8. Supabase config applied: site_url + uri_allow_list (covering localhost + atlas-ai.vercel.app + preview branches), external_email_enabled, 1h OTP expiry
+8. Supabase config applied: site_url + uri_allow_list (covering localhost + pathway-ai.vercel.app + preview branches), external_email_enabled, 1h OTP expiry
 9. Build + typecheck both clean
 10. Magic link generation tested via Admin API — test user created + deleted, auth.users back to 0
 

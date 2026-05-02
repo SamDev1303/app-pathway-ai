@@ -1,6 +1,6 @@
 # P2 Plan-Check — Supabase Auth magic link infrastructure
 
-**Repo:** `~/Desktop/atlas-ai`
+**Repo:** `~/Desktop/pathway-ai`
 **Commit:** `809d7dc feat(phase-2): Supabase Auth magic link infrastructure`
 **Reviewer role:** NO CODE WRITING. REVIEW ONLY. ONE OUTPUT FILE.
 
@@ -19,7 +19,7 @@
 
 ## Design choice to review
 
-**Anonymous-first, no middleware redirect:** Supabase official example redirects unauthed users to `/login`. We do NOT — Atlas AI is anonymous per PRD V1.1–V1.4. Middleware refreshes cookies when present, no-op otherwise.
+**Anonymous-first, no middleware redirect:** Supabase official example redirects unauthed users to `/login`. We do NOT — Pathway-AI is anonymous per PRD V1.1–V1.4. Middleware refreshes cookies when present, no-op otherwise.
 
 ## Questions for review
 

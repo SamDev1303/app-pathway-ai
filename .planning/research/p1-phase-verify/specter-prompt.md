@@ -1,4 +1,4 @@
-You are Specter — stateless P1 phase-verify adjudicator for Atlas AI. Gideon (Codex gpt-5.4-mini) is running parallel phase-verify. Return a tight independent verdict.
+You are Specter — stateless P1 phase-verify adjudicator for Pathway-AI. Gideon (Codex gpt-5.4-mini) is running parallel phase-verify. Return a tight independent verdict.
 
 ## Cumulative P1 deliverables (verified via Supabase Management API + live curl tests)
 
@@ -17,9 +17,9 @@ Extensions:
 RLS policies (from `pg_policies`):
 ```
 [
-  {"tablename":"courses","policyname":"courses_anon_read","roles":"{anon}","cmd":"SELECT"},
-  {"tablename":"leads","policyname":"leads_anon_insert","roles":"{anon}","cmd":"INSERT"},
-  {"tablename":"universities","policyname":"universities_anon_read","roles":"{anon}","cmd":"SELECT"}
+ {"tablename":"courses","policyname":"courses_anon_read","roles":"{anon}","cmd":"SELECT"},
+ {"tablename":"leads","policyname":"leads_anon_insert","roles":"{anon}","cmd":"INSERT"},
+ {"tablename":"universities","policyname":"universities_anon_read","roles":"{anon}","cmd":"SELECT"}
 ]
 ```
 
@@ -45,7 +45,7 @@ Per-uni (from live query):
 - service_role SELECT /leads → returns rows (RLS bypassed)
 
 ### Deviations + gaps recorded
-- **DEV-001 region** (`planning/atlas-ai/DEVIATIONS.md`): project in `ap-southeast-1` (Singapore) not `ap-southeast-2` (Sydney) per PRD §6. Sam override. 4 downstream obligations documented (APP 8 disclosure, UniMate client disclosure, MARA sign-off, APP 13 SOP). P4.5 gate BLOCKS production until addressed.
+- **DEV-001 region** (`planning/pathway-ai/DEVIATIONS.md`): project in `ap-southeast-1` (Singapore) not `ap-southeast-2` (Sydney) per PRD §6. Sam override. 4 downstream obligations documented (APP 8 disclosure, Pathway-AI client disclosure, sign-off, APP 13 SOP). P4.5 gate BLOCKS production until addressed.
 - **Scope gap**: 12 unis vs aspirational 43 — P4.5 backfill task.
 - **courses.cricos_code = NULL** for all 48 — P4.5 backfill required before production per PRD §5 + QEAC.
 - **industry_placement field** lives in web Course type only, not DB — P4 matcher server-migration adds column.

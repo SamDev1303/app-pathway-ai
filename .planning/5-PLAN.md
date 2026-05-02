@@ -11,12 +11,12 @@ See session transcript for full plan. Summary:
 - **Wave 4** (commit `2fccc41`) — `chat-session.ts` issues `atlas_chat_session` httpOnly cookie, creates/refreshes `chat_sessions`, links `lead_id` if `atlas_lead` cookie present. `chat_messages` user + assistant persistence with `retrieved_course_ids` + `deflected` flag.
 - **Wave 5** (commit `01a1d82`) — `@upstash/ratelimit` sliding window 10/min IP + 50/hr session + 200/day global. Fail-open when env not wired. 429 streams Calendly CTA without model call.
 - **Wave 6** (this commit range) — shared `ChatClient` component, `SourcesPill` expandable citations, `/chat` page (Suspense-wrapped for PPR), `ChatDrawer` delegates to `ChatClient`, Hero CTA now links `/chat`.
-- **Wave 7** (this commit) — MARA gate patterns verified locally (zero hits), `pnpm build` passes, STATE.md sign-off.
+- **Wave 7** (this commit) — gate patterns verified locally (zero hits), `pnpm build` passes, STATE.md sign-off.
 
 ## Verification status
 
 - `pnpm build` — PASS (Next.js 16.2.3 Turbopack, 13 routes including `/chat`).
-- MARA gate patterns locally clean (fake-identifier + affirmative-advice).
+- gate patterns locally clean (fake-identifier + affirmative-advice).
 - Backfill + Upstash env provisioning require Sam's paid-key unlock (post-meeting).
 - Gideon single-seat phase-verify — deferred to Sam's dispatch (Rule 11 mandatory).
 

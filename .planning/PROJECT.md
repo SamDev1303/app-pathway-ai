@@ -20,3 +20,15 @@ This file satisfies the GSD `.planning/` scaffold requirement. Canonical content
 **Do not duplicate content from the root docs into this file.** If PRD or PHASE changes, those are authoritative — do not sync a copy here.
 
 GSD `/gsd-*` commands that operate on `.planning/` should treat root `PHASE.md` as the roadmap source and root `PRD.md` as the requirements source.
+
+## Current Milestone: v2.0 First-Customer Activation
+
+**Goal:** Validate that v1 earns revenue before building more modules. Get to one paying customer or one signed pilot.
+
+**Target features:**
+- Mobile app wired to live backend (parity with web)
+- Data quality: 43-uni surface + zero NULL CRICOS course codes
+- Marketing landing + lead-magnet (one inbound conversion path)
+- 30-prospect outreach + first close
+
+See `.planning/ROADMAP.md` for phases P7–P10.

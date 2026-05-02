@@ -3,11 +3,11 @@
 // This is the SYSTEM PROMPT the AI SDK provider receives on every /api/chat call.
 //
 // Edit rule: bumping content requires bumping CHAT_SYSTEM_PROMPT_VERSION in the
-// same commit, mirroring MARA_DISCLAIMER_VERSION pattern in mara-disclaimer.ts.
+// same commit.
 //
-// Design constraint ( Act 1958 s.280): MUST deflect all visa/PR/migration
-// questions WITHOUT hedging. "I'm not sure if I can answer that" is WORSE than
-// "I can't answer that — consult a advisor". Hedging = liability surface.
+// Design constraint: MUST deflect visa/PR/migration questions WITHOUT hedging.
+// "I'm not sure if I can answer that" is WORSE than
+// "I can't answer that — consult a licensed advisor". Hedging = liability surface.
 // Deflection = compliant.
 
 export const CHAT_SYSTEM_PROMPT_VERSION = "2026-04-20.v1";

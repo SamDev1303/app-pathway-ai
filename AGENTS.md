@@ -54,7 +54,9 @@ rows=$(grep -c '^| POST\|^| GET\|^| DELETE' SOURCECODE.md | head -1)
 
 Reason: Gideon's P0 plan-check caught that `SOURCECODE.md` listed 4 routes but 5 existed (`/api/match` was missing). If the living arch doc is wrong, every agent downstream inherits the wrong map. This rule is the mechanical check that prevents doc drift.
 
-P9 lands an automated regenerator for this table. Until then, every author of an API-touching commit runs the check above and fixes the table in the same commit.
+**Known gap (2026-09-23, left for Sam):** run as written, this grep counts 12 rows against 4 route files, because it
+also matches rows in other tables of `SOURCECODE.md`; it needs scoping to the "Active HTTP endpoints" table before it
+can pass or fail meaningfully. P9 lands an automated regenerator for this table. Until then, every author of an API-touching commit runs the check above and fixes the table in the same commit.
 
 ---
 
@@ -133,7 +135,7 @@ Koda orchestrates but does not override. Sam signs invoices and holds ultimate v
 
 ## 8. AU compliance is non-negotiable
 
-- ** Code of Conduct:** chat must NEVER give migration advice. System prompt hard rule + per-turn footer disclaimer: "This is not migration advice. Consult a registered advisor." Pathway-AI's number must be visible in page footer.
+- **MARA Code of Conduct:** chat must NEVER give migration advice. System prompt hard rule + per-turn footer disclaimer: "This is not migration advice. Consult a registered advisor." Pathway-AI's MARA number must be visible in page footer.
 - **Privacy Act 1988:** lead capture stores `consent_given_at` + `consent_wording_version` + `consent_service` + `consent_marketing`. Consent wording drafted + signed off by Neo.
 - **QEAC:** only CRICOS-registered courses surface. "CRICOS-registered" badge visible. No ranking claims beyond QS WUR public data.
 - **Data residency:** Supabase region `ap-southeast-2` (Sydney). Do not change without Sam's approval.
@@ -168,7 +170,8 @@ Global rules inherited from `~/.agents/AGENTS.md` and the operator runtime `~/cl
 - Verify live + visually before claiming "done" — URL + mobile 375px width check, buttons clickable, nav/footer present
 - Sam-facing progress: always keep an active todo list visible; Sam should never ask "where are we?"
 - Approval gate — Sam gives an explicit, timestamped "proceed" before `/gsd-execute-phase` runs (the old
-  `planning/pathway-ai/APPROVAL.md` file no longer exists; record where the approval came from in the phase row)
+  `planning/pathway-ai/APPROVAL.md` file no longer exists, though `.planning/config.json` `approval_gate` still names it —
+  left for Sam; record where the approval came from in the phase row)
 
 If in doubt, read `PHASE.md` first. If still in doubt, ask Sam.
 

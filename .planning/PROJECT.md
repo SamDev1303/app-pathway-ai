@@ -12,7 +12,7 @@ This file satisfies the GSD `.planning/` scaffold requirement. Canonical content
 | v1 research summary | → [`../_reference/v1-research-summary.md`](../_reference/v1-research-summary.md) |
 | Roadmap | → [`../PHASE.md`](../PHASE.md) |
 | Architecture | → [`../SOURCECODE.md`](../SOURCECODE.md) |
-| Governance | → [`../CLAUDE.md`](../CLAUDE.md) |
+| Governance | → [`../AGENTS.md`](../AGENTS.md) |
 | Config | → [`./config.json`](./config.json) |
 | State | → [`./STATE.md`](./STATE.md) |
 | Research (per phase) | → `./research/` |

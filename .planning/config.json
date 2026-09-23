@@ -17,9 +17,11 @@
  "requirements": "PRD.md",
  "roadmap": "PHASE.md",
  "architecture": "SOURCECODE.md",
- "governance": "CLAUDE.md",
+ "governance": "AGENTS.md",
  "state": ".planning/STATE.md"
  },
  "approval_gate": "planning/pathway-ai/APPROVAL.md",
- "notes": "GSD .planning/ is a thin layer; canonical docs live at project root per CLAUDE.md §1. Do not duplicate content here — point to the root files."
+ "notes": "GSD .planning/ is a thin layer; canonical docs live at project root per AGENTS.md §1. Do not duplicate content here — point to the root files.",
+ "claude_md_path": "./AGENTS.md",
+ "claude_md_assembly": { "mode": "link" }
 }

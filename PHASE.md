@@ -2,7 +2,7 @@
 
 **Plan locked:** 2026-04-16 · **Granularity:** fine · **Research + plan-check + verifier:** enabled
 **Sign-off rule:** Gideon AND Neo must both sign off in a phase before it moves to `done` (Specter / NVIDIA Nemotron via NIM serves as NeMo Tron fallback if Neo/OpenCode infra is unavailable). No self-signoff by Koda. If they disagree, escalate to Sam.
-**Update rule:** Every commit that maps to a phase MUST update that phase's row in the same commit. If it can't be mapped, STOP and add a new phase or flag off-plan (CLAUDE.md §3).
+**Update rule:** Every commit that maps to a phase MUST update that phase's row in the same commit. If it can't be mapped, STOP and add a new phase or flag off-plan (AGENTS.md §3).
 
 ---
 
@@ -370,7 +370,7 @@ Any change that can't map to a phase above goes here BEFORE coding. Each row nee
 
 | Date | Change | Phase impact | Sam approved? |
 |---|---|---|---|
-| — | — | — | — |
+| 2026-09-23 | Rules file moved: `CLAUDE.md` merged into `AGENTS.md` (the one file every CLI reads) and deleted; `web/CLAUDE.md` (an `@AGENTS.md` import) deleted; stale seat model ids, `~/Desktop` paths and the OpenRouter/gpt-4o-mini claim corrected | none — docs and GSD config only | Yes — Sam's fleet-wide directive 2026-09-23 (AGENTS.md-only workspaces) |
 
 ---
 

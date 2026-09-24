@@ -47,9 +47,11 @@ The "## 4. HTTP endpoints" table in `SOURCECODE.md` is the audit surface. Before
 
 ```bash
 # One `/api/` row in SOURCECODE.md §4 per route.ts file, whatever the method; the counts must match
-# run from the repo root
-routes=$(ls web/src/app/api/*/route.ts 2>/dev/null | wc -l | tr -d ' ')
+# works from any directory in the checkout; nested routes count too
+cd "$(git rev-parse --show-toplevel)" || exit 1
+routes=$(find web/src/app/api -name route.ts | wc -l | tr -d ' ')
 rows=$(awk '/^## 4\. HTTP endpoints/{f=1;next} /^## /{f=0} f' SOURCECODE.md | grep -c '^| [A-Z]* | `/api/')
+[ "$routes" -gt 0 ] || echo "FAIL: no route.ts found under web/src/app/api"
 [ "$routes" = "$rows" ] || echo "MISMATCH: $routes route files vs $rows /api/ rows"
 ```
 

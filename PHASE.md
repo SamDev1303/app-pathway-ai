@@ -1,7 +1,7 @@
 # PHASE.md — Pathway-AI v1 Phase Tracker
 
 **Plan locked:** 2026-04-16 · **Granularity:** fine · **Research + plan-check + verifier:** enabled
-**Sign-off rule:** Gideon AND Neo must both sign off in a phase before it moves to `done` (Specter / NVIDIA Nemotron via NIM serves as NeMo Tron fallback if Neo/OpenCode infra is unavailable). No self-signoff by Koda. If they disagree, escalate to Sam.
+**Sign-off rule:** Gideon AND Neo must both sign off in a phase before it moves to `done` (Specter, lane `mini-specter`, is the fallback when the Neo/opencode seat is unavailable). No self-signoff by Koda. If they disagree, escalate to Sam.
 **Update rule:** Every commit that maps to a phase MUST update that phase's row in the same commit. If it can't be mapped, STOP and add a new phase or flag off-plan (AGENTS.md §3).
 
 ---

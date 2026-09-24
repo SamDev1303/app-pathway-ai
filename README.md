@@ -51,7 +51,7 @@ Vercel project: `prj_A6cObazFvum7qN49jOm8UiDFIBbH` (renamed display → `pathway
 
 ## Governance
 
-Every commit must update [`PHASE.md`](./PHASE.md) and [`SOURCECODE.md`](./SOURCECODE.md). Phase transitions require dual sign-off (Gideon + Neo; Specter/NeMo Tron as fallback when Neo/OpenCode infra stalls) in PHASE.md. Hard rules in [`AGENTS.md`](./AGENTS.md).
+Every commit must update [`PHASE.md`](./PHASE.md) and [`SOURCECODE.md`](./SOURCECODE.md). Phase transitions require dual sign-off (Gideon + Neo; Specter, lane `mini-specter`, as fallback when the Neo/opencode seat stalls) in PHASE.md. Hard rules in [`AGENTS.md`](./AGENTS.md).
 
 Demo / pre-rename history archived in [`_reference/archive/`](./_reference/archive/).
 

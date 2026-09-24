@@ -46,11 +46,11 @@ If a change can't be mapped to a phase in `PHASE.md`:
 The "## 4. HTTP endpoints" table in `SOURCECODE.md` is the audit surface. Before any commit that touches `web/src/app/api/`, verify:
 
 ```bash
-# One POST row in SOURCECODE.md §4 per route.ts file; the counts must match
+# One `/api/` row in SOURCECODE.md §4 per route.ts file, whatever the method; the counts must match
 # run from the repo root
 routes=$(ls web/src/app/api/*/route.ts 2>/dev/null | wc -l | tr -d ' ')
-rows=$(awk '/^## 4\. HTTP endpoints/{f=1;next} /^## /{f=0} f' SOURCECODE.md | grep -c '^| POST')
-[ "$routes" = "$rows" ] || echo "MISMATCH: $routes route files vs $rows POST rows"
+rows=$(awk '/^## 4\. HTTP endpoints/{f=1;next} /^## /{f=0} f' SOURCECODE.md | grep -c '^| [A-Z]* | `/api/')
+[ "$routes" = "$rows" ] || echo "MISMATCH: $routes route files vs $rows /api/ rows"
 ```
 
 Reason: Gideon's P0 plan-check caught that `SOURCECODE.md` listed 4 routes but 5 existed (`/api/match` was missing). If the living arch doc is wrong, every agent downstream inherits the wrong map. This rule is the mechanical check that prevents doc drift.

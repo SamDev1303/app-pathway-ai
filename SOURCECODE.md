@@ -222,7 +222,7 @@ sentry.{client,server,edge}.config.ts Sentry configs per runtime
 | POST | `/api/leads` | rate-limited | Lead capture → match RPC → match_token + email | `app/api/leads/route.ts`, `lib/lead-*.ts` |
 | POST | `/api/sop` | rate-limited | SOP generator | `app/api/sop/route.ts`, `lib/sop-prompt.ts` |
 
-**Accuracy rule (AGENTS.md §3a):** the count of `app/api/*/route.ts` files must equal the POST row count above. Currently 4 = 4 ✅.
+**Accuracy rule (AGENTS.md §3a):** the count of `app/api/*/route.ts` files must equal the number of `/api/` rows above, whatever the method. Currently 4 = 4 ✅.
 
 ---
 

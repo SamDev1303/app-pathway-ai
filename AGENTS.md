@@ -259,3 +259,8 @@ uses `~/claudeking.cloud/.planning/`; project work uses that project's `.plannin
 
 Do not merge the PR unless explicitly instructed. Keep the worktree until the PR is merged or closed.
 <!-- WORKFLOW:END -->
+
+## This repo's checks
+
+- `cd web && npm ci && npm run build`
+- Before a commit that touches `web/src/app/api/`: the route-table check in the "Active HTTP endpoints" section above

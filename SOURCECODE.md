@@ -222,7 +222,7 @@ sentry.{client,server,edge}.config.ts Sentry configs per runtime
 | POST | `/api/leads` | rate-limited | Lead capture → match RPC → match_token + email | `app/api/leads/route.ts`, `lib/lead-*.ts` |
 | POST | `/api/sop` | rate-limited | SOP generator | `app/api/sop/route.ts`, `lib/sop-prompt.ts` |
 
-**Accuracy rule (AGENTS.md §3a):** the count of `route.ts` files under `app/api/` (nested ones too; `bash scripts/check-route-table.sh`) must equal the number of `/api/` rows above, whatever the method. Currently 4 = 4 ✅.
+**Accuracy rule (AGENTS.md §3a):** every `route.ts` under `app/api/` (nested ones too) has exactly one `/api/` row above with the same path, and every `/api/` row has a route file (`bash scripts/check-route-table.sh`). Currently 4 = 4 ✅.
 
 ---
 
@@ -352,7 +352,7 @@ Production: managed via `vercel env`. Never commit `.env.local`.
 | Change wording | `web/src/lib/mara-disclaimer.ts` |
 | Add a new university | INSERT into `universities` + `courses`, run `scripts/backfill-course-embeddings.ts` |
 | Swap AI provider | Set `CHAT_MODEL` env var; no code change |
-| Add a new API route | `web/src/app/api/<name>/route.ts` + add row to §4 of this file (AGENTS.md §3a will fail CI otherwise) |
+| Add a new API route | `web/src/app/api/<name>/route.ts` + add row to §4 of this file (run `bash scripts/check-route-table.sh`, AGENTS.md §3a; it is a manual check, not wired into CI) |
 | Add a new DB migration | `supabase/migrations/0NN_<name>.sql` + add row to §5 of this file |
 | Add a phase | `PHASE.md` (with dual sign-off plan) |
 | Continue work next session | Read `STATE.md` + `HANDOFF.json` + this file |

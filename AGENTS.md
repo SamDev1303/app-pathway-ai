@@ -46,7 +46,7 @@ If a change can't be mapped to a phase in `PHASE.md`:
 The "## 4. HTTP endpoints" table in `SOURCECODE.md` is the audit surface. Before any commit that touches `web/src/app/api/`, verify:
 
 ```bash
-bash scripts/check-route-table.sh   # exits 1 on a mismatch; counts nested routes; runs from any directory
+bash scripts/check-route-table.sh   # compares route paths (nested too) with §4 rows; exits 1 on any difference
 ```
 
 Reason: Gideon's P0 plan-check caught that `SOURCECODE.md` listed 4 routes but 5 existed (`/api/match` was missing). If the living arch doc is wrong, every agent downstream inherits the wrong map. This rule is the mechanical check that prevents doc drift.

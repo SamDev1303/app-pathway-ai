@@ -174,13 +174,14 @@ Global rules inherited from `~/.agents/AGENTS.md` and the operator runtime `~/cl
 
 If in doubt, read `PHASE.md` first. If still in doubt, ask Sam.
 
-<!-- WORKFLOW:BEGIN — canonical workflow block. Source of truth: ~/Tools/SKILLS/references/WORKFLOW.md. Written verbatim into every AGENTS.md (the only rules file; no workspace keeps a CLAUDE.md) by scripts/bootstrap-workspace.sh --agents-md; scripts/check-agents-md.sh hashes every copy against this file. Edit HERE only. -->
+<!-- WORKFLOW:BEGIN — canonical workflow block. Source of truth: ~/Tools/SKILLS/references/WORKFLOW.md. Written verbatim into every AGENTS.md (the only rules file; no workspace keeps a CLAUDE.md) by scripts/bootstrap-workspace.sh --agents-md; scripts/check-agents-md.sh hashes every copy against this file. Edit only the canonical references/WORKFLOW.md in the skills repo, never a copy. -->
 
 # Agent workflow
 
 Every task moves through the same beats, whichever CLI or agent runs it — Claude, Codex/Gideon, Antigravity/Atlas,
 OpenCode/Neo, Grok, Cursor, Kimi. Drop this block into a repo's `AGENTS.md` — the one rules file every CLI reads — then
-append the repo-specific callouts at the end; it also governs work in the repos that generate it.
+add the repo-specific callouts (commands and checks, invariants, environment) before or after this block; it also
+governs work in the repos that generate it.
 
 ## 0. GSD first
 
@@ -246,7 +247,7 @@ uses `~/claudeking.cloud/.planning/`; project work uses that project's `.plannin
 ## Completing a task
 
 1. Keep changes limited to the assigned task.
-2. Run the repo's checks *(repo-specific: list the exact commands in the block below)*.
+2. Run the repo's checks *(repo-specific: list the exact commands in this file's checks section)*.
 3. Assemble the evidence captured along the way into before/after pairs.
 4. Commit with a clear message, rebase onto the latest `origin/main`, and rerun the checks.
 5. Push (`git push -u origin <branch>`; after rebasing an already-pushed branch, `--force-with-lease`).

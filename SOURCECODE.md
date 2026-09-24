@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-04-25 · phases 0 → 5.5 done; P6 SOP partial; P7 mobile rebrand pending; P8 dataset backfill pending; P9 handover pending.
 
-**Read this file first** if you are a new developer (human or LLM) opening this repo. It is the contract between code and docs. Every commit that adds, removes, renames a file or bumps a stack version updates this file in the same commit (CLAUDE.md §3).
+**Read this file first** if you are a new developer (human or LLM) opening this repo. It is the contract between code and docs. Every commit that adds, removes, renames a file or bumps a stack version updates this file in the same commit (AGENTS.md §3).
 
 **TL;DR for an LLM agent:** Pathway-AI is a Next.js 16 + Supabase + AI-SDK student-matching app for Australian universities, scoped under Pathway-AI's registration. Matching is **deterministic SQL** (Postgres RPC). The LLM is **advisor-only** with belt-and-braces deflection on regulated migration topics. Logs are 3-layer redacted. Mobile (Expo SDK 54) exists but is not yet wired to the production API — see §Mobile.
 
@@ -92,7 +92,7 @@ pathway-ai/
 ├── CLIENT-INTAKE.md Client intake doc
 ├── CLIENT-STATUS.md Status snapshot for client
 ├── PHASE.md Phase tracker — dual sign-off, rows = ground truth
-├── CLAUDE.md Governance rules for AI agents working here
+├── AGENTS.md Governance rules for every AI agent and CLI working here (the only rules file)
 ├── RESUME.md How to continue the build next session (older — STATE.md+HANDOFF.json supersede day-to-day)
 ├── STATE.md Active session pause/resume state
 ├── HANDOFF.json Machine-readable session handoff
@@ -222,7 +222,7 @@ sentry.{client,server,edge}.config.ts Sentry configs per runtime
 | POST | `/api/leads` | rate-limited | Lead capture → match RPC → match_token + email | `app/api/leads/route.ts`, `lib/lead-*.ts` |
 | POST | `/api/sop` | rate-limited | SOP generator | `app/api/sop/route.ts`, `lib/sop-prompt.ts` |
 
-**Accuracy rule (CLAUDE.md §3a):** the count of `app/api/*/route.ts` files must equal the POST row count above. Currently 4 = 4 ✅.
+**Accuracy rule (AGENTS.md §3a):** every `route.ts` under `app/api/` (nested ones too) has exactly one `/api/` row above with the same path, and every `/api/` row has a route file (`bash scripts/check-route-table.sh`). Currently 4 = 4 ✅.
 
 ---
 
@@ -352,7 +352,7 @@ Production: managed via `vercel env`. Never commit `.env.local`.
 | Change wording | `web/src/lib/mara-disclaimer.ts` |
 | Add a new university | INSERT into `universities` + `courses`, run `scripts/backfill-course-embeddings.ts` |
 | Swap AI provider | Set `CHAT_MODEL` env var; no code change |
-| Add a new API route | `web/src/app/api/<name>/route.ts` + add row to §4 of this file (CLAUDE.md §3a will fail CI otherwise) |
+| Add a new API route | `web/src/app/api/<name>/route.ts` + add row to §4 of this file (run `bash scripts/check-route-table.sh`, AGENTS.md §3a; it is a manual check, not wired into CI) |
 | Add a new DB migration | `supabase/migrations/0NN_<name>.sql` + add row to §5 of this file |
 | Add a phase | `PHASE.md` (with dual sign-off plan) |
 | Continue work next session | Read `STATE.md` + `HANDOFF.json` + this file |

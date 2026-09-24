@@ -1,7 +1,8 @@
 # Pathway-AI — AGENTS.md
 
 > Global rules: `~/.agents/AGENTS.md` — every CLI loads it. This file is the workspace's only rules file; there is no
-> CLAUDE.md here, and none may be added. `web/AGENTS.md` adds the Next.js version notes for `web/`.
+> CLAUDE.md here, and none may be added. `.planning/config.json` sets GSD's `claude_md_path` to this file, so GSD
+> writes its sections here (`link` mode writes `@path` references) and never creates a CLAUDE.md. `web/AGENTS.md` adds the Next.js version notes for `web/`.
 
 Rules every agent (Claude, Gideon, Neo, minis) must follow in this repo. Violations block the commit. These rules supersede the global defaults where they conflict.
 
@@ -42,21 +43,19 @@ If a change can't be mapped to a phase in `PHASE.md`:
 
 ### 3a. SOURCECODE.md route table must match `web/src/app/api/` (HARD RULE)
 
-The "Active HTTP endpoints" table in `SOURCECODE.md` is the audit surface. Before any commit that touches `web/src/app/api/`, verify:
+The "## 4. HTTP endpoints" table in `SOURCECODE.md` is the audit surface. Before any commit that touches `web/src/app/api/`, verify:
 
 ```bash
-# One row per route.ts file; row count must match file count
+# One POST row in SOURCECODE.md §4 per route.ts file; the counts must match
 # run from the repo root
 routes=$(ls web/src/app/api/*/route.ts 2>/dev/null | wc -l | tr -d ' ')
-rows=$(grep -c '^| POST\|^| GET\|^| DELETE' SOURCECODE.md | head -1)
-[ "$routes" = "$rows" ] || echo "MISMATCH: $routes route files vs $rows table rows"
+rows=$(awk '/^## 4\. HTTP endpoints/{f=1;next} /^## /{f=0} f' SOURCECODE.md | grep -c '^| POST')
+[ "$routes" = "$rows" ] || echo "MISMATCH: $routes route files vs $rows POST rows"
 ```
 
 Reason: Gideon's P0 plan-check caught that `SOURCECODE.md` listed 4 routes but 5 existed (`/api/match` was missing). If the living arch doc is wrong, every agent downstream inherits the wrong map. This rule is the mechanical check that prevents doc drift.
 
-**Known gap (2026-09-23, left for Sam):** run as written, this grep counts 12 rows against 4 route files, because it
-also matches rows in other tables of `SOURCECODE.md`; it needs scoping to the "Active HTTP endpoints" table before it
-can pass or fail meaningfully. P9 lands an automated regenerator for this table. Until then, every author of an API-touching commit runs the check above and fixes the table in the same commit.
+P9 lands an automated regenerator for this table. Until then, every author of an API-touching commit runs the check above and fixes the table in the same commit.
 
 ---
 
@@ -263,4 +262,4 @@ Do not merge the PR unless explicitly instructed. Keep the worktree until the PR
 ## This repo's checks
 
 - `cd web && npm ci && npm run build`
-- Before a commit that touches `web/src/app/api/`: the route-table check in the "Active HTTP endpoints" section above
+- Before a commit that touches `web/src/app/api/`: the §3a route-table check above
